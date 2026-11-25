@@ -25,6 +25,7 @@ interface AppState {
   toggleWatch: (s: string) => void;
   toggleSaved: (id: string) => void;
   markRead: (id: string) => void;
+  markAllRead: (ids: string[]) => void;
   toggleNotif: (k: NotifKey) => void;
   setChartStyle: (s: ChartStyle) => void;
   setMapStyle: (s: MapStyle) => void;
@@ -51,6 +52,7 @@ export const useApp = create<AppState>()(
       toggleWatch: s => set(st => ({ watch: toggle(st.watch, s) })),
       toggleSaved: id => set(st => ({ saved: toggle(st.saved, id) })),
       markRead: id => set(st => (st.read.includes(id) ? st : { read: [...st.read, id] })),
+      markAllRead: ids => set(st => ({ read: [...new Set([...st.read, ...ids])] })),
       toggleNotif: k => set(st => ({ notif: { ...st.notif, [k]: !st.notif[k] } })),
       setChartStyle: chartStyle => set({ chartStyle }),
       setMapStyle: mapStyle => set({ mapStyle }),

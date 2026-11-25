@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { openDoc } from '@/components/edition';
@@ -11,7 +12,8 @@ const extent = (d: Doc) => { const n = pdfMeta(d)?.pages; return docFormat(d) ==
 
 export default function Research() {
   const role = useApp(s => s.role);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All');
+  const { filter: initial } = useLocalSearchParams<{ filter?: string }>();
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]>(FILTERS.find(f => f === initial) ?? 'All');
   const docs = visibleDocs(role).filter(d => filter === 'All' || d.kind === filter);
 
   return (

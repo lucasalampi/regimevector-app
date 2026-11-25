@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { DriverList, openDoc, RegimeCard, viewTitle, ViewText } from '@/components/edition';
 import { DocRow, Kicker, Screen } from '@/components/ui';
-import { ED, LATEST_IDS, visibleDocs } from '@/data';
+import { ED, latestDocs } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
@@ -14,7 +14,7 @@ export default function Today() {
   const role = useApp(s => s.role);
   const internal = role === 'Internal';
   const top = SC.cells.reduce((m, w, i, a) => (w.v > a[m].v ? i : m), 0);
-  const latest = visibleDocs(role).filter(d => LATEST_IDS.includes(d.id));
+  const latest = latestDocs(role);
 
   return (
     <Screen>

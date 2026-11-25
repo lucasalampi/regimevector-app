@@ -25,7 +25,7 @@ The app needs no backend. Sign-in is mocked: any valid email and a password of 6
 | `/research` | Library grouped by programme, with filters |
 | `/reader/[id]` | Reader: daily summary, fit-width edition pages, save |
 | `/viewer/[id]` | Full-screen edition: zoom, text selection, page counter |
-| `/events` | Event feed with unread state and the mid-day note |
+| `/events` | Thematic event feed: theme cards (count, unread, live tracked instrument) as filters; items grouped by day with theme colour, live instrument chips ("Now" on earlier days); Today's edition panel |
 | `/more`, `/watchlist`, `/positioning`, `/names`, `/name/[tk]`, `/search`, `/settings` | Secondary screens |
 
 The navy masthead and the five-tab bar stay on every screen, as in the design. Tapping a tab clears any pushed screens.
@@ -76,6 +76,12 @@ A value the latest edition did not re-observe shows **"as of <date>"** instead o
 4. Run `npm run build:data`.
 
 The script fails loudly if a listed brief file is missing or if content refers to an unknown document id.
+
+## Events and the mid-day note
+
+`content/events.json` holds client **themes** (id, name, colour, tracked instrument; `internal` themes are hidden from Client) and **alerts** (`theme`, ISO `date`, `type`, `links` to instruments).
+
+Research entries flagged `midday: true` are mid-day orientation notes, and they are offered **only on their own publication day**. On that day, Events shows **Open mid-day orientation note** and Today's Latest research lists the note. On any other day both leave it out. Events then says that no mid-day note was issued and opens the day's brief instead (operating-state brief for Internal, client brief otherwise), with a link to the event-contingent archive in Research (`/research?filter=Events`).
 
 ## Reader
 

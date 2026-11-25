@@ -1,5 +1,5 @@
 {
-  "$comment": "Research library catalogue. `file` is a name in assets/briefs/. `internal: true` hides the row from the Client role. `daily: true` shows the mobile summary above the full edition. `kind` must be a key of `programmes`. Issuers whose edition is internal are hidden from the Client role. Issuer `last` is the close on `lastDate`.",
+  "$comment": "Research library catalogue. `file` is a name in assets/briefs/. `internal: true` hides the row from the Client role. `daily: true` shows the mobile summary above the full edition. `kind` must be a key of `programmes`. Issuers whose edition is internal are hidden from the Client role. Issuer `last` is the close on `lastDate`. `midday: true` marks mid-day orientation notes: they are offered (Events, Latest research) only on their own publication day. `latest` lists candidates in order; Today shows the first three that pass that rule and the role filter.",
   "programmes": {
     "Daily": "Daily operating state",
     "Events": "Event-contingent notes",
@@ -9,6 +9,7 @@
   "latest": [
     "d6",
     "d3",
+    "x1",
     "x6"
   ],
   "docs": [
@@ -79,7 +80,8 @@
       "code": "EV-1.0 · E5",
       "date": "24 Nov 2026",
       "pages": "Mockup",
-      "file": "midday-2026-11-24.pdf"
+      "file": "midday-2026-11-24.pdf",
+      "midday": true
     },
     {
       "id": "e2",
@@ -88,7 +90,8 @@
       "code": "EV-1.0",
       "date": "23 Nov 2026",
       "pages": "Mockup",
-      "file": "midday-2026-11-23.pdf"
+      "file": "midday-2026-11-23.pdf",
+      "midday": true
     },
     {
       "id": "e3",
@@ -97,7 +100,8 @@
       "code": "EV-1.0",
       "date": "20 Nov 2026",
       "pages": "Mockup",
-      "file": "midday-2026-11-20.pdf"
+      "file": "midday-2026-11-20.pdf",
+      "midday": true
     },
     {
       "id": "e4",

@@ -25,10 +25,20 @@ export interface Dim { name: string; tag: string; level: string; bd: number; dat
 export interface Doc {
   id: string; kind: DocKind; title: string; code: string; date: string; pages: string; file: string;
   daily?: boolean; internal?: boolean;
+  /** Mid-day orientation note: offered only on its own publication day. */
+  midday?: boolean;
 }
 export type DocKind = 'Daily' | 'Events' | 'Executive' | 'Special';
 export interface Issuer { tk: string; co: string; ed: string; status: string; doc?: string; last?: string; lastDate?: string }
-export interface Alert { id: string; type: 'Event' | 'Policy' | 'Geo'; when: string; t: string; b: string; internal?: boolean }
+export interface Alert {
+  id: string; type: 'Event' | 'Policy' | 'Geo'; theme: string;
+  /** ISO date of the event. */
+  date: string;
+  t: string; b: string; internal?: boolean;
+  /** Instrument keys shown as live chips. */
+  links?: string[];
+}
+export interface Theme { id: string; name: string; short: string; color: string; key?: string; internal?: boolean }
 
 export const ED = edition.edition as {
   n: number; date: string; dateLong: string; dateShort: string; day: number; regime: string; trend: string;
@@ -56,7 +66,7 @@ export const DOCS = research.docs as Doc[];
 export const LATEST_IDS = research.latest;
 export const ISSUERS = research.issuers as Issuer[];
 export const ALERTS = events.alerts as Alert[];
-export const MIDDAY_DOC = events.middayDoc;
+export const THEMES = (events as unknown as { themes: Theme[] }).themes;
 export const POSITIONING = positioning as unknown as {
   illustrative: boolean; weekEnding: string; briefDoc: string; books: Record<string, [string, number][]>;
 };
@@ -71,9 +81,28 @@ export const rowByKey = (k: string) => ALL_ROWS.find(r => r.k === k);
 /** Issuers whose edition is internal stay hidden from Client. */
 export const visibleIssuers = (role: Role) => ISSUERS.filter(i => role === 'Internal' || !(i.doc && DOCS.find(d => d.id === i.doc)?.internal));
 export const visibleDocs = (role: Role) => DOCS.filter(d => role === 'Internal' || !d.internal);
+export const visibleThemes = (role: Role) => THEMES.filter(t => role === 'Internal' || !t.internal);
 export const visibleAlerts = (role: Role) => ALERTS.filter(a => role === 'Internal' || !a.internal);
 export const docById = (id: string) => DOCS.find(d => d.id === id);
 const PDF_META = (edition as unknown as { pdfMeta: Record<string, { pages: number; aspects: number[] }> }).pdfMeta ?? {};
 /** Build-time page count and page shapes for a PDF edition. */
 export const pdfMeta = (d: Pick<Doc, 'file'>) => PDF_META[d.file];
 export const docFormat = (d: Doc) => (/\.pdf$/i.test(d.file) ? 'pdf' : /\.html?$/i.test(d.file) ? 'html' : 'other');
+
+const MONTH: Record<string, string> = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+/** "24 Nov 2026" → "2026-11-24". */
+export const docIso = (d: Pick<Doc, 'date'>) => {
+  const [day, mon, year] = d.date.split(' ');
+  return `${year}-${MONTH[mon] ?? '01'}-${day.padStart(2, '0')}`;
+};
+/** Mid-day notes are offered only on the day they were published; everything else is always current. */
+export const isCurrent = (d: Doc) => !d.midday || docIso(d) === ED.date;
+/** The mid-day note for the current edition's day, if one was issued. */
+export const todaysMidday = (role: Role) => visibleDocs(role).find(d => d.midday && docIso(d) === ED.date);
+/** The daily brief for the current edition: the internal operating-state brief for Internal, the client brief otherwise. */
+export const todaysBrief = (role: Role) => {
+  const today = visibleDocs(role).filter(d => d.kind === 'Daily' && docIso(d) === ED.date);
+  return (role === 'Internal' ? today.find(d => d.internal) : undefined) ?? today.find(d => !d.internal) ?? today[0];
+};
+/** Today's "Latest research": content order, same-day rule for mid-day notes, first three. */
+export const latestDocs = (role: Role) => LATEST_IDS.map(id => visibleDocs(role).find(d => d.id === id)).filter((d): d is Doc => !!d && isCurrent(d)).slice(0, 3);

@@ -1,129 +1,224 @@
 {
-  "$comment": "Event feed. `type`: Event | Policy | Geo. `internal: true` hides from Client. `middayDoc` and `positioningDoc` point at research doc ids.",
-  "middayDoc": "d3",
+  "$comment": "Event feed, organised by client theme. Each alert: `theme` (id from `themes`), `date` (ISO), optional `links` (instrument keys shown as live chips), `type` (Event | Policy | Geo, a secondary label), `internal: true` hides it from Client. Themes with `internal: true` are hidden from Client. Mid-day notes come from research docs flagged `midday` and are only offered on the day they were published.",
   "alerts": [
     {
       "id": "b1",
       "type": "Event",
-      "when": "25 Nov",
       "t": "Market Structure → Technical breakdown",
-      "b": "S&P closed 2.25% under its 200-day average, through the −2% line, after a 3.2% intraday drop. Boundary distance 0.042."
+      "b": "S&P closed 2.25% under its 200-day average, through the −2% line, after a 3.2% intraday drop. Boundary distance 0.042.",
+      "theme": "equity",
+      "date": "2026-11-25",
+      "links": [
+        "x_spx200",
+        "spx"
+      ]
     },
     {
       "id": "b2",
       "type": "Policy",
-      "when": "25 Nov",
       "t": "Core PCE 3.3%, above forecasts",
-      "b": "October core PCE 3.3% (vs 3.2%), headline 3.8%. December 25bp hike priced ~98%; yields still fell (10Y 4.85, −6bp)."
+      "b": "October core PCE 3.3% (vs 3.2%), headline 3.8%. December 25bp hike priced ~98%; yields still fell (10Y 4.85, −6bp).",
+      "theme": "policy",
+      "date": "2026-11-25",
+      "links": [
+        "core_pce_yoy",
+        "fed_hike_prob_dec"
+      ]
     },
     {
       "id": "b3",
       "type": "Geo",
-      "when": "25 Nov",
       "t": "Drones intercepted over Ras Tanura",
-      "b": "Four drones aimed at the Saudi oil terminal shot down. Repeat-class entry; weights held 10/8/72/10."
+      "b": "Four drones aimed at the Saudi oil terminal shot down. Repeat-class entry; weights held 10/8/72/10.",
+      "theme": "energy",
+      "date": "2026-11-25",
+      "links": [
+        "brent"
+      ]
     },
     {
       "id": "b4",
       "type": "Geo",
-      "when": "25 Nov",
       "t": "Coalition strikes on Hodeidah port",
-      "b": "Saudi-led strikes after an evacuation order (SPA). Repeat-class entry; Houthi threat to Saudi Red Sea ports logged as words."
+      "b": "Saudi-led strikes after an evacuation order (SPA). Repeat-class entry; Houthi threat to Saudi Red Sea ports logged as words.",
+      "theme": "energy",
+      "date": "2026-11-25"
     },
     {
       "id": "b5",
       "type": "Event",
-      "when": "25 Nov",
       "t": "Brent $0.39 from $95",
-      "b": "Brent Jan 94.61 (+3.21). WTI reference 84.88, $5.12 below $90, the closest this month. Oil channel still off."
+      "b": "Brent Jan 94.61 (+3.21). WTI reference 84.88, $5.12 below $90, the closest this month. Oil channel still off.",
+      "theme": "energy",
+      "date": "2026-11-25",
+      "links": [
+        "brent",
+        "wti"
+      ]
     },
     {
       "id": "b6",
       "type": "Event",
-      "when": "25 Nov",
       "t": "High-yield spreads widen 9bp",
-      "b": "HY OAS 372bp as of 24 Nov (+42bp over 20 sessions). Credit NORMAL/WIDENING; confirming the equity signal."
+      "b": "HY OAS 372bp as of 24 Nov (+42bp over 20 sessions). Credit NORMAL/WIDENING; confirming the equity signal.",
+      "theme": "credit",
+      "date": "2026-11-25",
+      "links": [
+        "credit_hy_oas"
+      ]
     },
     {
       "id": "b7",
       "type": "Geo",
-      "when": "25 Nov",
       "t": "Held: mine claims, US-bases headline",
       "b": "Iranian mine-hit claims logged at zero; US-bases video headline unconfirmed, not logged.",
-      "internal": true
+      "internal": true,
+      "theme": "energy",
+      "date": "2026-11-25"
     },
     {
       "id": "b8",
       "type": "Event",
-      "when": "25 Nov",
       "t": "Gate 17/17 · HY 20/20 · chain clean",
       "b": "Nov-24 DXY/TSX finals reconciled; GoC Nov-24 row filled. Owed: CME finals (FEB derived), GoC and OAS Nov-25.",
-      "internal": true
+      "internal": true,
+      "theme": "ops",
+      "date": "2026-11-25"
     },
     {
       "id": "a1",
       "type": "Event",
-      "when": "24 Nov",
       "t": "Chip give-back, equal-weight ahead",
-      "b": "NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%."
+      "b": "NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%.",
+      "theme": "equity",
+      "date": "2026-11-24",
+      "links": [
+        "nasdaq",
+        "russell2k"
+      ]
     },
     {
       "id": "a2",
       "type": "Policy",
-      "when": "24 Nov",
       "t": "December 25bp hike priced at 95%",
-      "b": "CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve."
+      "b": "CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve.",
+      "theme": "policy",
+      "date": "2026-11-24",
+      "links": [
+        "fed_hike_prob_dec",
+        "usy2"
+      ]
     },
     {
       "id": "a3",
       "type": "Geo",
-      "when": "23 Nov",
       "t": "Projectiles reported in the strait",
-      "b": "UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded)."
+      "b": "UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded).",
+      "theme": "energy",
+      "date": "2026-11-23"
     },
     {
       "id": "a4",
       "type": "Geo",
-      "when": "23 Nov",
       "t": "Riyadh KAFD tower incident",
-      "b": "11 injured per Saudi Civil Defence. Repeat-class entry."
+      "b": "11 injured per Saudi Civil Defence. Repeat-class entry.",
+      "theme": "energy",
+      "date": "2026-11-23"
     },
     {
       "id": "a5",
       "type": "Event",
-      "when": "24 Nov",
       "t": "Oil channel OFF",
-      "b": "Jan WTI settled 82.05, $12.07 below 95. Brent Jan 91.40."
+      "b": "Jan WTI settled 82.05, $12.07 below 95. Brent Jan 91.40.",
+      "theme": "energy",
+      "date": "2026-11-24",
+      "links": [
+        "wti"
+      ]
     },
     {
       "id": "a8",
       "type": "Event",
-      "when": "24 Nov",
       "t": "Dollar Regime returns to USD firm",
-      "b": "The dollar index fell 0.48% to 103.82, back below 104."
+      "b": "The dollar index fell 0.48% to 103.82, back below 104.",
+      "theme": "fx",
+      "date": "2026-11-24",
+      "links": [
+        "dxy"
+      ]
     },
     {
       "id": "a9",
       "type": "Event",
-      "when": "24 Nov",
       "t": "Market Structure 5bp inside the breakdown line",
       "b": "S&P 1.95% under its 200-day average. Boundary distance 0.013; Technical neutral held.",
-      "internal": true
+      "internal": true,
+      "theme": "equity",
+      "date": "2026-11-24",
+      "links": [
+        "x_spx200"
+      ]
     },
     {
       "id": "a6",
       "type": "Geo",
-      "when": "24 Nov",
       "t": "Held: tanker strike report, cyberattack investigation",
       "b": "Not entered. Held pending confirmation.",
-      "internal": true
+      "internal": true,
+      "theme": "energy",
+      "date": "2026-11-24"
     },
     {
       "id": "a7",
       "type": "Event",
-      "when": "24 Nov",
       "t": "I10 FAIL logged",
       "b": "Engine v6.1b. Manifest untouched.",
+      "internal": true,
+      "theme": "ops",
+      "date": "2026-11-24"
+    }
+  ],
+  "themes": [
+    {
+      "id": "equity",
+      "name": "Equities & market structure",
+      "short": "Equities",
+      "color": "#15304e",
+      "key": "x_spx200"
+    },
+    {
+      "id": "policy",
+      "name": "Inflation & the Fed",
+      "short": "Inflation & Fed",
+      "color": "#8b2020",
+      "key": "fed_hike_prob_dec"
+    },
+    {
+      "id": "energy",
+      "name": "Oil & Gulf security",
+      "short": "Oil & Gulf",
+      "color": "#bc9330",
+      "key": "brent"
+    },
+    {
+      "id": "credit",
+      "name": "Credit",
+      "short": "Credit",
+      "color": "#0e7c7b",
+      "key": "credit_hy_oas"
+    },
+    {
+      "id": "fx",
+      "name": "Dollar & FX",
+      "short": "Dollar & FX",
+      "color": "#185c38",
+      "key": "dxy"
+    },
+    {
+      "id": "ops",
+      "name": "Desk & data operations",
+      "short": "Desk ops",
+      "color": "#7a8fa3",
       "internal": true
     }
   ]
