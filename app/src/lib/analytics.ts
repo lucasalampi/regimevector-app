@@ -5,12 +5,12 @@ import { DATES, REGIMES, SERIES, TRANSMISSION, type Row } from '@/data';
 export type Unit = 'bp' | 'pp' | 'pt' | '%';
 const MINUS = '−';
 
-/** One-period change in the instrument's unit. */
-export function change(a: number, b: number, unit: Unit): number {
-  if (unit === '%') return (b / a - 1) * 100;
-  if (unit === 'bp') return (b - a) * 100;
-  return b - a;
+/** One-period change in the instrument's own unit (bp / pp / pt as scaled differences, or %). */
+export function change(a: number, b: number, row: Pick<Row, 'mode' | 'scale'>): number {
+  return row.mode === 'pct' ? (b / a - 1) * 100 : (b - a) * row.scale;
 }
+/** Step series (monthly prints, policy rates) hold between decisions; per-session statistics do not apply. */
+export const isStep = (row: Pick<Row, 'freq'>) => row.freq !== 'daily';
 
 export function fmtChange(v: number, unit: Unit, dpOverride?: number): string {
   const dp = dpOverride ?? (unit === 'bp' ? 0 : unit === '%' ? 2 : 1);
@@ -20,8 +20,9 @@ export function fmtChange(v: number, unit: Unit, dpOverride?: number): string {
 }
 
 export function fmtValue(v: number, row: Pick<Row, 'fmt' | 'dp'>): string {
-  const s = v.toLocaleString('en-US', { minimumFractionDigits: row.dp, maximumFractionDigits: row.dp });
-  return row.fmt === 'yield' || row.fmt === 'prob' ? s + '%' : row.fmt === 'bp' ? s + 'bp' : s;
+  const s = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: row.dp, maximumFractionDigits: row.dp });
+  const sign = v < 0 && +s.replace(/,/g, '') !== 0 ? MINUS : row.fmt === 'pctlvl' && v > 0 ? '+' : '';
+  return sign + s + (row.fmt === 'yield' || row.fmt === 'prob' || row.fmt === 'pctlvl' ? '%' : row.fmt === 'bp' ? 'bp' : '');
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -54,7 +55,7 @@ export function windowFor(row: Row, span: number): Window {
 /** Daily changes inside the window, tagged with the edition they land on. */
 function dailyChanges(row: Row, w: Window) {
   const s = SERIES[row.k], out: { i: number; c: number }[] = [];
-  for (let i = w.from + 1; i <= w.end; i++) { const a = s[i - 1], b = s[i]; if (a != null && b != null) out.push({ i, c: change(a, b, row.unit as Unit) }); }
+  for (let i = w.from + 1; i <= w.end; i++) { const a = s[i - 1], b = s[i]; if (a != null && b != null) out.push({ i, c: change(a, b, row) }); }
   return out;
 }
 
@@ -74,12 +75,12 @@ export function stats(row: Row, w: Window): Stats {
   let hi = { v: -Infinity, i: w.from }, lo = { v: Infinity, i: w.from };
   for (let i = w.from; i <= w.end; i++) { const v = s[i]; if (v == null) continue; if (v > hi.v) hi = { v, i }; if (v < lo.v) lo = { v, i }; }
   const first = s[w.from]!, last = s[w.end]!;
-  const daily = row.freq === 'daily' ? dailyChanges(row, w) : [];
+  const daily = !isStep(row) ? dailyChanges(row, w) : [];
   const vol = daily.length >= 10
     ? row.unit === '%' ? { v: sd(daily.map(d => d.c)) * Math.sqrt(252), label: 'annualised' } : { v: sd(daily.map(d => d.c)), label: 'per session' }
     : null;
   const big = daily.length ? daily.reduce((m, d) => (Math.abs(d.c) > Math.abs(m.c) ? d : m)) : null;
-  return { first, last, chg: change(first, last, row.unit as Unit), hi, lo, pos: hi.v > lo.v ? (last - lo.v) / (hi.v - lo.v) : 0.5, vol, big, n: w.end - w.from + 1 };
+  return { first, last, chg: change(first, last, row), hi, lo, pos: hi.v > lo.v ? (last - lo.v) / (hi.v - lo.v) : 0.5, vol, big, n: w.end - w.from + 1 };
 }
 
 export interface RegimeRow { name: string; tint: string; solid: string; sessions: number; avg: number; cum: number; level: number }
@@ -94,7 +95,7 @@ export function byRegime(row: Row, w: Window): RegimeRow[] {
     const e = acc.get(r.name) ?? { name: r.name, tint: r.tint, solid: r.solid, sessions: 0, avg: 0, cum: 0, level: 0, levels: [], chgs: [] };
     e.sessions++; e.levels.push(v);
     const p = s[i - 1];
-    if (i > w.from && p != null) e.chgs.push(change(p, v, row.unit as Unit));
+    if (i > w.from && p != null) e.chgs.push(change(p, v, row));
     acc.set(r.name, e);
   }
   return [...acc.values()].map(e => ({ ...e, avg: mean(e.chgs), cum: e.chgs.reduce((a, b) => a + b, 0), level: mean(e.levels) }))
@@ -103,7 +104,7 @@ export function byRegime(row: Row, w: Window): RegimeRow[] {
 
 /** Correlation of this instrument's daily changes with the six transmission nodes over the last `n` editions. */
 export function coMovement(row: Row, n = TRANSMISSION.window) {
-  if (row.freq !== 'daily') return null;
+  if (isStep(row)) return null;
   const end = DATES.length - 1, start = Math.max(row.from + 1, end - n + 1);
   const mine = SERIES[row.k];
   const out = TRANSMISSION.nodes.map((name, j) => {
@@ -112,7 +113,7 @@ export function coMovement(row: Row, n = TRANSMISSION.window) {
     for (let i = start; i <= end; i++) {
       const a = mine[i - 1], b = mine[i], c = s[i - 1], d = s[i];
       if (a == null || b == null || c == null || d == null) continue;
-      x.push(change(a, b, row.unit as Unit)); y.push(diff ? d - c : d / c - 1);
+      x.push(change(a, b, row)); y.push(diff ? d - c : d / c - 1);
     }
     return { name, key, v: corr(x, y), n: x.length, self: key === row.k };
   });

@@ -8,8 +8,8 @@ const sgn = (v: number) => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2);
 const cellBg = (v: number) => (v >= 0 ? alpha(C.a700, v) : alpha(C.down, -v));
 
 /** Correlation of daily changes across the six transmission nodes. */
-export function TransmissionMap({ style }: { style: MapStyle }) {
-  const { nodes, matrix } = TRANSMISSION;
+export function TransmissionMap({ style, onOpenNode }: { style: MapStyle; onOpenNode?: (key: string) => void }) {
+  const { nodes, matrix, keys } = TRANSMISSION;
   const [cell, setCell] = useState<[number, number]>([4, 5]);
 
   if (style === 'Ranked') {
@@ -58,6 +58,17 @@ export function TransmissionMap({ style }: { style: MapStyle }) {
           <View style={{ width: 10, height: 10, backgroundColor: C.down }} /><Text style={[font(400, 12), { color: MUTED }]}>against</Text>
         </View>
       </View>
+      {onOpenNode ? (
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {[cell[0], cell[1]].map(n => (
+            <Pressable key={n} onPress={() => onOpenNode(keys[n])} accessibilityRole="link"
+              style={({ pressed }) => ({ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 38, paddingHorizontal: 10, borderWidth: 1, borderColor: C.divider, backgroundColor: pressed ? C.a100 : '#fff' })}>
+              <Text style={[font(500, 12), { color: C.text }]}>Open {nodes[n]}</Text>
+              <Text style={[font(500, 14), { color: C.a700 }]}>›</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
     </>
   );
 }

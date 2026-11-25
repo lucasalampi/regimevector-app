@@ -1,17 +1,21 @@
-import { useMemo, useState } from 'react';
-import { Platform, Text, View, type GestureResponderEvent } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { useMemo, useRef, useState } from 'react';
+import { PanResponder, Platform, Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { DATES, REGIMES, SERIES, type Row } from '@/data';
-import { fmtValue, monthOf, regimeAt, shortDate, type Window } from '@/lib/analytics';
+import { fmtValue, isStep, monthOf, regimeAt, shortDate, type Window } from '@/lib/analytics';
 import type { ChartStyle } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
-const H = 236;          // card height
-const TOP = 40;         // room for the read-out
-const BOTTOM = 26;      // x-axis labels
-const GUTTER = 52;      // y-axis labels and the last-value tag
+const H = 248;          // card height
+const TOP = 40;         // read-out row
+const RIBBON = 10;      // regime timeline height (Timeline mode)
+const AXIS = 22;        // x-axis labels
+const GUTTER = 54;      // y-axis labels and value tags
 const PAD_L = 10;
 const AXIS_FONT = Platform.select({ web: 'Inter_400Regular, Inter, sans-serif', default: 'Inter_400Regular' });
+const isWeb = Platform.OS === 'web';
+const tick = () => { if (!isWeb) Haptics.selectionAsync().catch(() => {}); };
 
 /** 3–5 round ticks covering [lo, hi]. */
 function ticks(lo: number, hi: number) {
@@ -23,13 +27,23 @@ function ticks(lo: number, hi: number) {
   return { out, step };
 }
 const tickDp = (step: number, dp: number) => Math.min(dp, Math.max(0, -Math.floor(Math.log10(step) + 1e-9)));
+const num = (v: number, dp: number) => (v < 0 ? '−' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 
-/** Archive time series with regime context, axes, last-value tag, coverage marker and a scrubbable read-out. */
+/**
+ * Archive time series with regime context.
+ * - Timeline (default): clean plot, regime ribbon under it.  Overlay: regime tints behind the line.
+ * - Touch: a horizontal drag or a short press-and-hold starts reading; vertical swipes keep scrolling the page.
+ *   Crosshair, value tag on the axis, date on the x-axis, haptic tick on start and at each regime change.
+ * - Web: hover to read.
+ */
 export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style: ChartStyle }) {
   const [width, setWidth] = useState(0);
   const [scrub, setScrub] = useState<number | null>(null);
   const s = SERIES[row.k];
-  const plotW = Math.max(10, width - GUTTER - PAD_L), plotH = H - TOP - BOTTOM;
+  const overlay = style === 'Overlay';
+  const plotW = Math.max(10, width - GUTTER - PAD_L);
+  const plotH = H - TOP - AXIS - (overlay ? 0 : RIBBON + 6);
+  const plotBottom = TOP + plotH;
   const span = Math.max(1, w.end - w.start);
   const x = (i: number) => PAD_L + ((i - w.start) / span) * plotW;
 
@@ -40,40 +54,59 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
     const t = ticks(lo, hi);
     lo = Math.min(lo, t.out[0]); hi = Math.max(hi, t.out[t.out.length - 1]);
     const y = (v: number) => TOP + (1 - (v - lo) / (hi - lo)) * plotH;
-    // Monthly releases are carried between prints: draw them as steps, not as a trend.
+    // Step series (monthly prints, policy rates) hold between decisions: draw steps, not a trend.
     let d = '';
     for (let i = w.from; i <= w.end; i++) {
       const v = s[i]; if (v == null) continue;
       const X = x(i).toFixed(1), Y = y(v).toFixed(1);
-      if (!d) d = `M${X},${Y}`;
-      else d += row.freq === 'monthly' ? `H${X}V${Y}` : `L${X},${Y}`;
+      d += !d ? `M${X},${Y}` : isStep(row) ? `H${X}V${Y}` : `L${X},${Y}`;
     }
-    // x ticks: month starts, or every fifth session in short windows.
     const xt: { i: number; label: string }[] = [];
     if (span <= 30) for (let i = w.start; i <= w.end; i += 5) xt.push({ i, label: shortDate(DATES[i]) });
     else for (let i = w.start + 1; i <= w.end; i++) if (DATES[i].slice(5, 7) !== DATES[i - 1].slice(5, 7)) xt.push({ i, label: monthOf(DATES[i]) });
-    return { y, d, yt: t.out, ydp: tickDp(t.step, row.dp), xt };
+    return { y, d, yt: t.out, ydp: tickDp(t.step, row.dp), xt, zero: lo < 0 && hi > 0 ? y(0) : null };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row.k, w.start, w.end, w.from, width]);
+  }, [row.k, w.start, w.end, w.from, width, plotH]);
 
   const bands = REGIMES.filter(r => r.to > w.start && r.from <= w.end).map(r => ({ r, a: Math.max(r.from, w.start), b: Math.min(r.to, w.end + 1) }));
   const last = s[w.end]!;
-  const strip = style === 'Strip', rules = style === 'Rules';
-  // The tag holds ~7 characters: full precision for FX, whole numbers for five-digit index levels.
   const tagDp = row.fmt === 'fx' ? row.dp : Math.abs(last) >= 10000 ? 0 : Math.min(row.dp, 2);
+  const covered = w.from > w.start;
 
+  // ---- interaction ----
+  const geoRef = useRef({ plotW, span, w }); geoRef.current = { plotW, span, w };
+  const active = useRef(false), hold = useRef<ReturnType<typeof setTimeout> | null>(null), lastRegime = useRef('');
   const pick = (px: number) => {
-    let i = Math.round(w.start + ((px - PAD_L) / plotW) * span);
-    i = Math.max(w.from, Math.min(w.end, i));
+    const g = geoRef.current;
+    const i = Math.max(g.w.from, Math.min(g.w.end, Math.round(g.w.start + ((px - PAD_L) / g.plotW) * g.span)));
+    const name = regimeAt(i).name;
+    if (active.current && lastRegime.current && name !== lastRegime.current) tick();
+    lastRegime.current = name;
     setScrub(i);
   };
-  const onTouch = (e: GestureResponderEvent) => pick(e.nativeEvent.locationX);
-  const hover = Platform.OS === 'web'
-    ? { onPointerMove: (e: { nativeEvent: { offsetX: number } }) => pick(e.nativeEvent.offsetX), onPointerLeave: () => setScrub(null) }
-    : {};
+  const end = () => { if (hold.current) clearTimeout(hold.current); active.current = false; lastRegime.current = ''; setScrub(null); };
+  const pan = useMemo(() => PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderGrant: e => {
+      const px = e.nativeEvent.locationX;
+      hold.current = setTimeout(() => { active.current = true; tick(); pick(px); }, 180);
+    },
+    onPanResponderMove: (e, g) => {
+      if (!active.current) {
+        if (Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy) * 1.2) { if (hold.current) clearTimeout(hold.current); active.current = true; tick(); }
+        else return;
+      }
+      pick(e.nativeEvent.locationX);
+    },
+    // Until reading has started, give the gesture back to the page scroll.
+    onPanResponderTerminationRequest: () => !active.current,
+    onPanResponderRelease: end, onPanResponderTerminate: end,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+  const hover = isWeb ? { onPointerMove: (e: { nativeEvent: { offsetX: number } }) => pick(e.nativeEvent.offsetX), onPointerLeave: end } : {};
 
   const si = scrub ?? w.end, sv = s[si] ?? last, sr = regimeAt(si);
-  const covered = w.from > w.start;
+  const sy = scrub != null && s[scrub] != null ? geo.y(s[scrub]!) : null;
 
   return (
     <View style={{ height: H, backgroundColor: '#fff', borderWidth: 1, borderColor: C.divider }}
@@ -81,58 +114,62 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
       accessibilityLabel={`${row.s} chart, ${shortDate(DATES[w.from])} to ${shortDate(DATES[w.end])}, last ${fmtValue(last, row)}`}>
       {width ? (
         <Svg width={width} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
-          {/* regime context */}
-          {bands.map(({ r, a, b }, i) => strip
-            ? <Rect key={r.from} x={x(a)} y={TOP + plotH - 6} width={Math.max(0, x(b) - x(a))} height={6} fill={r.solid} />
-            : rules
-              ? (i > 0 ? <Line key={r.from} x1={x(a)} x2={x(a)} y1={TOP} y2={TOP + plotH} stroke={C.a400} strokeDasharray="3 3" strokeWidth={1} /> : null)
-              : <Rect key={r.from} x={x(a)} y={TOP} width={Math.max(0, x(b) - x(a))} height={plotH} fill={r.tint} />)}
-          {/* no archive coverage */}
+          {overlay ? bands.map(({ r, a, b }) => <Rect key={r.from} x={x(a)} y={TOP} width={Math.max(0, x(b) - x(a))} height={plotH} fill={r.tint} />) : null}
           {covered ? (
             <G>
               <Rect x={PAD_L} y={TOP} width={x(w.from) - PAD_L} height={plotH} fill="#f3f5f7" />
-              <Line x1={x(w.from)} x2={x(w.from)} y1={TOP} y2={TOP + plotH} stroke={C.n500} strokeDasharray="2 3" />
+              <Line x1={x(w.from)} x2={x(w.from)} y1={TOP} y2={plotBottom} stroke={C.n500} strokeDasharray="2 3" />
             </G>
           ) : null}
-          {/* grid + y labels */}
           {geo.yt.map(v => (
             <G key={v}>
               <Line x1={PAD_L} x2={PAD_L + plotW} y1={geo.y(v)} y2={geo.y(v)} stroke={C.divider} strokeWidth={1} />
-              {Math.abs(geo.y(v) - geo.y(last)) < 13 ? null : <SvgText x={width - 6} y={geo.y(v) + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill={C.n500} textAnchor="end">
-                {v.toLocaleString('en-US', { minimumFractionDigits: geo.ydp, maximumFractionDigits: geo.ydp })}
-              </SvgText>}
+              {Math.abs(geo.y(v) - geo.y(last)) < 13 || (sy != null && Math.abs(geo.y(v) - sy) < 13) ? null : (
+                <SvgText x={width - 6} y={geo.y(v) + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill={C.n500} textAnchor="end">{num(v, geo.ydp)}</SvgText>
+              )}
             </G>
           ))}
+          {geo.zero != null ? <Line x1={PAD_L} x2={PAD_L + plotW} y1={geo.zero} y2={geo.zero} stroke={C.a400} strokeWidth={1} /> : null}
+          <Line x1={PAD_L} x2={PAD_L + plotW} y1={plotBottom} y2={plotBottom} stroke={C.a300} />
+
+          {/* regime timeline ribbon */}
+          {!overlay ? bands.map(({ r, a, b }) => (
+            <Rect key={'rb' + r.from} x={x(a)} y={plotBottom + 5} width={Math.max(0.5, x(b) - x(a) - 0.5)} height={RIBBON} fill={r.solid}
+              opacity={scrub == null || r.name === sr.name ? 1 : 0.28} />
+          )) : null}
+
           {/* x labels */}
           {geo.xt.map(t => (
-            <G key={t.i}>
-              <Line x1={x(t.i)} x2={x(t.i)} y1={TOP + plotH} y2={TOP + plotH + 4} stroke={C.a300} />
-              <SvgText x={x(t.i)} y={H - 9} fontSize={10} fontFamily={AXIS_FONT} fill={C.n500}
-                textAnchor={x(t.i) - PAD_L < 18 ? 'start' : PAD_L + plotW - x(t.i) < 18 ? 'end' : 'middle'}>{t.label}</SvgText>
-            </G>
+            <SvgText key={t.i} x={x(t.i)} y={H - 7} fontSize={10} fontFamily={AXIS_FONT} fill={C.n500}
+              textAnchor={x(t.i) - PAD_L < 18 ? 'start' : PAD_L + plotW - x(t.i) < 18 ? 'end' : 'middle'}
+              opacity={scrub != null ? 0.25 : 1}>{t.label}</SvgText>
           ))}
-          <Line x1={PAD_L} x2={PAD_L + plotW} y1={TOP + plotH} y2={TOP + plotH} stroke={C.a300} />
-          {/* series */}
+
           <Path d={geo.d} fill="none" stroke={C.navy} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
-          {/* last value tag */}
+
+          {/* last value */}
           <Line x1={x(w.end)} x2={PAD_L + plotW} y1={geo.y(last)} y2={geo.y(last)} stroke={C.gold} strokeDasharray="2 2" />
           <Rect x={PAD_L + plotW + 2} y={geo.y(last) - 9} width={GUTTER - 4} height={18} fill={C.navy} />
-          <SvgText x={width - 6} y={geo.y(last) + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill="#fff" textAnchor="end">
-            {last.toLocaleString('en-US', { minimumFractionDigits: tagDp, maximumFractionDigits: tagDp })}
-          </SvgText>
+          <SvgText x={width - 6} y={geo.y(last) + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill="#fff" textAnchor="end">{num(last, tagDp)}</SvgText>
           <Circle cx={x(w.end)} cy={geo.y(last)} r={3.5} fill={C.gold} stroke="#fff" strokeWidth={1.5} />
-          {/* scrub */}
-          {scrub != null && s[scrub] != null ? (
+
+          {/* crosshair */}
+          {scrub != null && sy != null ? (
             <G>
-              <Line x1={x(scrub)} x2={x(scrub)} y1={TOP} y2={TOP + plotH} stroke={C.text} strokeWidth={1} />
-              <Circle cx={x(scrub)} cy={geo.y(s[scrub]!)} r={4} fill="#fff" stroke={C.text} strokeWidth={1.5} />
+              <Line x1={x(scrub)} x2={x(scrub)} y1={TOP} y2={plotBottom + (overlay ? 0 : RIBBON + 5)} stroke={C.text} strokeWidth={1} />
+              <Line x1={PAD_L} x2={PAD_L + plotW} y1={sy} y2={sy} stroke={C.text} strokeWidth={0.75} strokeDasharray="3 3" />
+              <Rect x={PAD_L + plotW + 2} y={sy - 9} width={GUTTER - 4} height={18} fill="#fff" stroke={C.text} strokeWidth={1} />
+              <SvgText x={width - 6} y={sy + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill={C.text} textAnchor="end">{num(s[scrub]!, tagDp)}</SvgText>
+              <Circle cx={x(scrub)} cy={sy} r={4.5} fill="#fff" stroke={C.text} strokeWidth={1.75} />
+              <Rect x={Math.min(Math.max(PAD_L, x(scrub) - 26), PAD_L + plotW - 52)} y={H - AXIS + 2} width={52} height={17} fill={C.text} />
+              <SvgText x={Math.min(Math.max(PAD_L + 26, x(scrub)), PAD_L + plotW - 26)} y={H - 7} fontSize={10} fontFamily={AXIS_FONT} fill="#fff" textAnchor="middle">{shortDate(DATES[scrub])}</SvgText>
             </G>
           ) : null}
         </Svg>
       ) : null}
 
-      {/* read-out: latest by default, the scrubbed session while dragging / hovering */}
-      <View pointerEvents="none" style={{ position: 'absolute', left: PAD_L, right: 10, top: 8, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      {/* read-out */}
+      <View pointerEvents="none" style={{ position: 'absolute', left: PAD_L, right: 10, top: 9, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text numberOfLines={1} style={[font(600, 11), tabular, { color: C.text, flexShrink: 0 }]}>{shortDate(DATES[si])}</Text>
         <Text numberOfLines={1} style={[font(700, 12), tabular, { color: C.text, flexShrink: 0 }]}>{fmtValue(sv, row)}</Text>
         <View style={{ width: 8, height: 8, backgroundColor: sr.solid, flexShrink: 0 }} />
@@ -144,27 +181,24 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
         </Text>
       ) : null}
 
-      {/* gesture layer over the plot */}
-      <View style={{ position: 'absolute', left: 0, top: TOP, width: PAD_L + plotW, height: plotH }}
-        onStartShouldSetResponder={() => true} onMoveShouldSetResponder={() => true}
-        onResponderTerminationRequest={() => false}
-        onResponderGrant={onTouch} onResponderMove={onTouch} onResponderRelease={() => setScrub(null)} onResponderTerminate={() => setScrub(null)}
-        {...(hover as object)} />
+      {/* gesture layer */}
+      <View style={{ position: 'absolute', left: 0, top: TOP, width: PAD_L + plotW, height: H - TOP }} {...pan.panHandlers} {...(hover as object)} />
     </View>
   );
 }
 
 /** 21-session sparkline for list rows. */
-export function Sparkline({ row, n = 21, width = 64, height = 22 }: { row: Row; n?: number; width?: number; height?: number }) {
+export function Sparkline({ row, n = 21, width = 60, height = 22 }: { row: Row; n?: number; width?: number; height?: number }) {
   const s = SERIES[row.k];
   const vals = s.slice(Math.max(row.from, s.length - n)).filter((v): v is number => v != null);
   if (vals.length < 2) return <View style={{ width, height }} />;
   const lo = Math.min(...vals), hi = Math.max(...vals), k = hi - lo || 1;
-  const d = vals.map((v, i) => `${i ? 'L' : 'M'}${((i / (vals.length - 1)) * (width - 2) + 1).toFixed(1)},${(height - 2 - ((v - lo) / k) * (height - 4)).toFixed(1)}`).join('');
+  const pts = vals.map((v, i) => [((i / (vals.length - 1)) * (width - 2) + 1), (height - 2 - ((v - lo) / k) * (height - 4))]);
+  const d = pts.map(([px, py], i) => (i ? (isStep(row) ? `H${px.toFixed(1)}V${py.toFixed(1)}` : `L${px.toFixed(1)},${py.toFixed(1)}`) : `M${px.toFixed(1)},${py.toFixed(1)}`)).join('');
   const up = vals[vals.length - 1] >= vals[0];
   return (
     <Svg width={width} height={height} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Path d={d} fill="none" stroke={up ? C.up : C.down} strokeWidth={1.25} strokeLinejoin="round" />
+      <Path d={d} fill="none" stroke={isStep(row) ? C.a700 : up ? C.up : C.down} strokeWidth={1.25} strokeLinejoin="round" />
     </Svg>
   );
 }

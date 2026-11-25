@@ -6,10 +6,19 @@ import positioning from '../../content/positioning.json';
 export type Role = 'Client' | 'Internal';
 
 export interface Row {
-  s: string; k: string; v: number; val: string; chg: string | null;
-  fmt: string; dp: number; unit: 'bp' | 'pp' | 'pt' | '%'; freq: 'daily' | 'monthly';
+  s: string; k: string; v: number; val: string;
+  /** Latest session move, formatted; null for step series and values not re-observed in the latest edition. */
+  chg: string | null;
+  fmt: string; dp: number;
+  /** How the instrument moves: differences scaled into bp / pp / pt, or percent changes. */
+  mode: 'diff' | 'pct'; scale: number; unit: 'bp' | 'pp' | 'pt' | '%';
+  /** daily sessions, monthly prints or policy decisions (the last two draw as steps). */
+  freq: 'daily' | 'monthly' | 'policy';
   /** First archive index with an observation. */
   from: number;
+  sub: string | null; note: string | null; derived: boolean;
+  /** ISO date of the last real observation when the latest edition carried it forward. */
+  asof: string | null;
 }
 export interface Group { id: string; name: string; rows: Row[] }
 export interface Dim { name: string; tag: string; level: string; bd: number; data: string }
@@ -52,8 +61,12 @@ export const POSITIONING = positioning as unknown as {
   illustrative: boolean; weekEnding: string; briefDoc: string; books: Record<string, [string, number][]>;
 };
 
+/** Regime dimension → instrument key it reads (navigation between Markets and Drill-down). */
+export const DIM_LINKS = (edition as unknown as { dimensionLinks: Record<string, string> }).dimensionLinks ?? {};
+
 export const ALL_ROWS = GROUPS.flatMap(g => g.rows.map(r => ({ ...r, gk: g.id, group: g.name })));
 export type FlatRow = (typeof ALL_ROWS)[number];
+export const rowByKey = (k: string) => ALL_ROWS.find(r => r.k === k);
 
 /** Issuers whose edition is internal stay hidden from Client. */
 export const visibleIssuers = (role: Role) => ISSUERS.filter(i => role === 'Internal' || !(i.doc && DOCS.find(d => d.id === i.doc)?.internal));

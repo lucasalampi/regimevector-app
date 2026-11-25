@@ -46,40 +46,77 @@ if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json ent
 // ---------- series ----------
 // Values are carried forward across interior gaps (an edition that did not re-observe a field keeps its last value),
 // but nothing is invented before an instrument's first observation: those editions stay null and the app marks
-// them "not in archive".
-const seriesKeys = new Set([
-  ...instruments.groups.flatMap(g => g.rows.map(r => r.key)),
+// them "not in archive". Derived instruments (spreads, flies, relatives) are computed edition by edition from
+// archive fields and exist only where every input does.
+const allRows = instruments.groups.flatMap(g => g.rows);
+const operands = e => (e.op === 'fly' ? [e.w1, e.body, e.w2] : [e.a, e.b]);
+const rawKeys = new Set([
+  ...allRows.filter(r => !r.expr).map(r => r.key),
+  ...allRows.filter(r => r.expr).flatMap(r => operands(r.expr)),
   ...instruments.transmission.nodes.map(n => n.key),
 ]);
-const series = {};
-const coverage = {};
-for (const k of seriesKeys) {
-  let lastV = null;
-  const s = eds.map(e => { const v = e.assets?.[k]; if (typeof v === 'number') lastV = v; return lastV; });
+const series = {}, coverage = {}, lastObs = {};
+for (const k of rawKeys) {
+  let lastV = null, seen = -1;
+  const s = eds.map((e, i) => { const v = e.assets?.[k]; if (typeof v === 'number') { lastV = v; seen = i; } return lastV; });
   const from = s.findIndex(v => v != null);
   if (from < 0) { console.warn(`build-data: series ${k} has no values; skipped`); continue; }
   series[k] = s.map(v => (v == null ? null : +v.toFixed(6)));
-  coverage[k] = from;
-  if (from > 0) console.log(`build-data: ${k} first observed in edition ${from + 1} (${eds[from].date}); earlier editions left empty`);
+  coverage[k] = from; lastObs[k] = seen;
 }
+for (const r of allRows.filter(r => r.expr)) {
+  const e = r.expr, ins = operands(e);
+  if (ins.some(k => !series[k])) { console.warn(`build-data: ${r.key} needs ${ins.join(', ')}; skipped`); continue; }
+  const at = i => ins.map(k => series[k][i]);
+  let base = null;
+  series[r.key] = eds.map((_, i) => {
+    const v = at(i); if (v.some(x => x == null)) return null;
+    let out;
+    if (e.op === 'spread') out = (v[0] - v[1]) * (e.scale ?? 1);
+    else if (e.op === 'fly') out = (2 * v[1] - v[0] - v[2]) * (e.scale ?? 1);
+    else if (e.op === 'pctvs') out = (v[0] / v[1] - 1) * 100;
+    else if (e.op === 'rel') { const q = v[0] / v[1]; base ??= q; out = (q / base) * 100; }
+    else throw new Error(`unknown expr op ${e.op}`);
+    return +out.toFixed(6);
+  });
+  coverage[r.key] = series[r.key].findIndex(v => v != null);
+  lastObs[r.key] = Math.min(...ins.map(k => lastObs[k]));
+}
+for (const [k, from] of Object.entries(coverage)) if (from > 0) console.log(`build-data: ${k} starts at edition ${from + 1} (${eds[from].date}); earlier editions left empty`);
 
 // ---------- formatting ----------
 const fmtNum = (v, dp) => v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const DP = { yield: 2, prob: 0, bp: 0, fx: 4, level: 1, pctlvl: 2, index: 2 };
 function fmtValue(v, row) {
-  switch (row.fmt) {
-    case 'yield': return v.toFixed(row.dp ?? 2) + '%';
-    case 'prob': return Math.round(v) + '%';
-    case 'bp': return Math.round(v) + 'bp';
-    case 'fx': return v.toFixed(row.dp ?? 4);
-    case 'level': return v.toFixed(row.dp ?? 1);
-    default: return fmtNum(v, row.dp ?? 2);
-  }
+  const dp = row.dp ?? DP[row.fmt] ?? 2;
+  const out = (() => {
+    switch (row.fmt) {
+      case 'yield': return v.toFixed(dp) + '%';
+      case 'prob': return Math.round(v) + '%';
+      case 'bp': return Math.round(v) + 'bp';
+      case 'pctlvl': return (v > 0 ? '+' : '') + v.toFixed(dp) + '%';
+      case 'fx': case 'level': return v.toFixed(dp);
+      default: return fmtNum(v, dp);
+    }
+  })();
+  return out.replace(/^-/, MINUS);
 }
 const signed = (x, s) => (x > 0 ? '+' : x < 0 ? MINUS : '') + s;
-function fmtChange(v, prev, kind) {
-  if (kind === 'none' || prev == null || v == null) return null;
-  if (kind === 'bp') { const d = Math.round((v - prev) * 100); return signed(d, Math.abs(d) + 'bp'); }
-  const p = (v / prev - 1) * 100; return signed(+p.toFixed(2), Math.abs(p).toFixed(2) + '%');
+// How each instrument moves: differences (scaled into bp / pp / pt) or percent changes.
+function moveOf(r) {
+  const step = r.freq === 'monthly';
+  switch (r.fmt) {
+    case 'yield': return step ? { mode: 'diff', scale: 1, unit: 'pp' } : { mode: 'diff', scale: 100, unit: 'bp' };
+    case 'bp': return { mode: 'diff', scale: 1, unit: 'bp' };
+    case 'prob': case 'pctlvl': return { mode: 'diff', scale: 1, unit: 'pp' };
+    case 'level': return { mode: 'diff', scale: 1, unit: 'pt' };
+    default: return { mode: 'pct', scale: 1, unit: '%' };
+  }
+}
+function fmtMove(d, unit) {
+  const dp = unit === 'bp' ? 0 : unit === '%' ? 2 : 1;
+  const r = +d.toFixed(dp);
+  return signed(r, Math.abs(r).toFixed(dp) + (unit === 'pt' ? ' pt' : unit));
 }
 const shortDate = iso => { const d = new Date(iso + 'T12:00:00Z'); return d.getUTCDate() + ' ' + d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }); };
 const longDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).replace(',', '');
@@ -87,14 +124,21 @@ const longDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB',
 const groups = instruments.groups.map(g => ({
   id: g.id, name: g.name,
   rows: g.rows.filter(r => series[r.key]).map(r => {
-    const v = A[r.key] ?? series[r.key][N - 1];
-    const prev = A[r.key + '_prev'] ?? (eds[N - 2]?.assets?.[r.key] ?? null);
+    const s = series[r.key];
+    const v = s[N - 1];
+    const freq = r.freq === 'monthly' ? 'monthly' : r.freq === 'policy' ? 'policy' : 'daily';
+    const mv = moveOf(r);
+    // Latest session move; archive *_prev fields win where they exist (they are the attested prior close).
+    const prev = (!r.expr && typeof A[r.key + '_prev'] === 'number') ? A[r.key + '_prev'] : s[N - 2];
+    const stale = lastObs[r.key] < N - 1; // not re-observed in the latest edition: a carried value, not a 0 move
+    const chg = freq === 'daily' && !stale && prev != null && v != null
+      ? fmtMove(mv.mode === 'pct' ? (v / prev - 1) * 100 : (v - prev) * mv.scale, mv.unit) : null;
     const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'));
-    const monthly = r.freq === 'monthly';
-    // Unit for changes in the drill-down: yields move in bp (monthly prints in pp), probabilities in pp, prices in %.
-    const unit = monthly ? (r.fmt === 'yield' ? 'pp' : 'pt') : r.fmt === 'yield' || r.fmt === 'bp' ? 'bp' : r.fmt === 'prob' ? 'pp' : '%';
-    const dp = r.dp ?? { yield: 2, prob: 0, bp: 0, fx: 4, level: 1 }[r.fmt] ?? 2;
-    return { s: label, k: r.key, v, val: fmtValue(v, r), chg: fmtChange(v, prev, r.chg), fmt: r.fmt, dp, unit, freq: monthly ? 'monthly' : 'daily', from: coverage[r.key] };
+    return {
+      s: label, k: r.key, v, val: fmtValue(v, r), chg, fmt: r.fmt, dp: r.dp ?? DP[r.fmt] ?? 2, ...mv, freq,
+      from: coverage[r.key], sub: r.sub ?? null, note: r.note ?? null, derived: !!r.expr,
+      asof: stale ? eds[lastObs[r.key]].date : null,
+    };
   }),
 }));
 
@@ -214,6 +258,7 @@ const out = {
   transmission: { window: T.window, nodes: T.nodes.map(n => n.name), keys: T.nodes.map(n => n.key), change: T.nodes.map(n => n.change), matrix },
   dates: eds.map(e => e.date),
   regimeTints: instruments.regimeTints,
+  dimensionLinks: instruments.dimensionLinks ?? {},
   pdfMeta,
 };
 fs.writeFileSync(rel('src', 'data', 'edition.generated.json'), JSON.stringify(out) + '\n');

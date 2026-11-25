@@ -4,7 +4,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Role } from '@/data';
 
-export type ChartStyle = 'Bands' | 'Strip' | 'Rules';
+/** Timeline: clean plot with a regime ribbon (default). Overlay: regime tints behind the line. */
+export type ChartStyle = 'Timeline' | 'Overlay';
 export type MapStyle = 'Matrix' | 'Ranked';
 export type NotifKey = 'daily' | 'event' | 'regime' | 'pos';
 
@@ -41,7 +42,7 @@ export const useApp = create<AppState>()(
       saved: [],
       read: [],
       notif: { daily: true, event: true, regime: true, pos: false },
-      chartStyle: 'Bands',
+      chartStyle: 'Timeline',
       mapStyle: 'Matrix',
       // Mock auth: any valid email + 6-char password. Replace with the real identity provider.
       signIn: (email, role) => set({ authed: true, email, role }),
@@ -55,9 +56,14 @@ export const useApp = create<AppState>()(
       setMapStyle: mapStyle => set({ mapStyle }),
     }),
     {
-      name: 'rv-app', version: 2, storage: createJSONStorage(() => AsyncStorage),
-      // v1 kept a reader font/zoom size; zoom now lives in the full-screen viewer.
-      migrate: s => { const { fs: _fs, ...rest } = (s ?? {}) as Record<string, unknown>; return rest as unknown as AppState; },
+      name: 'rv-app', version: 3, storage: createJSONStorage(() => AsyncStorage),
+      // v1 kept a reader font/zoom size (zoom now lives in the full-screen viewer).
+      migrate: s => {
+        const { fs: _fs, ...rest } = (s ?? {}) as Record<string, unknown>;
+        // v2 offered Bands / Strip / Rules; Bands maps to Overlay, the others to the new Timeline default.
+        rest.chartStyle = rest.chartStyle === 'Bands' ? 'Overlay' : 'Timeline';
+        return rest as unknown as AppState;
+      },
     },
   ),
 );

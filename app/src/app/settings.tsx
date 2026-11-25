@@ -33,8 +33,9 @@ export default function Settings() {
 
       <View style={{ gap: 6 }}>
         <Kicker>Chart display</Kicker>
-        <Text style={[font(400, 12), { color: MUTED }]}>Regime shading on time series</Text>
-        <Seg options={['Bands', 'Strip', 'Rules'] as const} value={s.chartStyle} onChange={s.setChartStyle} />
+        <Text style={[font(400, 12), { color: MUTED }]}>Regime context on time series</Text>
+        <Seg options={['Timeline', 'Overlay'] as const} value={s.chartStyle} onChange={s.setChartStyle} />
+        <Text style={[font(400, 11, 1.4), { color: C.n500 }]}>Timeline keeps the plot clean with a regime ribbon underneath; Overlay tints the plot itself.</Text>
         <Text style={[font(400, 12), { color: MUTED, marginTop: 6 }]}>Transmission map</Text>
         <Seg options={['Matrix', 'Ranked'] as const} value={s.mapStyle} onChange={s.setMapStyle} />
       </View>

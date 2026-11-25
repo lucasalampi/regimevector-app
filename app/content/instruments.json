@@ -1,5 +1,5 @@
 {
-  "$comment": "Cross-asset instrument catalogue. `key` is the asset field in the macro archive. `fmt`: yield | prob | bp | index | fx | level. `chg`: bp | pct | none. `label` may use {asof:<field>} to splice an archive date. `freq: monthly` marks releases carried between prints (drawn as steps, no daily statistics).",
+  "$comment": "Cross-asset instrument catalogue. `key` is an archive asset field, or a derived id with `expr` (spread: (a−b)×scale · fly: (2×body−w1−w2)×scale · pctvs: (a/b−1)×100 · rel: a/b rebased to 100). `fmt`: yield | prob | bp | index | fx | level | pctlvl. `sub` groups rows inside a tab. `freq`: monthly (prints) or policy (decided rates), drawn as steps without per-session statistics. `note` explains a derived series in the drill-down. `label` may use {asof:<field>}. `dimensionLinks` maps each regime dimension to the instrument it reads, for navigation.",
   "groups": [
     {
       "id": "rates",
@@ -9,31 +9,141 @@
           "label": "US 2Y",
           "key": "usy2",
           "fmt": "yield",
-          "chg": "bp"
+          "sub": "Treasury curve"
         },
         {
           "label": "US 10Y",
           "key": "usy10",
           "fmt": "yield",
-          "chg": "bp"
+          "sub": "Treasury curve"
         },
         {
           "label": "US 30Y",
           "key": "usy30",
           "fmt": "yield",
-          "chg": "bp"
+          "sub": "Treasury curve"
+        },
+        {
+          "label": "2s10s",
+          "key": "x_us2s10s",
+          "fmt": "bp",
+          "sub": "Treasury curve",
+          "expr": {
+            "op": "spread",
+            "a": "usy10",
+            "b": "usy2",
+            "scale": 100
+          },
+          "note": "US 10Y minus US 2Y."
+        },
+        {
+          "label": "10s30s",
+          "key": "x_us10s30s",
+          "fmt": "bp",
+          "sub": "Treasury curve",
+          "expr": {
+            "op": "spread",
+            "a": "usy30",
+            "b": "usy10",
+            "scale": 100
+          },
+          "note": "US 30Y minus US 10Y."
+        },
+        {
+          "label": "2s10s30s fly",
+          "key": "x_usfly",
+          "fmt": "bp",
+          "sub": "Treasury curve",
+          "expr": {
+            "op": "fly",
+            "w1": "usy2",
+            "body": "usy10",
+            "w2": "usy30",
+            "scale": 100
+          },
+          "note": "2 × 10Y − 2Y − 30Y. Positive = belly cheap to the wings."
+        },
+        {
+          "label": "Fed funds",
+          "key": "fed_funds",
+          "fmt": "yield",
+          "sub": "Policy",
+          "freq": "policy"
         },
         {
           "label": "Dec 25bp hike",
           "key": "fed_hike_prob_dec",
           "fmt": "prob",
-          "chg": "none"
+          "sub": "Policy"
+        },
+        {
+          "label": "2Y − Fed funds",
+          "key": "x_us2yff",
+          "fmt": "bp",
+          "sub": "Policy",
+          "expr": {
+            "op": "spread",
+            "a": "usy2",
+            "b": "fed_funds",
+            "scale": 100
+          },
+          "note": "Front end over the policy rate: roughly what the market prices beyond the current setting."
         },
         {
           "label": "HY OAS ({asof:credit_hy_oas_asof})",
           "key": "credit_hy_oas",
           "fmt": "bp",
-          "chg": "none"
+          "sub": "Credit"
+        },
+        {
+          "label": "IG OAS",
+          "key": "credit_ig_oas",
+          "fmt": "bp",
+          "sub": "Credit"
+        },
+        {
+          "label": "CCC OAS",
+          "key": "credit_ccc_oas",
+          "fmt": "bp",
+          "sub": "Credit"
+        },
+        {
+          "label": "HY − IG",
+          "key": "x_hyig",
+          "fmt": "bp",
+          "sub": "Credit",
+          "expr": {
+            "op": "spread",
+            "a": "credit_hy_oas",
+            "b": "credit_ig_oas",
+            "scale": 1
+          },
+          "note": "High-yield over investment-grade option-adjusted spread."
+        },
+        {
+          "label": "HYG (HY ETF)",
+          "key": "credit_proxy_hyg",
+          "fmt": "index",
+          "sub": "Credit",
+          "dp": 2
+        },
+        {
+          "label": "Canada 2Y",
+          "key": "ca2y",
+          "fmt": "yield",
+          "sub": "Canada"
+        },
+        {
+          "label": "Canada 10Y",
+          "key": "ca10y",
+          "fmt": "yield",
+          "sub": "Canada"
+        },
+        {
+          "label": "Canada 2s10s",
+          "key": "ca_2s10s",
+          "fmt": "bp",
+          "sub": "Canada"
         }
       ]
     },
@@ -45,31 +155,59 @@
           "label": "DXY",
           "key": "dxy",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Dollar"
         },
         {
           "label": "EURUSD",
           "key": "eurusd",
           "fmt": "fx",
-          "chg": "pct"
+          "sub": "Majors"
         },
         {
           "label": "USDJPY",
           "key": "usdjpy",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Majors"
         },
         {
           "label": "GBPUSD",
           "key": "gbpusd",
           "fmt": "fx",
-          "chg": "pct"
+          "sub": "Majors"
         },
         {
           "label": "USDCAD",
           "key": "usdcad",
           "fmt": "fx",
-          "chg": "pct"
+          "sub": "Majors"
+        },
+        {
+          "label": "Canada − US 2Y",
+          "key": "ca_us_2y",
+          "fmt": "bp",
+          "sub": "Differentials",
+          "note": "Canada 2Y minus US 2Y: the front-end rate gap behind USDCAD."
+        },
+        {
+          "label": "Canada − US 10Y",
+          "key": "ca_us_10y",
+          "fmt": "bp",
+          "sub": "Differentials",
+          "note": "Canada 10Y minus US 10Y."
+        },
+        {
+          "label": "Fed − BoC policy",
+          "key": "x_fedboc",
+          "fmt": "bp",
+          "sub": "Differentials",
+          "expr": {
+            "op": "spread",
+            "a": "fed_funds",
+            "b": "boc_rate",
+            "scale": 100
+          },
+          "freq": "policy",
+          "note": "Fed funds minus the Bank of Canada rate."
         }
       ]
     },
@@ -81,37 +219,85 @@
           "label": "S&P 500",
           "key": "spx",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Indices"
         },
         {
           "label": "Nasdaq",
           "key": "nasdaq",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Indices"
         },
         {
           "label": "Dow",
           "key": "dow",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Indices"
         },
         {
           "label": "Russell 2000",
           "key": "russell2k",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Indices"
         },
         {
           "label": "TSX",
           "key": "tsx",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Indices"
         },
         {
           "label": "VIX",
           "key": "vix",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Volatility"
+        },
+        {
+          "label": "S&P vs 200-day",
+          "key": "x_spx200",
+          "fmt": "pctlvl",
+          "sub": "Market structure",
+          "expr": {
+            "op": "pctvs",
+            "a": "spx",
+            "b": "spx_200dma"
+          },
+          "note": "S&P 500 against its 200-day average. The Market Structure dimension reads this line."
+        },
+        {
+          "label": "S&P from 52w high",
+          "key": "x_spxdd",
+          "fmt": "pctlvl",
+          "sub": "Market structure",
+          "expr": {
+            "op": "pctvs",
+            "a": "spx",
+            "b": "spx_52w_high"
+          },
+          "note": "Drawdown from the 52-week high."
+        },
+        {
+          "label": "Russell 2000 / S&P",
+          "key": "x_rtyspx",
+          "fmt": "index",
+          "sub": "Market structure",
+          "expr": {
+            "op": "rel",
+            "a": "russell2k",
+            "b": "spx"
+          },
+          "note": "Small caps relative to the S&P 500, rebased to 100 at the start of the archive."
+        },
+        {
+          "label": "Nasdaq / Dow",
+          "key": "x_ndxdow",
+          "fmt": "index",
+          "sub": "Market structure",
+          "expr": {
+            "op": "rel",
+            "a": "nasdaq",
+            "b": "dow"
+          },
+          "note": "Growth-heavy Nasdaq relative to the Dow, rebased to 100."
         }
       ]
     },
@@ -124,58 +310,58 @@
           "key": "cpi_yoy",
           "fmt": "yield",
           "dp": 1,
-          "chg": "none",
-          "freq": "monthly"
+          "freq": "monthly",
+          "sub": "Prints"
         },
         {
           "label": "Core CPI YoY",
           "key": "core_cpi_yoy",
           "fmt": "yield",
           "dp": 1,
-          "chg": "none",
-          "freq": "monthly"
+          "freq": "monthly",
+          "sub": "Prints"
         },
         {
           "label": "Core PCE YoY",
           "key": "core_pce_yoy",
           "fmt": "yield",
           "dp": 1,
-          "chg": "none",
-          "freq": "monthly"
+          "freq": "monthly",
+          "sub": "Prints"
         },
         {
           "label": "PPI YoY",
           "key": "ppi_yoy",
           "fmt": "yield",
           "dp": 1,
-          "chg": "none",
-          "freq": "monthly"
+          "freq": "monthly",
+          "sub": "Prints"
         },
         {
           "label": "ISM Prices",
           "key": "ism_prices",
           "fmt": "level",
           "dp": 1,
-          "chg": "none",
-          "freq": "monthly"
+          "freq": "monthly",
+          "sub": "Prints"
         },
         {
           "label": "WTI reference",
           "key": "wti",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Commodities"
         },
         {
           "label": "Brent Jan",
           "key": "brent",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Commodities"
         },
         {
           "label": "Gold",
           "key": "gold",
           "fmt": "index",
-          "chg": "pct"
+          "sub": "Commodities"
         }
       ]
     }
@@ -248,5 +434,13 @@
       "#e3f1f1",
       "#0e7c7b"
     ]
+  },
+  "dimensionLinks": {
+    "Risk Sentiment": "vix",
+    "Supply Shock": "wti",
+    "Inflation Regime": "cpi_yoy",
+    "Policy Stance": "fed_hike_prob_dec",
+    "Dollar Regime": "dxy",
+    "Market Structure": "x_spx200"
   }
 }

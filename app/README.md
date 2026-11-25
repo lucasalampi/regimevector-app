@@ -20,8 +20,8 @@ The app needs no backend. Sign-in is mocked: any valid email and a password of 6
 | --- | --- |
 | `/login` | Sign in with access role |
 | `/` | Today: regime card, macro or strategist view, scenario weights, drivers, latest research |
-| `/markets` | Regime dimensions, cross-asset close, transmission map |
-| `/asset?group=&sym=` | Drill-down: instrument header and current regime, scrubbable chart with axes and regime context, range statistics, behaviour by regime, co-movement with the transmission nodes, group list with sparklines |
+| `/markets` | Jump links; regime dimensions (tap → the instrument each reads); cross-asset cards with tappable rows and section counts; transmission map with links to both nodes |
+| `/asset?group=&sym=` | Drill-down: breadcrumb, instrument header, RV analytic note, chart (Timeline default / Overlay), related instruments and the dimension fed, range statistics, behaviour by regime, co-movement, sectioned instrument list |
 | `/research` | Library grouped by programme, with filters |
 | `/reader/[id]` | Reader: daily summary, fit-width edition pages, save |
 | `/viewer/[id]` | Full-screen edition: zoom, text selection, page counter |
@@ -44,6 +44,30 @@ content/events.json, positioning.json   ─┘                           assets/
 - **Editorial content:** `content/` holds what the archive does not: driver lists, the event feed, the research catalogue, issuers and positioning. Positioning is still **illustrative** and is labelled so in the app.
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
+
+**Instruments (43)** live in `content/instruments.json`, grouped into sections:
+
+| Group | Sections |
+|---|---|
+| Rates | Treasury curve (2Y/10Y/30Y, 2s10s, 10s30s, 2s10s30s fly) · Policy (Fed funds, Dec hike odds, 2Y − Fed funds) · Credit (HY/IG/CCC OAS, HY − IG, HYG) · Canada (2Y, 10Y, 2s10s) |
+| FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) |
+| Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, Russell 2000/S&P, Nasdaq/Dow) |
+| Inflation | Prints · Commodities |
+
+**Derived instruments** are built edition by edition from archive fields. An `expr` sets the formula: spread, fly, pctvs (percent versus) or rel (relative, rebased to 100). They are marked "RV" in the app.
+
+Each row also states how it moves:
+- yields in **bp**;
+- probabilities and percent levels in **pp**;
+- spreads already quoted in bp in **bp**;
+- prices in **%**.
+
+A value the latest edition did not re-observe shows **"as of <date>"** instead of a change. Canada fields last arrived on 23 Nov.
+
+**Chart interaction:**
+- **Timeline** (default): the plot stays clean and a regime ribbon runs underneath. **Overlay**: the plot itself is tinted by regime. Switch on the chart, or set the default in Settings.
+- **On phones:** a sideways drag, or a 180 ms press-and-hold, starts reading values with a crosshair, an axis value tag, the date and a light haptic tick. A vertical swipe still scrolls the page.
+- **On the web:** hover to read.
 
 **To publish a new edition:**
 1. Drop the new archive in `../project/uploads/`, or pass its path to the script.
