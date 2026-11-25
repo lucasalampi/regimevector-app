@@ -33,8 +33,10 @@ const js = (v: unknown) => JSON.stringify(v).replace(/<\//g, '<\\/');
 export function pdfHtml(pdf: { b64: string } | { url: string }, pdfjs: PdfjsSource, post: string, opts: PdfHtmlOptions): string {
   const viewer = opts.mode === 'viewer';
   const load = 'b64' in pdf
-    ? `{ data: Uint8Array.from(atob(${js(pdf.b64)}), function(c){ return c.charCodeAt(0); }) }`
-    : `{ url: ${js(pdf.url)} }`;
+    ? `{ data: Uint8Array.from(atob(${js(pdf.b64)}), function(c){ return c.charCodeAt(0); }), isEvalSupported: false }`
+    : `{ url: ${js(pdf.url)}, isEvalSupported: false }`;
+  // isEvalSupported:false is the published mitigation for CVE-2024-4367 (GHSA-wgrm-67xf-hhpq) in pdf.js < 4.2.67:
+  // font glyphs are interpreted instead of compiled with eval, so a crafted PDF cannot run script.
   const text = 'lib' in pdfjs
     ? `Promise.resolve([${js(pdfjs.lib)}, ${js(pdfjs.worker)}])`
     : `Promise.all([fetch(${js(pdfjs.libUrl)}).then(function(r){ return r.text(); }), fetch(${js(pdfjs.workerUrl)}).then(function(r){ return r.text(); })])`;
