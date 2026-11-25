@@ -1,55 +1,8 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import Svg, { Polyline } from 'react-native-svg';
-import { ARCHIVE, REGIMES, TRANSMISSION } from '@/data';
-import type { ChartStyle, MapStyle } from '@/store';
+import { TRANSMISSION } from '@/data';
+import type { MapStyle } from '@/store';
 import { alpha, C, font, MUTED, tabular } from '@/theme';
-import { blueprint } from './ui';
-
-const H = 170;
-
-/** Time series over the edition archive with regime shading (Bands | Strip | Rules). */
-export function RegimeChart({ data, start, dp, style }: { data: number[]; start: number; dp: number; style: ChartStyle }) {
-  const [w, setW] = useState(0);
-  const n = data.length;
-  const mn = Math.min(...data), mx = Math.max(...data);
-  const strip = style === 'Strip', rules = style === 'Rules';
-  const bands = REGIMES.filter(r => r.to > start).map(r => ({ r, a: Math.max(r.from, start) - start, b: r.to - start }));
-  const pts = w ? data.map((v, i) => `${((i / (n - 1)) * w).toFixed(1)},${(((92 - ((v - mn) / (mx - mn || 1)) * 80) / 100) * H).toFixed(1)}`).join(' ') : '';
-  const legend = [...new Map(bands.map(({ r }) => [r.name, r])).values()];
-
-  return (
-    <>
-      <View style={[blueprint, { height: H, overflow: 'hidden' }]} onLayout={e => setW(e.nativeEvent.layout.width - 2)}
-        accessibilityLabel={`Chart, ${n} editions, range ${mn.toFixed(dp)} to ${mx.toFixed(dp)}`}>
-        {bands.map(({ r, a, b }, i) => (
-          <View key={r.from} style={{
-            position: 'absolute', left: `${(a / n) * 100}%`, width: `${((b - a) / n) * 100}%`,
-            top: strip ? undefined : 0, bottom: 0, height: strip ? 8 : undefined,
-            backgroundColor: rules ? 'transparent' : strip ? r.solid : r.tint,
-            borderLeftWidth: (rules || strip) && i > 0 ? 1 : 0, borderLeftColor: C.a700, borderStyle: 'dashed',
-          }} />
-        ))}
-        {w ? (
-          <Svg width={w} height={H} style={{ position: 'absolute', left: 0, top: 0 }}>
-            <Polyline points={pts} fill="none" stroke={C.navy} strokeWidth={1.5} strokeLinejoin="round" />
-          </Svg>
-        ) : null}
-        <Text style={[font(400, 11), tabular, { position: 'absolute', right: 6, top: 4, color: C.n800 }]}>{mx.toFixed(dp)}</Text>
-        <Text style={[font(400, 11), tabular, { position: 'absolute', right: 6, bottom: 12, color: C.n800 }]}>{mn.toFixed(dp)}</Text>
-      </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 4 }}>
-        {legend.map(r => (
-          <View key={r.name} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <View style={{ width: 10, height: 10, borderWidth: 1, borderColor: C.divider, backgroundColor: rules ? 'transparent' : strip ? r.solid : r.tint }} />
-            <Text style={[font(400, 11), { color: MUTED }]}>{r.name}</Text>
-          </View>
-        ))}
-        <Text style={[font(600, 11), { letterSpacing: 0.66, color: MUTED }]}>ARCHIVE · {ARCHIVE.n} EDITIONS</Text>
-      </View>
-    </>
-  );
-}
 
 const sgn = (v: number) => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2);
 const cellBg = (v: number) => (v >= 0 ? alpha(C.a700, v) : alpha(C.down, -v));

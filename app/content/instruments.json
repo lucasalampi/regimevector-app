@@ -1,74 +1,252 @@
 {
-  "$comment": "Cross-asset instrument catalogue. `key` is the asset field in the macro archive. `fmt`: yield | prob | bp | index | fx | level. `chg`: bp | pct | none. `label` may use {asof:<field>} to splice an archive date.",
+  "$comment": "Cross-asset instrument catalogue. `key` is the asset field in the macro archive. `fmt`: yield | prob | bp | index | fx | level. `chg`: bp | pct | none. `label` may use {asof:<field>} to splice an archive date. `freq: monthly` marks releases carried between prints (drawn as steps, no daily statistics).",
   "groups": [
     {
       "id": "rates",
       "name": "Rates",
       "rows": [
-        { "label": "US 2Y", "key": "usy2", "fmt": "yield", "chg": "bp" },
-        { "label": "US 10Y", "key": "usy10", "fmt": "yield", "chg": "bp" },
-        { "label": "US 30Y", "key": "usy30", "fmt": "yield", "chg": "bp" },
-        { "label": "Dec 25bp hike", "key": "fed_hike_prob_dec", "fmt": "prob", "chg": "none" },
-        { "label": "HY OAS ({asof:credit_hy_oas_asof})", "key": "credit_hy_oas", "fmt": "bp", "chg": "none" }
+        {
+          "label": "US 2Y",
+          "key": "usy2",
+          "fmt": "yield",
+          "chg": "bp"
+        },
+        {
+          "label": "US 10Y",
+          "key": "usy10",
+          "fmt": "yield",
+          "chg": "bp"
+        },
+        {
+          "label": "US 30Y",
+          "key": "usy30",
+          "fmt": "yield",
+          "chg": "bp"
+        },
+        {
+          "label": "Dec 25bp hike",
+          "key": "fed_hike_prob_dec",
+          "fmt": "prob",
+          "chg": "none"
+        },
+        {
+          "label": "HY OAS ({asof:credit_hy_oas_asof})",
+          "key": "credit_hy_oas",
+          "fmt": "bp",
+          "chg": "none"
+        }
       ]
     },
     {
       "id": "fx",
       "name": "FX",
       "rows": [
-        { "label": "DXY", "key": "dxy", "fmt": "index", "chg": "pct" },
-        { "label": "EURUSD", "key": "eurusd", "fmt": "fx", "chg": "pct" },
-        { "label": "USDJPY", "key": "usdjpy", "fmt": "index", "chg": "pct" },
-        { "label": "GBPUSD", "key": "gbpusd", "fmt": "fx", "chg": "pct" },
-        { "label": "USDCAD", "key": "usdcad", "fmt": "fx", "chg": "pct" }
+        {
+          "label": "DXY",
+          "key": "dxy",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "EURUSD",
+          "key": "eurusd",
+          "fmt": "fx",
+          "chg": "pct"
+        },
+        {
+          "label": "USDJPY",
+          "key": "usdjpy",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "GBPUSD",
+          "key": "gbpusd",
+          "fmt": "fx",
+          "chg": "pct"
+        },
+        {
+          "label": "USDCAD",
+          "key": "usdcad",
+          "fmt": "fx",
+          "chg": "pct"
+        }
       ]
     },
     {
       "id": "equities",
       "name": "Equities",
       "rows": [
-        { "label": "S&P 500", "key": "spx", "fmt": "index", "chg": "pct" },
-        { "label": "Nasdaq", "key": "nasdaq", "fmt": "index", "chg": "pct" },
-        { "label": "Dow", "key": "dow", "fmt": "index", "chg": "pct" },
-        { "label": "Russell 2000", "key": "russell2k", "fmt": "index", "chg": "pct" },
-        { "label": "TSX", "key": "tsx", "fmt": "index", "chg": "pct" },
-        { "label": "VIX", "key": "vix", "fmt": "index", "chg": "pct" }
+        {
+          "label": "S&P 500",
+          "key": "spx",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "Nasdaq",
+          "key": "nasdaq",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "Dow",
+          "key": "dow",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "Russell 2000",
+          "key": "russell2k",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "TSX",
+          "key": "tsx",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "VIX",
+          "key": "vix",
+          "fmt": "index",
+          "chg": "pct"
+        }
       ]
     },
     {
       "id": "inflation",
       "name": "Inflation",
       "rows": [
-        { "label": "CPI YoY", "key": "cpi_yoy", "fmt": "yield", "dp": 1, "chg": "none" },
-        { "label": "Core CPI YoY", "key": "core_cpi_yoy", "fmt": "yield", "dp": 1, "chg": "none" },
-        { "label": "Core PCE YoY", "key": "core_pce_yoy", "fmt": "yield", "dp": 1, "chg": "none" },
-        { "label": "PPI YoY", "key": "ppi_yoy", "fmt": "yield", "dp": 1, "chg": "none" },
-        { "label": "ISM Prices", "key": "ism_prices", "fmt": "level", "dp": 1, "chg": "none" },
-        { "label": "WTI reference", "key": "wti", "fmt": "index", "chg": "pct" },
-        { "label": "Brent Jan", "key": "brent", "fmt": "index", "chg": "pct" },
-        { "label": "Gold", "key": "gold", "fmt": "index", "chg": "pct" }
+        {
+          "label": "CPI YoY",
+          "key": "cpi_yoy",
+          "fmt": "yield",
+          "dp": 1,
+          "chg": "none",
+          "freq": "monthly"
+        },
+        {
+          "label": "Core CPI YoY",
+          "key": "core_cpi_yoy",
+          "fmt": "yield",
+          "dp": 1,
+          "chg": "none",
+          "freq": "monthly"
+        },
+        {
+          "label": "Core PCE YoY",
+          "key": "core_pce_yoy",
+          "fmt": "yield",
+          "dp": 1,
+          "chg": "none",
+          "freq": "monthly"
+        },
+        {
+          "label": "PPI YoY",
+          "key": "ppi_yoy",
+          "fmt": "yield",
+          "dp": 1,
+          "chg": "none",
+          "freq": "monthly"
+        },
+        {
+          "label": "ISM Prices",
+          "key": "ism_prices",
+          "fmt": "level",
+          "dp": 1,
+          "chg": "none",
+          "freq": "monthly"
+        },
+        {
+          "label": "WTI reference",
+          "key": "wti",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "Brent Jan",
+          "key": "brent",
+          "fmt": "index",
+          "chg": "pct"
+        },
+        {
+          "label": "Gold",
+          "key": "gold",
+          "fmt": "index",
+          "chg": "pct"
+        }
       ]
     }
   ],
   "transmission": {
     "window": 60,
     "nodes": [
-      { "name": "Oil", "key": "wti", "change": "pct" },
-      { "name": "Rates", "key": "usy10", "change": "diff" },
-      { "name": "USD", "key": "dxy", "change": "pct" },
-      { "name": "Credit", "key": "credit_hy_oas", "change": "diff" },
-      { "name": "Equity", "key": "spx", "change": "pct" },
-      { "name": "Vol", "key": "vix", "change": "pct" }
+      {
+        "name": "Oil",
+        "key": "wti",
+        "change": "pct"
+      },
+      {
+        "name": "Rates",
+        "key": "usy10",
+        "change": "diff"
+      },
+      {
+        "name": "USD",
+        "key": "dxy",
+        "change": "pct"
+      },
+      {
+        "name": "Credit",
+        "key": "credit_hy_oas",
+        "change": "diff"
+      },
+      {
+        "name": "Equity",
+        "key": "spx",
+        "change": "pct"
+      },
+      {
+        "name": "Vol",
+        "key": "vix",
+        "change": "pct"
+      }
     ]
   },
   "regimeTints": {
-    "Disinflation / Hawkish Pivot": ["#f5edda", "#bc9330"],
-    "Cost-Push / Hawkish Pivot": ["#dfe6ee", "#15304e"],
-    "Cost-Push Stalemate": ["#eef2f6", "#7a8fa3"],
-    "Post-Shock Disinflation Transition": ["#ebf4ee", "#185c38"],
-    "Stagflationary Supply Shock": ["#fdf0f0", "#8b2020"],
-    "Stagflationary Pressure / Supply Easing": ["#f6e4e4", "#b05a5a"],
-    "Stagflationary Residual / Supply Normalised": ["#fdf8ee", "#6b4800"],
-    "Supply Normalisation / Risk Recovery": ["#e3f1f1", "#0e7c7b"]
+    "Disinflation / Hawkish Pivot": [
+      "#f5edda",
+      "#bc9330"
+    ],
+    "Cost-Push / Hawkish Pivot": [
+      "#dfe6ee",
+      "#15304e"
+    ],
+    "Cost-Push Stalemate": [
+      "#eef2f6",
+      "#7a8fa3"
+    ],
+    "Post-Shock Disinflation Transition": [
+      "#ebf4ee",
+      "#185c38"
+    ],
+    "Stagflationary Supply Shock": [
+      "#fdf0f0",
+      "#8b2020"
+    ],
+    "Stagflationary Pressure / Supply Easing": [
+      "#f6e4e4",
+      "#b05a5a"
+    ],
+    "Stagflationary Residual / Supply Normalised": [
+      "#fdf8ee",
+      "#6b4800"
+    ],
+    "Supply Normalisation / Risk Recovery": [
+      "#e3f1f1",
+      "#0e7c7b"
+    ]
   }
 }

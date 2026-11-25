@@ -43,18 +43,24 @@ const N = eds.length;
 const notes = notesAll[last.date] || {};
 if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json entry for ${last.date}; drivers will be empty`);
 
-// ---------- series (forward-filled, leading gaps back-filled) ----------
+// ---------- series ----------
+// Values are carried forward across interior gaps (an edition that did not re-observe a field keeps its last value),
+// but nothing is invented before an instrument's first observation: those editions stay null and the app marks
+// them "not in archive".
 const seriesKeys = new Set([
   ...instruments.groups.flatMap(g => g.rows.map(r => r.key)),
   ...instruments.transmission.nodes.map(n => n.key),
 ]);
 const series = {};
+const coverage = {};
 for (const k of seriesKeys) {
   let lastV = null;
   const s = eds.map(e => { const v = e.assets?.[k]; if (typeof v === 'number') lastV = v; return lastV; });
-  const first = s.find(v => v != null);
-  if (first == null) { console.warn(`build-data: series ${k} has no values; skipped`); continue; }
-  series[k] = s.map(v => (v == null ? first : +v.toFixed(6)));
+  const from = s.findIndex(v => v != null);
+  if (from < 0) { console.warn(`build-data: series ${k} has no values; skipped`); continue; }
+  series[k] = s.map(v => (v == null ? null : +v.toFixed(6)));
+  coverage[k] = from;
+  if (from > 0) console.log(`build-data: ${k} first observed in edition ${from + 1} (${eds[from].date}); earlier editions left empty`);
 }
 
 // ---------- formatting ----------
@@ -84,7 +90,11 @@ const groups = instruments.groups.map(g => ({
     const v = A[r.key] ?? series[r.key][N - 1];
     const prev = A[r.key + '_prev'] ?? (eds[N - 2]?.assets?.[r.key] ?? null);
     const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'));
-    return { s: label, k: r.key, v, val: fmtValue(v, r), chg: fmtChange(v, prev, r.chg) };
+    const monthly = r.freq === 'monthly';
+    // Unit for changes in the drill-down: yields move in bp (monthly prints in pp), probabilities in pp, prices in %.
+    const unit = monthly ? (r.fmt === 'yield' ? 'pp' : 'pt') : r.fmt === 'yield' || r.fmt === 'bp' ? 'bp' : r.fmt === 'prob' ? 'pp' : '%';
+    const dp = r.dp ?? { yield: 2, prob: 0, bp: 0, fx: 4, level: 1 }[r.fmt] ?? 2;
+    return { s: label, k: r.key, v, val: fmtValue(v, r), chg: fmtChange(v, prev, r.chg), fmt: r.fmt, dp, unit, freq: monthly ? 'monthly' : 'daily', from: coverage[r.key] };
   }),
 }));
 
@@ -108,7 +118,7 @@ const weakest = dims.reduce((m, d) => (m == null || d.bd < m.bd ? d : m), null);
 const T = instruments.transmission;
 const changes = T.nodes.map(n => {
   const s = series[n.key]; const out = [];
-  for (let i = 1; i < s.length; i++) out.push(n.change === 'diff' ? s[i] - s[i - 1] : s[i] / s[i - 1] - 1);
+  for (let i = 1; i < s.length; i++) if (s[i] != null && s[i - 1] != null) out.push(n.change === 'diff' ? s[i] - s[i - 1] : s[i] / s[i - 1] - 1);
   return out.slice(-T.window);
 });
 const corr = (x, y) => {
@@ -201,7 +211,8 @@ const out = {
   },
   archive: { n: N, first: eds[0].date },
   series, runs, groups,
-  transmission: { window: T.window, nodes: T.nodes.map(n => n.name), matrix },
+  transmission: { window: T.window, nodes: T.nodes.map(n => n.name), keys: T.nodes.map(n => n.key), change: T.nodes.map(n => n.change), matrix },
+  dates: eds.map(e => e.date),
   regimeTints: instruments.regimeTints,
   pdfMeta,
 };

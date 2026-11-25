@@ -21,7 +21,7 @@ The app needs no backend. Sign-in is mocked: any valid email and a password of 6
 | `/login` | Sign in with access role |
 | `/` | Today: regime card, macro or strategist view, scenario weights, drivers, latest research |
 | `/markets` | Regime dimensions, cross-asset close, transmission map |
-| `/asset?group=&sym=` | Drill-down chart over the whole archive with regime shading, 1M/3M/All, watch stars |
+| `/asset?group=&sym=` | Drill-down: instrument header and current regime, scrubbable chart with axes and regime context, range statistics, behaviour by regime, co-movement with the transmission nodes, group list with sparklines |
 | `/research` | Library grouped by programme, with filters |
 | `/reader/[id]` | Reader: daily summary, fit-width edition pages, save |
 | `/viewer/[id]` | Full-screen edition: zoom, text selection, page counter |
@@ -42,6 +42,8 @@ content/events.json, positioning.json   ─┘                           assets/
 
 - **From the archive:** levels and daily changes, all 130 editions of history for every chart, regime runs for the shading, the seven dimensions with boundary distances, scenario weights, both view texts, tenure and the weakest boundary. The transmission matrix is computed from the last 60 editions of daily changes: yield and OAS changes are differences, the rest are percent changes.
 - **Editorial content:** `content/` holds what the archive does not: driver lists, the event feed, the research catalogue, issuers and positioning. Positioning is still **illustrative** and is labelled so in the app.
+
+**Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
 **To publish a new edition:**
 1. Drop the new archive in `../project/uploads/`, or pass its path to the script.

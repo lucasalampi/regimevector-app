@@ -5,7 +5,12 @@ import positioning from '../../content/positioning.json';
 
 export type Role = 'Client' | 'Internal';
 
-export interface Row { s: string; k: string; v: number; val: string; chg: string | null }
+export interface Row {
+  s: string; k: string; v: number; val: string; chg: string | null;
+  fmt: string; dp: number; unit: 'bp' | 'pp' | 'pt' | '%'; freq: 'daily' | 'monthly';
+  /** First archive index with an observation. */
+  from: number;
+}
 export interface Group { id: string; name: string; rows: Row[] }
 export interface Dim { name: string; tag: string; level: string; bd: number; data: string }
 export interface Doc {
@@ -24,9 +29,11 @@ export const ED = edition.edition as {
   dims: Dim[]; drivers: { t: string; b: string }[];
 };
 export const ARCHIVE = edition.archive;
-export const SERIES = edition.series as Record<string, number[]>;
+/** Per-edition values; null before an instrument's first observation. */
+export const SERIES = edition.series as Record<string, (number | null)[]>;
+export const DATES = (edition as unknown as { dates: string[] }).dates;
 export const GROUPS = edition.groups as Group[];
-export const TRANSMISSION = edition.transmission as { window: number; nodes: string[]; matrix: number[][] };
+export const TRANSMISSION = edition.transmission as { window: number; nodes: string[]; keys: string[]; change: ('pct' | 'diff')[]; matrix: number[][] };
 
 const TINTS = edition.regimeTints as unknown as Record<string, [string, string]>;
 export interface RegimeRun { from: number; to: number; name: string; tint: string; solid: string }
