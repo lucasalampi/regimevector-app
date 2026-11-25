@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-46f8a662-736b-4961-a08c-9167945aae2f/styles.css">
+<style>
+body{margin:0;background:var(--color-surface)}
+a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}
+input{font-family:var(--font-body)}
+*::-webkit-scrollbar{width:0;height:0}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 16px;font-family:var(--font-body);color:var(--color-text)">
+<div data-screen-label="Phone" style="width:390px;height:844px;flex:none;background:var(--color-bg);border:1px solid var(--color-text);border-radius:{{ phoneR }};box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;position:relative">
+
+  <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px var(--font-body);position:relative">
+    <span style="font-variant-numeric:tabular-nums">17:42</span>
+    <span style="position:absolute;left:50%;top:11px;transform:translateX(-50%);height:22px;width:{{ islandW }};background:var(--color-text);border-radius:11px"></span>
+    <span style="font:500 12px var(--font-body);letter-spacing:.04em">5G&nbsp;&nbsp;87%</span>
+  </div>
+
+  <sc-if value="{{ is.login }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Login" style="flex:1;display:flex;flex-direction:column;padding:56px 28px 28px;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font:600 40px/1 var(--font-heading);letter-spacing:-.015em">Regime<span style="color:var(--color-accent-700)">Vector</span></div>
+        <div style="font:400 15px/1.45 var(--font-body);color:var(--color-neutral-700)">Cross-asset regime intelligence. Daily classification, research editions and event notes.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px">
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Work email
+          <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="name@firm.com" style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Password
+          <input type="password" value="{{ pw }}" onChange="{{ setPw }}" placeholder="6+ characters" style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+        </label>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Access</div>
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ roleSeg }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 14px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}">
+          <div style="font:500 13px var(--font-body);color:var(--color-accent-800);border:1px solid var(--color-accent);padding:8px 10px">{{ err }}</div>
+        </sc-if>
+      </div>
+      <div class="blueprint" onClick="{{ signIn }}" style="margin-top:6px;height:50px;display:flex;align-items:center;justify-content:center;background:var(--color-accent-600);border-color:var(--color-accent-600);color:#fff;font:600 19px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-700)" style-active="background:var(--color-accent-800)">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Sign in
+      </div>
+      <div style="margin-top:auto;font:400 12px/1.45 var(--font-body);color:var(--color-neutral-700)">Research content is interpretive commentary on a classified state. It is not investment advice.</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ authed }}" hint-placeholder-val="{{ false }}">
+    <div style="height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px;border-bottom:1px solid var(--color-divider)">
+      <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ back }}" style="width:44px;height:44px;margin-left:-12px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--color-accent-100)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-width:0;font:600 23px/1 var(--font-heading);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</div>
+      <div style="font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--color-accent);color:var(--color-accent-700)">{{ roleLabel }}</div>
+      <div onClick="{{ openSearch }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--color-accent-100)">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+      </div>
+    </div>
+
+    <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+      <sc-if value="{{ is.today }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Today" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Tuesday 24 November 2026 · Day 217 · Edition 130</div>
+          <div class="blueprint" style="padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">Current regime</div>
+            <div style="font:600 30px/1.05 var(--font-heading);letter-spacing:-.015em">Disinflation / Hawkish Pivot</div>
+            <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:16px;margin-top:6px;padding-top:8px;border-top:1px solid var(--color-divider);font:400 12px var(--font-body);color:var(--color-neutral-700)">
+                <span>Classification robustness <b style="color:var(--color-text)">MODERATE · 0.52</b></span>
+                <span>Weakest <b style="color:var(--color-text)">Dollar 0.04</b></span>
+              </div>
+              <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">Robustness block as of 20 Nov state export.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ viewTitle }}</div>
+              <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700)">DRAFT · OPERATOR REVIEW</div></sc-if>
+            </div>
+            <div style="border-left:3px solid var(--color-accent);padding:2px 0 2px 14px;font:400 17px/1.5 var(--font-body);text-wrap:pretty">The hawkish pivot remains the organising force across assets. Front-end pricing has hardened into December while crude has eased, so the disinflation impulse is arriving through energy as policy stays restrictive. Tuesday's chip give-back alongside a firmer equal-weight tape fits that picture: leadership is narrowing at the top while breadth holds beneath it. The long end remains the cleaner barometer of how the pivot is being absorbed.</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Scenario weights</div>
+            <div style="display:flex;height:14px;border:1px solid var(--color-divider)">
+              <div style="width:10%;background:var(--color-accent-200)"></div><div style="width:8%;background:var(--color-accent-300)"></div><div style="width:72%;background:var(--color-accent-700)"></div><div style="width:10%;background:var(--color-accent-400)"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font:400 12px var(--font-body);color:var(--color-neutral-700)">
+              <div>Base<div style="font:600 20px var(--font-heading);color:var(--color-text)">10%</div></div>
+              <div>Stalemate<div style="font:600 20px var(--font-heading);color:var(--color-text)">8%</div></div>
+              <div>Escalation<div style="font:600 20px var(--font-heading);color:var(--color-accent-700)">72%</div></div>
+              <div>Resolution<div style="font:600 20px var(--font-heading);color:var(--color-text)">10%</div></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Top market drivers</div>
+            <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:26px 1fr;gap:4px;padding:10px 0;border-top:1px solid var(--color-divider)">
+                <div style="font:600 20px/1.1 var(--font-heading);color:var(--color-accent-700)">{{ d.n }}</div>
+                <div><div style="font:500 15px/1.3 var(--font-body)">{{ d.t }}</div><div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ d.b }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Latest research</div>
+            <sc-for list="{{ latestDocs }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.open }}" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 0;border-top:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <div style="flex:1;min-width:0"><div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div></div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.markets }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Dashboard" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Regime dimensions</div>
+            <div class="blueprint" style="display:grid;grid-template-columns:1fr 1fr">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <sc-for list="{{ dims }}" as="d" hint-placeholder-count="7">
+                <div style="padding:10px 12px;border-bottom:1px solid var(--color-divider);border-right:1px solid var(--color-divider);margin:0 -1px -1px 0">
+                  <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">{{ d.name }}</div>
+                  <div style="font:600 17px/1.15 var(--font-heading);color:{{ d.fg }}">{{ d.tag }}{{ d.flag }}</div>
+                  <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">Boundary dist. {{ d.bd }} · {{ d.level }}</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">† Boundary-flagged. Dimensions as of 20 Nov state export.</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Cross-asset · close 24 Nov</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+                <div class="blueprint" onClick="{{ g.open }}" style="padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px" style-hover="background:var(--color-accent-100)">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font:600 19px/1 var(--font-heading)">{{ g.name }}</div>
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                    <div style="display:flex;justify-content:space-between;gap:6px;font:400 13px var(--font-body);font-variant-numeric:tabular-nums"><span style="color:var(--color-neutral-700)">{{ r.s }}</span><span style="font-weight:500">{{ r.val }}</span></div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Transmission map</div>
+              <div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-neutral-700)">ILLUSTRATIVE · 60D</div>
+            </div>
+            <sc-if value="{{ mapMatrix }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:52px repeat(6,1fr);gap:2px;font:500 11px var(--font-body)">
+                <div></div>
+                <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="6"><div style="text-align:center;color:var(--color-neutral-700);padding-bottom:2px">{{ n }}</div></sc-for>
+                <sc-for list="{{ matrix }}" as="row" hint-placeholder-count="6">
+                  <div style="display:contents">
+                    <div style="display:flex;align-items:center;color:var(--color-neutral-700)">{{ row.name }}</div>
+                    <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                      <div onClick="{{ c.pick }}" style="aspect-ratio:1;background:{{ c.bg }};outline:{{ c.ol }};outline-offset:-2px;border:1px solid var(--color-divider);cursor:pointer"></div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font:400 12px var(--font-body);color:var(--color-neutral-700)">
+                <span style="font:500 14px var(--font-body);color:var(--color-text);font-variant-numeric:tabular-nums">{{ cellRead }}</span>
+                <span style="display:flex;align-items:center;gap:6px"><i style="width:10px;height:10px;background:var(--color-accent)"></i>with<i style="width:10px;height:10px;background:var(--color-neutral-700)"></i>against</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ mapRanked }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ links }}" as="l" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:112px 1fr 44px;align-items:center;gap:8px;height:30px;border-top:1px solid var(--color-divider);font:400 13px var(--font-body);font-variant-numeric:tabular-nums">
+                    <span>{{ l.pair }}</span>
+                    <span style="height:8px;background:{{ l.bg }};width:{{ l.w }}"></span>
+                    <span style="text-align:right;font-weight:500">{{ l.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.asset }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Asset drill-down" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ groupSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ chart.sym }}</div><div style="font:600 36px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ chart.val }}</div></div>
+            <div style="display:flex;border:1px solid var(--color-divider)">
+              <sc-for list="{{ rangeSeg }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="width:44px;height:32px;display:flex;align-items:center;justify-content:center;font:500 12px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div class="blueprint" style="height:170px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="position:absolute;inset:0;overflow:hidden">
+              <sc-for list="{{ chart.bands }}" as="b" hint-placeholder-count="3">
+                <div style="position:absolute;left:{{ b.l }};width:{{ b.w }};top:{{ b.t }};height:{{ b.h }};background:{{ b.bg }};border-left:{{ b.bl }}"></div>
+              </sc-for>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><polyline points="{{ chart.pts }}" fill="none" stroke="#1d1f20" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+              <div style="position:absolute;right:6px;top:4px;font:400 11px var(--font-body);color:var(--color-neutral-800);font-variant-numeric:tabular-nums">{{ chart.max }}</div>
+              <div style="position:absolute;right:6px;bottom:12px;font:400 11px var(--font-body);color:var(--color-neutral-800);font-variant-numeric:tabular-nums">{{ chart.min }}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px 12px;font:400 11px var(--font-body);color:var(--color-neutral-700)">
+            <sc-for list="{{ chart.legend }}" as="b" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;gap:5px"><i style="width:10px;height:10px;background:{{ b.sw }};border:1px solid var(--color-divider)"></i>{{ b.name }}</span>
+            </sc-for>
+            <span style="font-weight:600;letter-spacing:.06em">HISTORY ILLUSTRATIVE</span>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+              <div onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:8px;height:48px;border-top:1px solid var(--color-divider);cursor:pointer;background:{{ r.bg }};padding:0 4px 0 8px;margin:0 -8px" style-hover="background:var(--color-accent-100)">
+                <span style="flex:1;font:500 15px var(--font-body)">{{ r.s }}</span>
+                <span style="font:400 13px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ r.chg }}</span>
+                <span style="width:86px;text-align:right;font:500 15px var(--font-body);font-variant-numeric:tabular-nums">{{ r.val }}</span>
+                <span onClick="{{ r.star }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--color-accent-700)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ r.starFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.research }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Research library" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ libSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ docs }}" as="d" hint-placeholder-count="6">
+              <div onClick="{{ d.open }}" style="display:flex;align-items:center;gap:10px;min-height:64px;padding:10px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ d.kind }}{{ d.lock }}</div>
+                  <div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div>
+                  <div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div>
+                </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.reader }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Brief reader" style="padding:14px 20px 32px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ doc.kind }} · {{ doc.code }}</div>
+            <div onClick="{{ fsDown }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:500 13px var(--font-body);cursor:pointer" style-hover="background:var(--color-accent-100)">A−</div>
+            <div onClick="{{ fsUp }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:500 17px var(--font-body);cursor:pointer" style-hover="background:var(--color-accent-100)">A+</div>
+            <div onClick="{{ toggleSave }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);color:var(--color-accent-700);cursor:pointer" style-hover="background:var(--color-accent-100)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ saveFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+            </div>
+          </div>
+          <div style="font:600 30px/1.08 var(--font-heading);letter-spacing:-.015em;text-wrap:balance">{{ doc.title }}</div>
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">{{ doc.date }} · {{ doc.pages }}</div>
+          <sc-if value="{{ doc.daily }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;font-size:{{ fsPx }};line-height:1.55">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Current regime</div>
+              <div style="font:600 22px/1.1 var(--font-heading)">Disinflation / Hawkish Pivot</div>
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ viewTitle }}</div>
+              <div style="border-left:3px solid var(--color-accent);padding-left:14px;text-wrap:pretty">The hawkish pivot remains the organising force across assets. Front-end pricing has hardened into December while crude has eased, so the disinflation impulse is arriving through energy as policy stays restrictive. Tuesday's chip give-back alongside a firmer equal-weight tape fits that picture: leadership is narrowing at the top while breadth holds beneath it. The long end remains the cleaner barometer of how the pivot is being absorbed.</div>
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Top market drivers</div>
+              <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="3">
+                <div><b style="font-weight:500">{{ d.n }}. {{ d.t }}.</b> <span style="color:var(--color-neutral-800)">{{ d.b }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ doc.pdf }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint" style="height:420px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,transparent 0 9px,var(--color-divider) 9px 10px)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:400 12px ui-monospace,Menlo,monospace;background:var(--color-bg);padding:6px 10px;border:1px solid var(--color-divider)">edition PDF · page 1</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.alerts }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Event notes" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ alertSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="5">
+              <div onClick="{{ a.read }}" style="display:grid;grid-template-columns:10px 1fr;gap:10px;padding:12px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <i style="width:8px;height:8px;margin-top:5px;background:{{ a.dot }};border:1px solid var(--color-accent)"></i>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)"><span>{{ a.type }}</span><span style="color:var(--color-neutral-700)">{{ a.when }}</span></div>
+                  <div style="font:500 15px/1.3 var(--font-body);margin-top:2px">{{ a.t }}</div>
+                  <div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700)">{{ a.b }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ openMidday }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);color:var(--color-accent-700);font:600 16px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Open mid-day orientation note</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.more }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="More" style="padding:8px 18px 28px;display:flex;flex-direction:column">
+          <sc-for list="{{ moreLinks }}" as="m" hint-placeholder-count="4">
+            <div onClick="{{ m.open }}" style="display:flex;align-items:center;gap:10px;min-height:68px;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+              <div style="flex:1"><div style="font:600 21px/1.1 var(--font-heading)">{{ m.t }}</div><div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">{{ m.b }}</div></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.positioning }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Positioning" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:16px">
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Weekly book · Saturday edition for week ending 20 Nov 2026</div>
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ posSeg }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-neutral-700)"><span>NET POSITION · 1Y PERCENTILE</span><span>ILLUSTRATIVE</span></div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ pos }}" as="p" hint-placeholder-count="8">
+              <div style="display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:10px;height:38px;border-top:1px solid var(--color-divider);font:400 13px var(--font-body);font-variant-numeric:tabular-nums">
+                <span>{{ p.n }}</span>
+                <span style="position:relative;height:10px;border-left:1px solid var(--color-divider);border-right:1px solid var(--color-divider)">
+                  <i style="position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--color-neutral-500)"></i>
+                  <i style="position:absolute;top:0;bottom:0;left:{{ p.l }};width:{{ p.w }};background:{{ p.bg }}"></i>
+                </span>
+                <span style="text-align:right;font-weight:500">{{ p.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ openPosBrief }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);color:var(--color-accent-700);font:600 16px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Open executive brief</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.watchlist }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Watchlist" style="padding:8px 18px 28px;display:flex;flex-direction:column">
+          <sc-for list="{{ watchRows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:8px;height:56px;border-bottom:1px solid var(--color-divider)">
+              <div onClick="{{ r.open }}" style="flex:1;cursor:pointer"><div style="font:500 15px var(--font-body)">{{ r.s }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ r.group }}</div></div>
+              <span style="font:400 13px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ r.chg }}</span>
+              <span style="font:500 15px var(--font-body);font-variant-numeric:tabular-nums">{{ r.val }}</span>
+              <span onClick="{{ r.star }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+              </span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ watchEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font:400 14px var(--font-body);color:var(--color-neutral-700)">Nothing watched. Star an instrument in Markets to add it.</div></sc-if>
+          <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin:22px 0 4px">Saved research</div>
+            <sc-for list="{{ savedDocs }}" as="d" hint-placeholder-count="1">
+              <div onClick="{{ d.open }}" style="min-height:52px;padding:8px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)"><div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div></div>
+            </sc-for>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.names }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Single-name research" style="padding:14px 18px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ names }}" as="n" hint-placeholder-count="6">
+            <div class="blueprint" onClick="{{ n.open }}" style="padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:4px" style-hover="background:var(--color-accent-100)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:600 30px/1 var(--font-heading)">{{ n.tk }}</div>
+              <div style="font:400 13px/1.3 var(--font-body);color:var(--color-neutral-700)">{{ n.co }}</div>
+              <div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700);margin-top:6px">{{ n.ed }} · {{ n.status }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.name }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Single-name detail" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:18px">
+          <div><div style="font:600 52px/1 var(--font-heading);letter-spacing:-.02em">{{ nm.tk }}</div><div style="font:400 15px var(--font-body);color:var(--color-neutral-700)">{{ nm.co }}</div></div>
+          <div class="blueprint" style="display:flex;flex-direction:column">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <sc-for list="{{ nm.facts }}" as="f" hint-placeholder-count="5">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--color-divider);margin-bottom:-1px;font:400 14px var(--font-body)"><span style="color:var(--color-neutral-700)">{{ f.k }}</span><span style="font-weight:500;text-align:right">{{ f.v }}</span></div>
+            </sc-for>
+          </div>
+          <div style="font:400 14px/1.5 var(--font-body);color:var(--color-neutral-800)">Issuer editions join the macro archive to filings and valuation. Each edition is read against the classified regime on its build date.</div>
+          <div class="blueprint" onClick="{{ nm.openDoc }}" style="height:50px;display:flex;align-items:center;justify-content:center;background:var(--color-accent-600);border-color:var(--color-accent-600);color:#fff;font:600 19px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-700)" style-active="background:var(--color-accent-800)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Open edition
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.search }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Search" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:10px">
+          <input value="{{ q }}" onChange="{{ setQ }}" placeholder="Instruments, editions, issuers" autofocus style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+          <div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ resultNote }}</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 0;border-top:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <span style="width:64px;font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700)">{{ r.kind }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font:500 15px/1.3 var(--font-body)">{{ r.label }}</span><span style="display:block;font:400 12px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ r.sub }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Settings" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">View as</div>
+            <div style="display:flex;border:1px solid var(--color-divider)">
+              <sc-for list="{{ roleSeg }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 14px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font:400 12px/1.45 var(--font-body);color:var(--color-neutral-700)">Internal adds classification robustness, boundary distances, held items and internal drafts.</div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:4px">Notifications</div>
+            <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+              <div onClick="{{ n.toggle }}" style="display:flex;align-items:center;gap:12px;min-height:54px;border-bottom:1px solid var(--color-divider);cursor:pointer">
+                <span style="flex:1;font:400 15px var(--font-body)">{{ n.label }}</span>
+                <span style="width:40px;height:22px;border:1px solid var(--color-accent-700);background:{{ n.bg }};position:relative;transition:background .15s"><i style="position:absolute;top:2px;left:{{ n.x }};width:16px;height:16px;background:{{ n.knob }};transition:left .15s"></i></span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Signed in as {{ email }}</div>
+          <div onClick="{{ signOut }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:600 16px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Sign out</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex:none;display:grid;grid-template-columns:repeat(5,1fr);height:60px;border-top:1px solid var(--color-divider);font:500 11px var(--font-body)">
+      <div onClick="{{ tabGoToday }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgToday }};border-top:{{ tabBdToday }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>Today
+      </div>
+      <div onClick="{{ tabGoMarkets }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgMarkets }};border-top:{{ tabBdMarkets }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Markets
+      </div>
+      <div onClick="{{ tabGoResearch }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgResearch }};border-top:{{ tabBdResearch }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Research
+      </div>
+      <div onClick="{{ tabGoAlerts }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgAlerts }};border-top:{{ tabBdAlerts }};margin-top:-1px;position:relative">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Events
+        <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:8px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;background:var(--color-accent-700);color:#fff;font:600 10px/16px var(--font-body);text-align:center">{{ unread }}</span></sc-if>
+      </div>
+      <div onClick="{{ tabGoMore }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgMore }};border-top:{{ tabBdMore }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>More
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:{{ homeW }};height:4px;background:var(--color-text);border-radius:2px"></span></div>
+</div>
+<div style="max-width:390px;text-align:center;font:400 11px/1.5 var(--font-body);color:var(--color-neutral-700)">PROTOTYPE · NOT ENGINE OUTPUT. Levels from the 24 Nov 2026 edition. Chart history, correlations and positioning are illustrative.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;iOS&quot;,&quot;Android&quot;],&quot;default&quot;:&quot;iOS&quot;,&quot;tsType&quot;:&quot;'iOS'|'Android'&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Client&quot;,&quot;Internal&quot;],&quot;default&quot;:&quot;Client&quot;,&quot;tsType&quot;:&quot;'Client'|'Internal'&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;startSignedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;chartStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bands&quot;,&quot;Strip&quot;,&quot;Rules&quot;],&quot;default&quot;:&quot;Bands&quot;,&quot;tsType&quot;:&quot;'Bands'|'Strip'|'Rules'&quot;,&quot;section&quot;:&quot;Chart treatments&quot;},&quot;mapStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Matrix&quot;,&quot;Ranked&quot;],&quot;default&quot;:&quot;Matrix&quot;,&quot;tsType&quot;:&quot;'Matrix'|'Ranked'&quot;,&quot;section&quot;:&quot;Chart treatments&quot;}}">
+const ON = 'var(--color-accent-700)', MUTED = 'var(--color-neutral-700)';
+const GROUPS = {
+  rates: { name: 'Rates', rows: [
+    { s: 'US 2Y', v: 4.63, val: '4.63%' }, { s: 'US 10Y', v: 4.91, val: '4.91%' }, { s: 'US 30Y', v: 5.30, val: '5.30%' },
+    { s: 'Dec 25bp hike', v: 95, val: '95%', chg: 'FedWatch' } ] },
+  fx: { name: 'FX', rows: [
+    { s: 'DXY', v: 103.818, val: '103.82' }, { s: 'EURUSD', v: 1.09657, val: '1.0966' }, { s: 'USDJPY', v: 159.23, val: '159.23' },
+    { s: 'GBPUSD', v: 1.31179, val: '1.3118' }, { s: 'USDCAD', v: 1.42714, val: '1.4271' }, { s: 'AUDUSD', v: 0.6641, val: '0.6641' },
+    { s: 'USDCHF', v: 0.8354, val: '0.8354' }, { s: 'USDCNH', v: 6.66503, val: '6.6650' } ] },
+  equities: { name: 'Equities', rows: [
+    { s: 'S&P 500', v: 7201.09, val: '7,201.09', chg: '−0.50%' }, { s: 'Nasdaq', v: 23733.54, val: '23,733.54', chg: '−1.48%' },
+    { s: 'Dow', v: 50018.70, val: '50,018.70', chg: '+0.85%' }, { s: 'Russell 2000', v: 2684.94, val: '2,684.94', chg: '+0.57%' },
+    { s: 'TSX', v: 33962.25, val: '33,962.25', chg: '−0.35%' }, { s: 'VIX', v: 26.36, val: '26.36' }, { s: 'NVDA', v: 155.38, val: '155.38', chg: '−5.9%' } ] },
+  inflation: { name: 'Inflation', rows: [
+    { s: 'WTI Jan', v: 82.05, val: '82.05' }, { s: 'Brent Jan', v: 91.40, val: '91.40' }, { s: 'Gold', v: 3556.26, val: '3,556.26' },
+    { s: 'Hormuz disruption', v: 71.7, val: '71.7', chg: 'guarded' } ] }
+};
+const REGIMES = [
+  { from: 0, to: 48, name: 'Reflation / Risk-On', tint: 'var(--color-accent-100)', solid: 'var(--color-accent-300)' },
+  { from: 48, to: 92, name: 'Supply Shock / Risk-Off', tint: 'var(--color-neutral-300)', solid: 'var(--color-neutral-500)' },
+  { from: 92, to: 114, name: 'Stagflation Watch', tint: 'var(--color-accent-200)', solid: 'var(--color-accent-500)' },
+  { from: 114, to: 126, name: 'Disinflation / Hawkish Pivot', tint: 'var(--color-accent-400)', solid: 'var(--color-accent-800)' }
+];
+const DIMS = [
+  ['Risk Sentiment', 'Risk aversion acute', 'RED', 0.059], ['Supply Shock', 'Easing', 'AMBER', 0.401],
+  ['Inflation Regime', 'Cost-push transmission', 'RED', 0.4], ['Policy Stance', 'Hawkish tilt', 'RED', 1.0],
+  ['Growth Signal', 'Resilient', 'GREEN', 0.333], ['Dollar Regime', 'USD firm', 'AMBER', 0.04], ['Market Structure', 'Technical breakdown', 'RED', 0.357]
+];
+const DOCS = [
+  { id: 'd1', kind: 'Daily', title: 'Client Brief: Disinflation / Hawkish Pivot', code: 'Day 217', date: '24 Nov 2026', pages: '2 pages', daily: true },
+  { id: 'd2', kind: 'Daily', title: 'Operating-State Brief', code: 'Day 217 · r129', date: '24 Nov 2026', pages: '4 pages', daily: true, internal: true },
+  { id: 'd3', kind: 'Daily', title: 'Mid-Day Macro Orientation Note', code: 'EV-1.0', date: '24 Nov 2026', pages: 'Mockup' },
+  { id: 'x1', kind: 'Executive', title: 'Currency Intelligence Executive Brief', code: 'FX-E1', date: '24 Nov 2026', pages: '1 page' },
+  { id: 'x2', kind: 'Executive', title: 'Positioning Intelligence Executive Brief', code: 'PB-XB-1.0', date: '20 Nov 2026', pages: '1 page' },
+  { id: 'x3', kind: 'Executive', title: 'Equity-Market Intelligence Executive Brief', code: 'SEMI-E2', date: '14 Nov 2026', pages: '1 page' },
+  { id: 'x4', kind: 'Executive', title: 'Inflation Intelligence Executive Brief', code: 'IN-E1', date: '3 Nov 2026', pages: '1 page' },
+  { id: 'x5', kind: 'Executive', title: 'Weekly Positioning Research Sidecar', code: 'PB-1.0', date: '20 Nov 2026', pages: 'Internal draft', internal: true },
+  { id: 's4', kind: 'Special', title: 'NVDA: Special Research', code: 'SR-SN4', date: '23 Nov 2026', pages: 'Draft · intraday', internal: true },
+  { id: 's1', kind: 'Special', title: 'CNQ: Special Research', code: 'SR-SN1', date: '23 Nov 2026', pages: 'Final' },
+  { id: 's2', kind: 'Special', title: 'CNR: Special Research', code: 'SR-SN2', date: '23 Nov 2026', pages: 'Edition' },
+  { id: 's3', kind: 'Special', title: 'AEM: Special Research', code: 'SR-SN3', date: '23 Nov 2026', pages: 'Edition' },
+  { id: 's7', kind: 'Special', title: 'E4 Huang Special', code: 'E4', date: '23 Nov 2026', pages: 'Special' },
+  { id: 's8', kind: 'Special', title: 'E5 Chip Rotation Special', code: 'E5', date: 'Nov 2026', pages: 'Special' }
+];
+const NAMES = [
+  { tk: 'NVDA', co: 'NVIDIA', ed: 'SR-SN4', status: 'DRAFT', doc: 's4', last: '155.38 (−5.9%)' },
+  { tk: 'CNQ', co: 'Canadian Natural Resources', ed: 'SR-SN1', status: 'FINAL', doc: 's1' },
+  { tk: 'CNR', co: 'Canadian National Railway', ed: 'SR-SN2', status: 'EDITION', doc: 's2' },
+  { tk: 'AEM', co: 'Agnico Eagle Mines', ed: 'SR-SN3', status: 'EDITION', doc: 's3' },
+  { tk: 'CAT', co: 'Caterpillar', ed: 'SR-SN5', status: 'IN BUILD' },
+  { tk: 'WMT', co: 'Walmart', ed: 'SR-SN6', status: 'IN BUILD' }
+];
+const ALERTS = [
+  { id: 'a1', type: 'Event', when: '24 Nov', t: 'Chip give-back, equal-weight ahead', b: 'NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%.' },
+  { id: 'a2', type: 'Policy', when: '24 Nov', t: 'December 25bp hike priced at 95%', b: 'CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve.' },
+  { id: 'a3', type: 'Geo', when: '23 Nov', t: 'Projectiles reported in the strait', b: 'UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded).' },
+  { id: 'a4', type: 'Geo', when: '23 Nov', t: 'Riyadh KAFD tower incident', b: '11 injured per Saudi Civil Defence. Repeat-class entry.' },
+  { id: 'a5', type: 'Event', when: '24 Nov', t: 'Oil channel OFF', b: 'Jan WTI settled 82.05; Brent Jan 91.40.' },
+  { id: 'a6', type: 'Geo', when: '24 Nov', t: 'Held: tanker strike report, cyberattack investigation', b: 'Not entered. Held pending confirmation.', internal: true },
+  { id: 'a7', type: 'Event', when: '24 Nov', t: 'I10 FAIL logged', b: 'Engine v6.1b. Manifest untouched.', internal: true }
+];
+const NODES = ['Oil', 'Rates', 'USD', 'Credit', 'Equity', 'Vol'];
+const CORR = [[1, .42, -.18, .25, -.31, .36], [.42, 1, .55, .38, -.47, .44], [-.18, .55, 1, .29, -.35, .33], [.25, .38, .29, 1, -.72, .68], [-.31, -.47, -.35, -.72, 1, -.81], [.36, .44, .33, .68, -.81, 1]];
+const POS = { 'Asset managers': [['UST 10Y', 71], ['S&P 500', 38], ['Nasdaq 100', 24], ['WTI', 57], ['Gold', 83], ['USD index', 66], ['JPY', 19], ['CAD', 31]],
+  'Leveraged funds': [['UST 10Y', 22], ['S&P 500', 44], ['Nasdaq 100', 61], ['WTI', 35], ['Gold', 58], ['USD index', 74], ['JPY', 12], ['CAD', 27]] };
+const TITLES = { today: 'RegimeVector', markets: 'Markets', research: 'Research', alerts: 'Events', more: 'More', asset: 'Drill-down', reader: 'Reader', positioning: 'Positioning', watchlist: 'Watchlist', names: 'Single-name', name: 'Issuer', search: 'Search', settings: 'Settings' };
+const sgn = v => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2);
+function series(sym, last) {
+  let h = 2166136261; for (const c of sym) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  const rnd = () => { h += 0x6D2B79F5; let t = h; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const out = [last]; let v = last, drift = 0;
+  for (let i = 0; i < 125; i++) { drift = drift * .9 + (rnd() - .5) * .006; v = v * (1 + drift + (rnd() - .5) * .012); out.unshift(v); }
+  return out;
+}
+
+class Component extends DCLogic {
+  state = { authed: false, email: '', pw: '', err: '', tab: 'today', stack: [], role: null, group: 'rates', sym: null, range: '6M', docId: 'd1', nameId: 'NVDA',
+    watch: ['US 10Y', 'WTI Jan', 'USDCAD', 'NVDA'], saved: [], q: '', notif: { daily: true, event: true, regime: true, pos: false }, fs: 16, alertFilter: 'All', read: [], libFilter: 'All', cell: [4, 5], posWho: 'Asset managers' };
+  scrollRef = React.createRef();
+  componentDidMount() { if (this.props.startSignedIn) this.setState({ authed: true, email: 'analyst@firm.com' }); }
+  componentDidUpdate() {
+    const s = this.state, cur = s.stack[s.stack.length - 1] || s.tab;
+    if (cur !== this._lastScreen) { this._lastScreen = cur; if (this.scrollRef.current) this.scrollRef.current.scrollTop = 0; }
+  }
+  push(screen, extra) { this.setState(s => ({ ...extra, stack: [...s.stack, screen] })); }
+  seg(opts, cur, set) { return opts.map(o => ({ label: o, bg: o === cur ? ON : 'transparent', fg: o === cur ? '#fff' : 'var(--color-text)', pick: () => set(o) })); }
+  toggleWatch(s) { this.setState(st => ({ watch: st.watch.includes(s) ? st.watch.filter(x => x !== s) : [...st.watch, s] })); }
+  renderVals() {
+    const st = this.state, p = this.props;
+    const ios = (p.platform ?? 'iOS') === 'iOS';
+    const role = st.role ?? p.role ?? 'Client', internal = role === 'Internal';
+    const chartStyle = p.chartStyle ?? 'Bands', mapStyle = p.mapStyle ?? 'Matrix';
+    const screen = !st.authed ? 'login' : (st.stack[st.stack.length - 1] || st.tab);
+    const is = {}; ['login', ...Object.keys(TITLES)].forEach(k => is[k] = k === screen);
+    const openDoc = id => () => this.push('reader', { docId: id });
+    const docsAll = DOCS.filter(d => internal || !d.internal).map(d => ({ ...d, lock: d.internal ? ' · Internal' : '', pdf: !d.daily, open: openDoc(d.id) }));
+    const doc = docsAll.find(d => d.id === st.docId) || docsAll[0];
+    const tabVals = {};
+    ['today', 'markets', 'research', 'alerts', 'more'].forEach(t => {
+      const on = st.stack.length === 0 && st.tab === t;
+      const T = t[0].toUpperCase() + t.slice(1); tabVals['tabGo' + T] = () => this.setState({ tab: t, stack: [] }); tabVals['tabFg' + T] = on ? ON : MUTED; tabVals['tabBd' + T] = on ? '2px solid ' + ON : '2px solid transparent';
+    });
+    // chart
+    const g = GROUPS[st.group], row = g.rows.find(r => r.s === st.sym) || g.rows[0];
+    const n = { '1M': 21, '3M': 63, '6M': 126 }[st.range], full = series(row.s, row.v), data = full.slice(126 - n), start = 126 - n;
+    const mn = Math.min(...data), mx = Math.max(...data), dp = row.v < 10 ? (row.v < 2 ? 4 : 2) : (row.v > 1000 ? 0 : 2);
+    const strip = chartStyle === 'Strip', rules = chartStyle === 'Rules';
+    const bandsRaw = REGIMES.filter(r => r.to > start).map(r => ({ r, a: Math.max(r.from, start) - start, b: r.to - start }));
+    const chart = { sym: row.s, val: row.val, max: mx.toFixed(dp), min: mn.toFixed(dp),
+      pts: data.map((v, i) => (i / (n - 1) * 100).toFixed(2) + ',' + (92 - (v - mn) / (mx - mn || 1) * 80).toFixed(2)).join(' '),
+      bands: bandsRaw.map(({ r, a, b }, i) => ({ l: (a / n * 100) + '%', w: ((b - a) / n * 100) + '%', t: strip ? 'calc(100% - 8px)' : '0', h: strip ? '8px' : '100%',
+        bg: rules ? 'transparent' : (strip ? r.solid : r.tint), bl: (rules || strip) && i > 0 ? '1px dashed var(--color-accent-700)' : '0' })),
+      legend: bandsRaw.map(({ r }) => ({ name: r.name, sw: rules ? 'transparent' : (strip ? r.solid : r.tint) })) };
+    const allRows = Object.entries(GROUPS).flatMap(([k, gr]) => gr.rows.map(r => ({ ...r, gk: k, group: gr.name })));
+    const openAsset = r => () => this.push('asset', { group: r.gk, sym: r.s });
+    // search
+    const q = st.q.trim().toLowerCase();
+    const pool = [
+      ...allRows.map(r => ({ kind: r.group.toUpperCase(), label: r.s, sub: r.val + (r.chg ? ' · ' + r.chg : ''), open: openAsset(r) })),
+      ...docsAll.map(d => ({ kind: 'EDITION', label: d.title, sub: d.code + ' · ' + d.date, open: d.open })),
+      ...NAMES.map(nm => ({ kind: 'ISSUER', label: nm.tk + ' · ' + nm.co, sub: nm.ed + ' · ' + nm.status, open: () => this.push('name', { nameId: nm.tk }) }))
+    ];
+    const results = q ? pool.filter(r => (r.label + ' ' + r.sub + ' ' + r.kind).toLowerCase().includes(q)).slice(0, 12) : [];
+    const alertsVis = ALERTS.filter(a => internal || !a.internal);
+    const unread = alertsVis.filter(a => !st.read.includes(a.id)).length;
+    const nmRaw = NAMES.find(x => x.tk === st.nameId) || NAMES[0];
+    const nmDoc = docsAll.find(d => d.id === nmRaw.doc);
+    const links = []; for (let i = 0; i < 6; i++) for (let j = i + 1; j < 6; j++) links.push([i, j, CORR[i][j]]);
+    links.sort((a, b) => Math.abs(b[2]) - Math.abs(a[2]));
+    const cellBg = v => v >= 0 ? `color-mix(in srgb, var(--color-accent) ${Math.round(v * 100)}%, transparent)` : `color-mix(in srgb, var(--color-neutral-700) ${Math.round(-v * 100)}%, transparent)`;
+    const NL = { daily: 'Daily brief published', event: 'Intraday event notes', regime: 'Regime label change', pos: 'Weekly positioning book' };
+    return { ...tabVals,
+      phoneR: ios ? '46px' : '26px', islandW: ios ? '104px' : '12px', homeW: ios ? '128px' : '72px',
+      is, authed: st.authed, isInternal: internal, roleLabel: role, title: screen === 'name' ? nmRaw.tk : TITLES[screen], canBack: st.stack.length > 0,
+      email: st.email, pw: st.pw, err: st.err, hasErr: !!st.err,
+      setEmail: e => this.setState({ email: e.target.value, err: '' }), setPw: e => this.setState({ pw: e.target.value, err: '' }),
+      signIn: () => { if (!/^\S+@\S+\.\S+$/.test(st.email)) return this.setState({ err: 'Enter a valid work email.' }); if (st.pw.length < 6) return this.setState({ err: 'Password must be at least 6 characters.' }); this.setState({ authed: true, err: '', tab: 'today', stack: [] }); },
+      signOut: () => this.setState({ authed: false, pw: '', stack: [], tab: 'today' }),
+      back: () => this.setState(s => ({ stack: s.stack.slice(0, -1) })), openSearch: () => { if (screen !== 'search') this.push('search', { q: '' }); },
+      roleSeg: this.seg(['Client', 'Internal'], role, o => this.setState({ role: o })),
+      viewTitle: internal ? "Strategist's view" : "Today's macro view",
+      drivers: [
+        { n: 1, t: 'Chip give-back, equal-weight ahead', b: 'NVDA −5.9%; Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%.' },
+        { n: 2, t: 'Policy pricing into December', b: '25bp hike priced at 95% (CME FedWatch). 2Y 4.63, 10Y 4.91, 30Y 5.30.' },
+        { n: 3, t: 'Crude and the strait', b: 'Jan WTI 82.05, Brent 91.40. Hormuz disruption 71.7 (guarded).' } ],
+      latestDocs: docsAll.filter(d => ['d3', 'x1', 's1'].includes(d.id)),
+      dims: DIMS.map(([name, tag, level, bd]) => ({ name, tag, level, bd: bd.toFixed(3), flag: bd < 0.1 ? ' †' : '', fg: bd < 0.1 ? ON : 'var(--color-text)' })),
+      groups: Object.entries(GROUPS).map(([k, gr]) => ({ name: gr.name, rows: gr.rows.slice(0, 3), open: () => this.push('asset', { group: k, sym: null }) })),
+      mapMatrix: mapStyle === 'Matrix', mapRanked: mapStyle !== 'Matrix', nodes: NODES,
+      matrix: NODES.map((name, i) => ({ name, cells: NODES.map((_, j) => ({ bg: i === j ? 'transparent' : cellBg(CORR[i][j]), ol: st.cell[0] === i && st.cell[1] === j ? '2px solid var(--color-text)' : 'none', pick: () => i !== j && this.setState({ cell: [i, j] }) })) })),
+      cellRead: NODES[st.cell[0]] + ' → ' + NODES[st.cell[1]] + '  ' + sgn(CORR[st.cell[0]][st.cell[1]]),
+      links: links.slice(0, 8).map(([i, j, v]) => ({ pair: NODES[i] + ' ↔ ' + NODES[j], v: sgn(v), w: Math.abs(v) * 100 + '%', bg: v >= 0 ? 'var(--color-accent)' : 'var(--color-neutral-700)' })),
+      groupSeg: Object.entries(GROUPS).map(([k, gr]) => ({ label: gr.name, bg: k === st.group ? ON : 'transparent', fg: k === st.group ? '#fff' : 'var(--color-text)', pick: () => this.setState({ group: k, sym: null }) })),
+      rangeSeg: this.seg(['1M', '3M', '6M'], st.range, o => this.setState({ range: o })), chart,
+      rows: g.rows.map(r => ({ ...r, chg: r.chg || '', bg: r.s === row.s ? 'var(--color-accent-100)' : 'transparent', pick: () => this.setState({ sym: r.s }),
+        star: e => { e.stopPropagation(); this.toggleWatch(r.s); }, starFill: st.watch.includes(r.s) ? 'currentColor' : 'none' })),
+      libSeg: this.seg(['All', 'Daily', 'Executive', 'Special'], st.libFilter, o => this.setState({ libFilter: o })),
+      docs: docsAll.filter(d => st.libFilter === 'All' || d.kind === st.libFilter), doc,
+      fsPx: st.fs + 'px', fsUp: () => this.setState(s => ({ fs: Math.min(22, s.fs + 2) })), fsDown: () => this.setState(s => ({ fs: Math.max(14, s.fs - 2) })),
+      saveFill: st.saved.includes(doc.id) ? 'currentColor' : 'none',
+      toggleSave: () => this.setState(s => ({ saved: s.saved.includes(doc.id) ? s.saved.filter(x => x !== doc.id) : [...s.saved, doc.id] })),
+      alertSeg: this.seg(['All', 'Event', 'Policy', 'Geo'], st.alertFilter, o => this.setState({ alertFilter: o })),
+      alerts: alertsVis.filter(a => st.alertFilter === 'All' || a.type === st.alertFilter).map(a => ({ ...a, type: a.type + (a.internal ? ' · Internal' : ''), dot: st.read.includes(a.id) ? 'transparent' : 'var(--color-accent)', read: () => this.setState(s => ({ read: s.read.includes(a.id) ? s.read : [...s.read, a.id] })) })),
+      unread, hasUnread: unread > 0, openMidday: openDoc('d3'), openPosBrief: openDoc('x2'),
+      moreLinks: [
+        { t: 'Watchlist', b: st.watch.length + ' instruments · ' + st.saved.length + ' saved editions', open: () => this.push('watchlist') },
+        { t: 'Positioning', b: 'Weekly book, week ending 20 Nov', open: () => this.push('positioning') },
+        { t: 'Single-name research', b: 'SR-SN 1.0 · ' + NAMES.length + ' issuers', open: () => this.push('names') },
+        { t: 'Settings', b: 'Role view, notifications, account', open: () => this.push('settings') } ],
+      posSeg: this.seg(Object.keys(POS), st.posWho, o => this.setState({ posWho: o })),
+      pos: POS[st.posWho].map(([nm, v]) => ({ n: nm, v, l: Math.min(v, 50) + '%', w: Math.abs(v - 50) + '%', bg: v >= 50 ? 'var(--color-accent)' : 'var(--color-neutral-700)' })),
+      watchRows: allRows.filter(r => st.watch.includes(r.s)).map(r => ({ ...r, chg: r.chg || '', open: openAsset(r), star: () => this.toggleWatch(r.s) })),
+      watchEmpty: st.watch.length === 0, savedDocs: docsAll.filter(d => st.saved.includes(d.id)), hasSaved: st.saved.length > 0,
+      names: NAMES.filter(x => internal || x.status !== 'DRAFT').map(x => ({ ...x, open: () => this.push('name', { nameId: x.tk }) })),
+      nm: { tk: nmRaw.tk, co: nmRaw.co, openDoc: nmDoc ? nmDoc.open : () => {},
+        facts: [{ k: 'Edition', v: nmRaw.ed }, { k: 'Status', v: nmRaw.status }, { k: 'Programme', v: 'SR-SN 1.0 under ERSM' }, { k: 'Regime at build', v: 'Disinflation / Hawkish Pivot' }, ...(nmRaw.last ? [{ k: 'Last close, 24 Nov', v: nmRaw.last }] : [])] },
+      q: st.q, setQ: e => this.setState({ q: e.target.value }), results,
+      resultNote: q ? results.length + ' result' + (results.length === 1 ? '' : 's') : 'Try “10Y”, “NVDA”, “positioning” or “FX”.',
+      notifs: Object.keys(NL).map(k => ({ label: NL[k], bg: st.notif[k] ? ON : 'transparent', knob: st.notif[k] ? '#fff' : ON, x: st.notif[k] ? '20px' : '2px', toggle: () => this.setState(s => ({ notif: { ...s.notif, [k]: !s.notif[k] } })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

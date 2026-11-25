@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-46f8a662-736b-4961-a08c-9167945aae2f/styles.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{--color-bg:#f4f7fa;--color-surface:#e4e9ee;--color-text:#0b0f1a;--color-accent:#15304e;--color-divider:#d9e0e7;
+--color-neutral-100:#f3f5f7;--color-neutral-200:#e4e9ee;--color-neutral-300:#d9e0e7;--color-neutral-400:#c4cdd6;--color-neutral-500:#7a8fa3;--color-neutral-600:#5a6e83;--color-neutral-700:#3a4d61;--color-neutral-800:#3a4d61;--color-neutral-900:#0b0f1a;
+--color-accent-100:#eef2f6;--color-accent-200:#dfe6ee;--color-accent-300:#c4cdd6;--color-accent-400:#9fb0c2;--color-accent-500:#7a8fa3;--color-accent-600:#15304e;--color-accent-700:#15304e;--color-accent-800:#0c1829;--color-accent-900:#0c1829;
+--font-heading:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;--font-body:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif}
+body{margin:0;background:var(--color-surface);-webkit-font-smoothing:antialiased}
+a{color:#15304e}a:hover{color:#0c1829}
+input{font-family:var(--font-body)}
+.blueprint{background:#fff}.blueprint>.corner{display:none}
+*::-webkit-scrollbar{width:0;height:0}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px 16px;font-family:var(--font-body);color:var(--color-text)">
+<div data-screen-label="Phone" style="width:390px;height:844px;flex:none;background:var(--color-bg);border:1px solid #0c1829;border-radius:{{ phoneR }};box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;position:relative">
+
+  <div style="height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px var(--font-body);position:relative;background:#0c1829;color:#fff">
+    <span style="font-variant-numeric:tabular-nums">17:42</span>
+    <span style="position:absolute;left:50%;top:11px;transform:translateX(-50%);height:22px;width:{{ islandW }};background:#000;border-radius:11px"></span>
+    <span style="font:500 12px var(--font-body);letter-spacing:.04em">5G&nbsp;&nbsp;87%</span>
+  </div>
+
+  <sc-if value="{{ is.login }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Login" style="flex:1;display:flex;flex-direction:column;padding:56px 28px 28px;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font:700 32px/1 var(--font-heading);letter-spacing:-.015em">Regime<span style="color:#bc9330">Vector</span></div>
+        <div style="font:400 15px/1.45 var(--font-body);color:var(--color-neutral-700)">Cross-asset regime intelligence. Daily classification, research editions and event notes.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:18px">
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Work email
+          <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="name@firm.com" style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Password
+          <input type="password" value="{{ pw }}" onChange="{{ setPw }}" placeholder="6+ characters" style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+        </label>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Access</div>
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ roleSeg }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 14px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}">
+          <div style="font:500 13px var(--font-body);color:var(--color-accent-800);border:1px solid var(--color-accent);padding:8px 10px">{{ err }}</div>
+        </sc-if>
+      </div>
+      <div class="blueprint" onClick="{{ signIn }}" style="margin-top:6px;height:50px;display:flex;align-items:center;justify-content:center;background:var(--color-accent-600);border-color:var(--color-accent-600);color:#fff;font:700 15px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-700)" style-active="background:var(--color-accent-800)">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Sign in
+      </div>
+      <div style="margin-top:auto;font:400 12px/1.45 var(--font-body);color:var(--color-neutral-700)">Research content is interpretive commentary on a classified state. It is not investment advice.</div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ authed }}" hint-placeholder-val="{{ false }}">
+    <div style="height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px;background:#0c1829;color:#fff;border-bottom:2px solid #bc9330">
+      <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ back }}" style="width:44px;height:44px;margin-left:-12px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:rgba(255,255,255,.12)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+        </div>
+      </sc-if>
+      <div style="flex:1;min-width:0;font:700 18px/1 var(--font-heading);letter-spacing:-.01em;color:{{ titleFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</div>
+      <div style="font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border:1px solid #22395a;color:#a9b8c8">{{ roleLabel }}</div>
+      <div onClick="{{ openSearch }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:rgba(255,255,255,.12)">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+      </div>
+    </div>
+
+    <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+      <sc-if value="{{ is.today }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Today" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Tuesday 24 November 2026 · Day 217 · Edition 130</div>
+          <div class="blueprint" style="padding:14px 16px;border-left:3px solid #bc9330;display:flex;flex-direction:column;gap:6px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:#bc9330">Current regime</div>
+            <div style="font:700 24px/1.05 var(--font-heading);letter-spacing:-.015em">Disinflation / Hawkish Pivot</div>
+            <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:16px;margin-top:6px;padding-top:8px;border-top:1px solid var(--color-divider);font:400 12px var(--font-body);color:var(--color-neutral-700)">
+                <span>Tenure <b style="color:var(--color-text)">12 sessions</b></span>
+                <span>Weakest boundary <b style="color:var(--color-text)">Market Structure 0.013</b></span>
+              </div>
+              <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">HY-1.0 LIVE · gate 15/15 PASS · revision #28 in force, first session.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ viewTitle }}</div>
+              <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}"><div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700)">EDITION 130</div></sc-if>
+            </div>
+            <div style="background:#fbf6ea;border-left:3px solid #bc9330;padding:14px 16px;font:400 15.5px/1.6 var(--font-body);text-wrap:pretty"><sc-if value="{{ isClient }}" hint-placeholder-val="{{ true }}">Stocks were mixed as chipmakers gave back part of Monday's surge: the S&P 500 fell 0.5% and the Nasdaq 1.5%, with Nvidia down 5.9%, while the Dow rose 0.9% back above 50,000 and small caps gained 0.6%. Health care and consumer staples led. The dollar weakened, Treasury yields were steady and gold fell 2.4%. Oil rose after new attacks on ships, with WTI at $82.05 and Brent at $91.40. Our reading stays DISINFLATION / HAWKISH PIVOT; two of four conditions are met.</sc-if><sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}">Tuesday turned Monday's one-stock rally into a rotation: chips fell, health care and staples rose, and the equal-weight index beat the cap-weighted one by a point. That is healthier breadth but a weaker index, and the S&P now sits right at the line where we would call the trend broken. Rates did not move and oil rose on new strait attacks. Wednesday's inflation report matters more than either.</sc-if></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Scenario weights</div>
+            <div style="display:flex;height:14px;border:1px solid var(--color-divider)">
+              <div style="width:10%;background:var(--color-accent-200)"></div><div style="width:8%;background:var(--color-accent-300)"></div><div style="width:72%;background:#bc9330"></div><div style="width:10%;background:var(--color-accent-400)"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font:400 12px var(--font-body);color:var(--color-neutral-700)">
+              <div>Base<div style="font:700 16px var(--font-heading);color:var(--color-text)">10%</div></div>
+              <div>Stalemate<div style="font:700 16px var(--font-heading);color:var(--color-text)">8%</div></div>
+              <div>Escalation<div style="font:700 16px var(--font-heading);color:var(--color-accent-700)">72%</div></div>
+              <div>Resolution<div style="font:700 16px var(--font-heading);color:var(--color-text)">10%</div></div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Top market drivers</div>
+            <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:26px 1fr;gap:4px;padding:10px 0;border-top:1px solid var(--color-divider)">
+                <div style="font:700 16px/1.1 var(--font-heading);color:var(--color-accent-700)">{{ d.n }}</div>
+                <div><div style="font:500 15px/1.3 var(--font-body)">{{ d.t }}</div><div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ d.b }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Latest research</div>
+            <sc-for list="{{ latestDocs }}" as="d" hint-placeholder-count="3">
+              <div onClick="{{ d.open }}" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 0;border-top:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <div style="flex:1;min-width:0"><div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div></div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.markets }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Dashboard" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Regime dimensions</div>
+            <div class="blueprint" style="display:grid;grid-template-columns:1fr 1fr">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <sc-for list="{{ dims }}" as="d" hint-placeholder-count="7">
+                <div style="padding:10px 12px;border-bottom:1px solid var(--color-divider);border-right:1px solid var(--color-divider);margin:0 -1px -1px 0;background:{{ d.bg }}">
+                  <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">{{ d.name }}</div>
+                  <div style="font:700 14px/1.15 var(--font-heading);color:{{ d.fg }}">{{ d.tag }}{{ d.flag }}</div>
+                  <div style="font:400 11px/1.35 var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ d.data }}</div>
+                  <sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}"><div style="font:400 11px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">Boundary dist. {{ d.bd }} · {{ d.level }}</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font:400 11px var(--font-body);color:var(--color-neutral-700)">† Boundary-flagged. Edition 130, 24 Nov 2026.</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Cross-asset · close 24 Nov</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+                <div class="blueprint" onClick="{{ g.open }}" style="padding:10px 12px;cursor:pointer;display:flex;flex-direction:column;gap:6px" style-hover="background:var(--color-accent-100)">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font:700 15px/1 var(--font-heading)">{{ g.name }}</div>
+                  <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                    <div style="display:flex;justify-content:space-between;gap:6px;font:400 13px var(--font-body);font-variant-numeric:tabular-nums"><span style="color:var(--color-neutral-700)">{{ r.s }}</span><span style="font-weight:500">{{ r.val }}</span></div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Transmission map</div>
+              <div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-neutral-700)">60 EDITIONS · DAILY CHANGES</div>
+            </div>
+            <sc-if value="{{ mapMatrix }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:52px repeat(6,1fr);gap:2px;font:500 11px var(--font-body)">
+                <div></div>
+                <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="6"><div style="text-align:center;color:var(--color-neutral-700);padding-bottom:2px">{{ n }}</div></sc-for>
+                <sc-for list="{{ matrix }}" as="row" hint-placeholder-count="6">
+                  <div style="display:contents">
+                    <div style="display:flex;align-items:center;color:var(--color-neutral-700)">{{ row.name }}</div>
+                    <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="6">
+                      <div onClick="{{ c.pick }}" style="aspect-ratio:1;background:{{ c.bg }};outline:{{ c.ol }};outline-offset:-2px;border:1px solid var(--color-divider);cursor:pointer"></div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font:400 12px var(--font-body);color:var(--color-neutral-700)">
+                <span style="font:500 14px var(--font-body);color:var(--color-text);font-variant-numeric:tabular-nums">{{ cellRead }}</span>
+                <span style="display:flex;align-items:center;gap:6px"><i style="width:10px;height:10px;background:var(--color-accent)"></i>with<i style="width:10px;height:10px;background:#8b2020"></i>against</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ mapRanked }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ links }}" as="l" hint-placeholder-count="8">
+                  <div style="display:grid;grid-template-columns:112px 1fr 44px;align-items:center;gap:8px;height:30px;border-top:1px solid var(--color-divider);font:400 13px var(--font-body);font-variant-numeric:tabular-nums">
+                    <span>{{ l.pair }}</span>
+                    <span style="height:8px;background:{{ l.bg }};width:{{ l.w }}"></span>
+                    <span style="text-align:right;font-weight:500">{{ l.v }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.asset }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Asset drill-down" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ groupSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ chart.sym }}</div><div style="font:700 29px/1 var(--font-heading);font-variant-numeric:tabular-nums">{{ chart.val }}</div></div>
+            <div style="display:flex;border:1px solid var(--color-divider)">
+              <sc-for list="{{ rangeSeg }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="width:44px;height:32px;display:flex;align-items:center;justify-content:center;font:500 12px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div class="blueprint" style="height:170px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="position:absolute;inset:0;overflow:hidden">
+              <sc-for list="{{ chart.bands }}" as="b" hint-placeholder-count="3">
+                <div style="position:absolute;left:{{ b.l }};width:{{ b.w }};top:{{ b.t }};height:{{ b.h }};background:{{ b.bg }};border-left:{{ b.bl }}"></div>
+              </sc-for>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%"><polyline points="{{ chart.pts }}" fill="none" stroke="#0c1829" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+              <div style="position:absolute;right:6px;top:4px;font:400 11px var(--font-body);color:var(--color-neutral-800);font-variant-numeric:tabular-nums">{{ chart.max }}</div>
+              <div style="position:absolute;right:6px;bottom:12px;font:400 11px var(--font-body);color:var(--color-neutral-800);font-variant-numeric:tabular-nums">{{ chart.min }}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px 12px;font:400 11px var(--font-body);color:var(--color-neutral-700)">
+            <sc-for list="{{ chart.legend }}" as="b" hint-placeholder-count="3">
+              <span style="display:flex;align-items:center;gap:5px"><i style="width:10px;height:10px;background:{{ b.sw }};border:1px solid var(--color-divider)"></i>{{ b.name }}</span>
+            </sc-for>
+            <span style="font-weight:600;letter-spacing:.06em">ARCHIVE · 130 EDITIONS</span>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+              <div onClick="{{ r.pick }}" style="display:flex;align-items:center;gap:8px;height:48px;border-top:1px solid var(--color-divider);cursor:pointer;background:{{ r.bg }};padding:0 4px 0 8px;margin:0 -8px" style-hover="background:var(--color-accent-100)">
+                <span style="flex:1;font:500 15px var(--font-body)">{{ r.s }}</span>
+                <span style="font:500 13px var(--font-body);color:{{ r.chgFg }};font-variant-numeric:tabular-nums">{{ r.chg }}</span>
+                <span style="width:86px;text-align:right;font:500 15px var(--font-body);font-variant-numeric:tabular-nums">{{ r.val }}</span>
+                <span onClick="{{ r.star }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--color-accent-700)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ r.starFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.research }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Research library" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ libSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ docs }}" as="d" hint-placeholder-count="6">
+              <sc-if value="{{ d.hasHead }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:#15304e;border-top:2px solid #bc9330;color:#fff;padding:8px 12px;margin-top:14px;font:700 11px/1.3 var(--font-body);letter-spacing:.1em;text-transform:uppercase"><span>{{ d.head }}</span><span style="font:400 10px var(--font-body);letter-spacing:.02em;text-transform:none;color:#9fb0c2">{{ d.count }}</span></div>
+              </sc-if>
+              <div onClick="{{ d.open }}" style="display:flex;align-items:center;gap:10px;min-height:64px;padding:10px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ d.kind }}{{ d.lock }}</div>
+                  <div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div>
+                  <div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div>
+                </div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.reader }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Brief reader" style="padding:14px 20px 32px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)">{{ doc.kind }} · {{ doc.code }}</div>
+            <div onClick="{{ fsDown }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:500 13px var(--font-body);cursor:pointer" style-hover="background:var(--color-accent-100)">A−</div>
+            <div onClick="{{ fsUp }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:500 17px var(--font-body);cursor:pointer" style-hover="background:var(--color-accent-100)">A+</div>
+            <div onClick="{{ toggleSave }}" style="width:44px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);color:var(--color-accent-700);cursor:pointer" style-hover="background:var(--color-accent-100)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ saveFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg>
+            </div>
+          </div>
+          <div style="font:700 24px/1.08 var(--font-heading);letter-spacing:-.015em;text-wrap:balance">{{ doc.title }}</div>
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">{{ doc.date }} · {{ doc.pages }}</div>
+          <sc-if value="{{ doc.daily }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;font-size:{{ fsPx }};line-height:1.55">
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Current regime</div>
+              <div style="font:700 18px/1.1 var(--font-heading)">Disinflation / Hawkish Pivot</div>
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">{{ viewTitle }}</div>
+              <div style="background:#fbf6ea;border-left:3px solid #bc9330;padding:12px 14px;text-wrap:pretty"><sc-if value="{{ isClient }}" hint-placeholder-val="{{ true }}">Stocks were mixed as chipmakers gave back part of Monday's surge: the S&P 500 fell 0.5% and the Nasdaq 1.5%, with Nvidia down 5.9%, while the Dow rose 0.9% back above 50,000 and small caps gained 0.6%. Health care and consumer staples led. The dollar weakened, Treasury yields were steady and gold fell 2.4%. Oil rose after new attacks on ships, with WTI at $82.05 and Brent at $91.40. Our reading stays DISINFLATION / HAWKISH PIVOT; two of four conditions are met.</sc-if><sc-if value="{{ isInternal }}" hint-placeholder-val="{{ false }}">Tuesday turned Monday's one-stock rally into a rotation: chips fell, health care and staples rose, and the equal-weight index beat the cap-weighted one by a point. That is healthier breadth but a weaker index, and the S&P now sits right at the line where we would call the trend broken. Rates did not move and oil rose on new strait attacks. Wednesday's inflation report matters more than either.</sc-if></div>
+              <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">Top market drivers</div>
+              <sc-for list="{{ drivers }}" as="d" hint-placeholder-count="3">
+                <div><b style="font-weight:500">{{ d.n }}. {{ d.t }}.</b> <span style="color:var(--color-neutral-800)">{{ d.b }}</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;background:#15304e;border-top:2px solid #bc9330;color:#fff;padding:8px 12px;font:700 11px/1.3 var(--font-body);letter-spacing:.1em;text-transform:uppercase"><span>Full edition</span><span style="font:400 10px var(--font-body);letter-spacing:.02em;text-transform:none;color:#9fb0c2">{{ pdfNote }}</span></div>
+          <sc-if value="{{ doc.isPdf }}" hint-placeholder-val="{{ false }}">
+            <div style="overflow-x:auto;margin:0 -20px;padding:0 20px"><div ref="{{ pdfRef }}" style="width:{{ zoomW }};min-height:200px;display:flex;flex-direction:column;gap:10px"></div></div>
+          </sc-if>
+          <sc-if value="{{ doc.isHtml }}" hint-placeholder-val="{{ false }}">
+            <iframe src="{{ doc.file }}" sandbox="allow-scripts" title="Edition" style="width:100%;height:540px;border:1px solid var(--color-divider);background:#fff"></iframe>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.alerts }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Event notes" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ alertSeg }}" as="o" hint-placeholder-count="4">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="5">
+              <div onClick="{{ a.read }}" style="display:grid;grid-template-columns:10px 1fr;gap:10px;padding:12px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <i style="width:8px;height:8px;margin-top:5px;background:{{ a.dot }};border:1px solid var(--color-accent)"></i>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font:600 10px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-accent-700)"><span>{{ a.type }}</span><span style="color:var(--color-neutral-700)">{{ a.when }}</span></div>
+                  <div style="font:500 15px/1.3 var(--font-body);margin-top:2px">{{ a.t }}</div>
+                  <div style="font:400 13px/1.45 var(--font-body);color:var(--color-neutral-700)">{{ a.b }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ openMidday }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);color:var(--color-accent-700);font:700 13px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Open mid-day orientation note</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.more }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="More" style="padding:8px 18px 28px;display:flex;flex-direction:column">
+          <sc-for list="{{ moreLinks }}" as="m" hint-placeholder-count="4">
+            <div onClick="{{ m.open }}" style="display:flex;align-items:center;gap:10px;min-height:68px;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+              <div style="flex:1"><div style="font:700 17px/1.1 var(--font-heading)">{{ m.t }}</div><div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">{{ m.b }}</div></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.positioning }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Positioning" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:16px">
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Weekly book · Saturday edition for week ending 20 Nov 2026</div>
+          <div style="display:flex;border:1px solid var(--color-divider)">
+            <sc-for list="{{ posSeg }}" as="o" hint-placeholder-count="2">
+              <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 13px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;justify-content:space-between;font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-neutral-700)"><span>NET POSITION · 1Y PERCENTILE</span><span>ILLUSTRATIVE</span></div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ pos }}" as="p" hint-placeholder-count="8">
+              <div style="display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:10px;height:38px;border-top:1px solid var(--color-divider);font:400 13px var(--font-body);font-variant-numeric:tabular-nums">
+                <span>{{ p.n }}</span>
+                <span style="position:relative;height:10px;border-left:1px solid var(--color-divider);border-right:1px solid var(--color-divider)">
+                  <i style="position:absolute;left:50%;top:-4px;bottom:-4px;width:1px;background:var(--color-neutral-500)"></i>
+                  <i style="position:absolute;top:0;bottom:0;left:{{ p.l }};width:{{ p.w }};background:{{ p.bg }}"></i>
+                </span>
+                <span style="text-align:right;font-weight:500">{{ p.v }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ openPosBrief }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);color:var(--color-accent-700);font:700 13px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Open executive brief</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.watchlist }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Watchlist" style="padding:8px 18px 28px;display:flex;flex-direction:column">
+          <sc-for list="{{ watchRows }}" as="r" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:8px;height:56px;border-bottom:1px solid var(--color-divider)">
+              <div onClick="{{ r.open }}" style="flex:1;cursor:pointer"><div style="font:500 15px var(--font-body)">{{ r.s }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ r.group }}</div></div>
+              <span style="font:500 13px var(--font-body);color:{{ r.chgFg }};font-variant-numeric:tabular-nums">{{ r.chg }}</span>
+              <span style="font:500 15px var(--font-body);font-variant-numeric:tabular-nums">{{ r.val }}</span>
+              <span onClick="{{ r.star }}" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+              </span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ watchEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:40px 0;text-align:center;font:400 14px var(--font-body);color:var(--color-neutral-700)">Nothing watched. Star an instrument in Markets to add it.</div></sc-if>
+          <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin:22px 0 4px">Saved research</div>
+            <sc-for list="{{ savedDocs }}" as="d" hint-placeholder-count="1">
+              <div onClick="{{ d.open }}" style="min-height:52px;padding:8px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)"><div style="font:500 15px/1.3 var(--font-body)">{{ d.title }}</div><div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ d.code }} · {{ d.date }}</div></div>
+            </sc-for>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.names }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Single-name research" style="padding:14px 18px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <sc-for list="{{ names }}" as="n" hint-placeholder-count="6">
+            <div class="blueprint" onClick="{{ n.open }}" style="padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:4px" style-hover="background:var(--color-accent-100)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font:700 24px/1 var(--font-heading)">{{ n.tk }}</div>
+              <div style="font:400 13px/1.3 var(--font-body);color:var(--color-neutral-700)">{{ n.co }}</div>
+              <div style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700);margin-top:6px">{{ n.ed }} · {{ n.status }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.name }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Single-name detail" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:18px">
+          <div><div style="font:700 42px/1 var(--font-heading);letter-spacing:-.02em">{{ nm.tk }}</div><div style="font:400 15px var(--font-body);color:var(--color-neutral-700)">{{ nm.co }}</div></div>
+          <div class="blueprint" style="display:flex;flex-direction:column">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <sc-for list="{{ nm.facts }}" as="f" hint-placeholder-count="5">
+              <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--color-divider);margin-bottom:-1px;font:400 14px var(--font-body)"><span style="color:var(--color-neutral-700)">{{ f.k }}</span><span style="font-weight:500;text-align:right">{{ f.v }}</span></div>
+            </sc-for>
+          </div>
+          <div style="font:400 14px/1.5 var(--font-body);color:var(--color-neutral-800)">Issuer editions join the macro archive to filings and valuation. Each edition is read against the classified regime on its build date.</div>
+          <div class="blueprint" onClick="{{ nm.openDoc }}" style="height:50px;display:flex;align-items:center;justify-content:center;background:var(--color-accent-600);border-color:var(--color-accent-600);color:#fff;font:700 15px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-700)" style-active="background:var(--color-accent-800)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Open edition
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.search }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Search" style="padding:14px 18px 28px;display:flex;flex-direction:column;gap:10px">
+          <input value="{{ q }}" onChange="{{ setQ }}" placeholder="Instruments, editions, issuers" autofocus style="height:46px;padding:0 12px;border:1px solid var(--color-divider);background:transparent;font-size:16px;color:var(--color-text);border-radius:0" style-focus="border-color:var(--color-accent);outline:none">
+          <div style="font:400 12px var(--font-body);color:var(--color-neutral-700)">{{ resultNote }}</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 0;border-top:1px solid var(--color-divider);cursor:pointer" style-hover="background:var(--color-accent-100)">
+                <span style="width:64px;font:600 10px var(--font-body);letter-spacing:.08em;color:var(--color-accent-700)">{{ r.kind }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font:500 15px/1.3 var(--font-body)">{{ r.label }}</span><span style="display:block;font:400 12px var(--font-body);color:var(--color-neutral-700);font-variant-numeric:tabular-nums">{{ r.sub }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ is.settings }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Settings" style="padding:18px 18px 28px;display:flex;flex-direction:column;gap:22px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700)">View as</div>
+            <div style="display:flex;border:1px solid var(--color-divider)">
+              <sc-for list="{{ roleSeg }}" as="o" hint-placeholder-count="2">
+                <div onClick="{{ o.pick }}" style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;font:500 14px var(--font-body);cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font:400 12px/1.45 var(--font-body);color:var(--color-neutral-700)">Internal adds classification robustness, boundary distances, held items and internal drafts.</div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="font:600 11px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:4px">Notifications</div>
+            <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="4">
+              <div onClick="{{ n.toggle }}" style="display:flex;align-items:center;gap:12px;min-height:54px;border-bottom:1px solid var(--color-divider);cursor:pointer">
+                <span style="flex:1;font:400 15px var(--font-body)">{{ n.label }}</span>
+                <span style="width:40px;height:22px;border:1px solid var(--color-accent-700);background:{{ n.bg }};position:relative;transition:background .15s"><i style="position:absolute;top:2px;left:{{ n.x }};width:16px;height:16px;background:{{ n.knob }};transition:left .15s"></i></span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font:400 13px var(--font-body);color:var(--color-neutral-700)">Signed in as {{ email }}</div>
+          <div onClick="{{ signOut }}" style="height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-divider);font:700 13px var(--font-heading);letter-spacing:.06em;text-transform:uppercase;cursor:pointer" style-hover="background:var(--color-accent-100)">Sign out</div>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="flex:none;display:grid;grid-template-columns:repeat(5,1fr);height:60px;background:#fff;border-top:1px solid var(--color-divider);font:500 11px var(--font-body)">
+      <div onClick="{{ tabGoToday }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgToday }};border-top:{{ tabBdToday }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>Today
+      </div>
+      <div onClick="{{ tabGoMarkets }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgMarkets }};border-top:{{ tabBdMarkets }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>Markets
+      </div>
+      <div onClick="{{ tabGoResearch }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgResearch }};border-top:{{ tabBdResearch }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><path d="M14 2v6h6"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Research
+      </div>
+      <div onClick="{{ tabGoAlerts }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgAlerts }};border-top:{{ tabBdAlerts }};margin-top:-1px;position:relative">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>Events
+        <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:8px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;background:var(--color-accent-700);color:#fff;font:600 10px/16px var(--font-body);text-align:center">{{ unread }}</span></sc-if>
+      </div>
+      <div onClick="{{ tabGoMore }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:{{ tabFgMore }};border-top:{{ tabBdMore }};margin-top:-1px">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg>More
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="height:22px;flex:none;display:flex;align-items:center;justify-content:center"><span style="width:{{ homeW }};height:4px;background:var(--color-text);border-radius:2px"></span></div>
+</div>
+<div style="max-width:390px;text-align:center;background:#fdf8ee;color:#6b4800;border:1px solid #e4e9ee;padding:6px 12px;font:600 10px/1.5 var(--font-body);letter-spacing:.06em;text-transform:uppercase">Prototype · not engine output. State, history and regime bands from Edition 130, 24 Nov 2026. Positioning illustrative.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;iOS&quot;,&quot;Android&quot;],&quot;default&quot;:&quot;iOS&quot;,&quot;tsType&quot;:&quot;'iOS'|'Android'&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Client&quot;,&quot;Internal&quot;],&quot;default&quot;:&quot;Client&quot;,&quot;tsType&quot;:&quot;'Client'|'Internal'&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;startSignedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Device&quot;},&quot;chartStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Bands&quot;,&quot;Strip&quot;,&quot;Rules&quot;],&quot;default&quot;:&quot;Bands&quot;,&quot;tsType&quot;:&quot;'Bands'|'Strip'|'Rules'&quot;,&quot;section&quot;:&quot;Chart treatments&quot;},&quot;mapStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Matrix&quot;,&quot;Ranked&quot;],&quot;default&quot;:&quot;Matrix&quot;,&quot;tsType&quot;:&quot;'Matrix'|'Ranked'&quot;,&quot;section&quot;:&quot;Chart treatments&quot;}}">
+const ON = 'var(--color-accent-700)', MUTED = 'var(--color-neutral-700)';
+const RV = {"n":130,"first":"2026-05-21","s":{"usy2":[4.08,4.13,4.01,4,3.99,3.98,4.05,4.05,4.08,4.05,4.17,4.15,4.12,4.12,4.05,4.08,4.07,4.05,4.2,4.19,4.24,4.16,4.11,4.1,4.08,4.1,4.14,4.17,4.14,4.13,4.19,4.2,4.16,4.2,4.27,4.19,4.13,4.16,4.18,4.2,4.26,4.317,4.37,4.33,4.322,4.254,4.22,4.23,4.28,4.264,4.2,4.18,4.25,4.18,4.241,4.218,4.2,4.15,4.1738,4.19,4.19,4.19,4.2,4.24,4.24,4.17,4.19,4.2,4.325,4.325,4.39,4.384,4.34,4.374,4.39,4.43,4.56,4.64,4.65,4.68,4.74,4.67,4.76,4.756,4.71,4.85,4.87,4.81,4.92,4.89,4.88,4.78,4.83,4.84,4.79,4.77,4.75,4.8,4.8,4.79,4.82,4.77,4.74,4.77,4.79,4.81,4.65,4.69,4.68,4.7,4.67,4.61,4.56,4.59,4.61,4.58,4.46,4.51,4.56,4.73,4.73,4.86,4.88,4.83,4.8,4.8,4.76,4.63,4.63,4.63],"usy10":[4.57,4.56,4.5,4.48,4.45,4.45,4.47,4.45,4.49,4.48,4.54,4.564,4.53,4.55,4.45,4.48,4.47,4.44,4.494,4.46,4.5048,4.499,4.398,4.394,4.38,4.38,4.44,4.48,4.49,4.48,4.55,4.57,4.55,4.56,4.61,4.58,4.55,4.557,4.54,4.59,4.63,4.675,4.71,4.68,4.65,4.605,4.685,4.68,4.74,4.688,4.63,4.63,4.69,4.65,4.705,4.7,4.68,4.63,4.69,4.72,4.7,4.653,4.696,4.734,4.697,4.625,4.66,4.68,4.72,4.75,4.79,4.784,4.77,4.78,4.79,4.84,4.938,4.96,4.97,5.01,5.02,4.94,5.01,4.962,4.96,5.11,5.18,5.17,5.24,5.26,5.29,5.24,5.28,5.31,5.27,5.28,5.22,5.24,5.24,5.21,5.19,5.1,5.09,5.15,5.12,5.13,4.96,5,5,4.99,5.05,4.98,4.94,4.91,4.95,4.9,4.84,4.86,4.88,4.98,4.98,5.1,5.15,5.12,5.1,5.07,5.04,4.92,4.92,4.91],"usy30":[5.1,5.07,5.03,5.01,4.98,4.99,4.99,4.98,4.99,4.97,5.01,5.02,5,5.04,4.95,4.97,4.97,4.93,4.93,4.9,4.95,4.94,4.86,4.86,4.87,4.86,4.92,4.97,4.98,4.98,5.05,5.06,5.06,5.06,5.1,5.09,5.08,5.08,5.06,5.11,5.13,5.161,5.167,5.167,5.12,5.092,5.211,5.21,5.27,5.23,5.18,5.17,5.22,5.202,5.249,5.24,5.237,5.21,5.2371,5.31,5.28,5.194,5.23,5.273,5.23,5.17,5.18,5.19,5.21,5.25,5.27,5.267,5.25,5.25,5.25,5.29,5.37,5.35,5.35,5.37,5.35,5.29,5.34,5.29,5.29,5.398,5.47,5.49,5.56,5.59,5.64,5.61,5.63,5.66,5.64,5.67,5.6,5.6,5.6,5.56,5.52,5.43,5.43,5.48,5.42,5.42,5.29,5.33,5.31,5.3,5.37,5.32,5.31,5.28,5.32,5.28,5.25,5.26,5.26,5.35,5.35,5.43,5.47,5.46,5.46,5.41,5.4,5.31,5.29,5.3],"fed_hike_prob_dec":[30,28,25,24,22,20,23,25,28,85,90,90,90,65,70,70,52,56,72,72,72,80,70,72,68,70,70,70,60,60,60,60,60,60,60,60,60,60,60,60,60,60,82,82,82,82,82,82,82,82,82,82,82,82,82,82,38.1,38.1,38.1,38.1,38.1,38.1,38.1,38.1,38.1,38.1,38.1,38.1,57,60,68.2,62.2,50,58,53,60,65,85.6,90,88,88,88,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,90,71,71,82,85,85,85,72,78,77,68.7,70,84,100,100,100,100,100,100,100,100,96,96,95],"credit_hy_oas":[278,274,272,271,272,272,272,271,275,274,276,275,278,280,278,271,266,271,263,266,265,271,276,278,283,280,275,274,275,272,267,270,270,269,269,272,271,271,273,269,269,268,277,279,281,284,287,284,285,278,273,275,271,270,270,272,271,271,267,270,275,273,275,270,269,270,267,263,260,263,265,266,265,268,267,271,270,265,271,276,270,270,268,266,268,273,280,293,302,308,312,324,310,312,303,309,315,311,311,316,325,323,331,329,333,327,340,338,330,318,314,326,326,343,340,340,348,342,334,334,330,320,323,334,343,347,352,376,363,363],"dxy":[99.257,99.239,99.097,99.206,99.02,98.908,99.201,99.219,99.529,99.413,100.069,100.045,99.909,99.947,99.858,99.747,99.631,99.54,100.089,100.849,101.02,101.408,101.609,101.431,101.357,101.105,101.19,101.4,100.857,100.853,101.023,100.991,100.904,100.952,101.235,100.919,100.485,100.763,100.765,100.96,101.173,101.125,101.444,101.468,101.535,101.417,100.886,99.864,99.914,99.897,99.858,99.676,99.93,99.539,99.811,99.828,100.014,99.964,99.66,99.637,99.657,98.833,98.895,98.8,99.002,98.915,99.165,99.159,99.702,99.428,99.68,99.596,98.908,99.176,98.787,98.817,99.048,99.12,99.391,99.615,100.252,100.248,100.222,100.44,100.6,101.1,101.29,100.97,101.197,101.372,101.451,102.1,101.93,102.167,101.833,102.24,102.138,102.213,102.59,102.18,102.553,102.055,101.837,101.98,101.7,101.78,101.61,101.81,101.96,102.32,102.19,102.04,101.88,101.75,101.87,101.57,101.55,102.3,101.65,102.23,102.91,103.17,103.41,103.55,103.49,103.86,103.9,103.81,104.32,103.82],"eurusd":[1.16179,1.16031,1.16322,1.16258,1.16501,1.16613,1.16325,1.16318,1.15984,1.16109,1.15226,1.15328,1.15442,1.15361,1.1579,1.15676,1.15898,1.16087,1.15021,1.14578,1.14291,1.13822,1.13586,1.13709,1.13864,1.14248,1.14218,1.139,1.14342,1.14412,1.14121,1.14169,1.14307,1.14156,1.13805,1.14211,1.14633,1.14431,1.14377,1.14146,1.13979,1.14128,1.13779,1.13723,1.13681,1.13866,1.1467,1.15276,1.15304,1.15085,1.15332,1.15542,1.15244,1.15596,1.15432,1.15432,1.15247,1.15291,1.15705,1.15801,1.15769,1.1678,1.16791,1.16764,1.16643,1.16747,1.1654,1.16522,1.15831,1.16174,1.1593,1.15884,1.16258,1.16144,1.16242,1.16334,1.16105,1.15989,1.15511,1.1542,1.14635,1.14758,1.14859,1.14642,1.14494,1.13847,1.13811,1.13913,1.13716,1.13432,1.133,1.12428,1.12521,1.122,1.12602,1.11951,1.12135,1.12008,1.11543,1.11981,1.11571,1.12149,1.1239,1.12113,1.12351,1.12332,1.12165,1.11949,1.1178,1.11362,1.1156,1.11621,1.11674,1.11948,1.119,1.12235,1.12239,1.11396,1.12242,1.11675,1.10933,1.10556,1.10247,1.10044,1.10094,1.09651,1.0974,1.09696,1.09037,1.09657],"usdjpy":[159.205,159.205,159.3,159.515,159.24,159.275,159.66,159.9,160.055,160.02,160.315,160.18,160.365,160.55,159.94,160.225,160.335,160.455,160.645,161.38,161.565,161.58,161.79,161.79,161.755,161.945,162.565,162,161.5,162,162.07,162.14,162.385,161.695,162.44,162.25,162.185,162.395,162.395,162.5,162.9,163.1,163.8,163.9,163.7,163.8,163.8,160,157.585,157.175,157.5,157.6,158.2,157.805,159.305,159.285,159.425,159.49,159.32,159.445,159.625,158.175,159.055,158.95,159.105,159.18,159.305,159.395,160.065,159.682,160.19,158.727,155.812,156.251,153.997,153.554,154.495,153.527,154.344,155.114,156.316,155.9794,156.8952,157.3948,157.3996,158.3468,158.8596,157.2953,157.3813,157.2843,157.4203,158.0926,157.8651,157.9714,158.1733,158.0702,157.874,158.2486,158.6537,158.3651,158.3118,158.1031,158,158.5489,158.2689,158.2055,156.869,156.8474,157.4991,157.9318,157.9737,157.9773,157.5581,157.9172,158.7406,158.487,157.8507,158.5003,157.7309,158.7821,159.8462,159.8375,159.7726,159.4727,159.3372,159.3618,159.7576,158.5227,158.9632,159.2302],"gbpusd":[1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.34841,1.35243,1.35181,1.35401,1.35469,1.35116,1.3526,1.35012,1.34768,1.33802,1.33579,1.33941,1.33697,1.33439,1.32405,1.322,1.32466,1.32549,1.32318,1.32639,1.3195,1.324,1.32229,1.32769,1.32129,1.32308,1.32412,1.3206,1.32529,1.31929,1.3275,1.33287,1.33039,1.33798,1.33936,1.33996,1.33724,1.33458,1.33167,1.33263,1.33651,1.3395,1.34111,1.34149,1.34677,1.34574,1.33488,1.3441,1.33501,1.328,1.32363,1.32117,1.31869,1.32156,1.31408,1.31007,1.30874,1.30353,1.31179],"usdcad":[1.3778,1.3821,1.381,1.378,1.38,1.376,1.3841,1.384,1.3897,1.3909,1.39408,1.394,1.39494,1.3944,1.39666,1.39915,1.399,1.4,1.4101,1.4137,1.4159,1.4211,1.4234,1.4202,1.4195,1.4211,1.4196,1.4217,1.413,1.42,1.4207,1.4173,1.4168,1.4157,1.4155,1.406,1.4042,1.4043,1.4022,1.4054,1.4095,1.4088,1.4083,1.4093,1.4114,1.4102,1.4083,1.4014,1.4029,1.4029,1.4068,1.4026,1.4018,1.3942,1.394,1.3924,1.3941,1.3931,1.3876,1.3876,1.3897,1.3809,1.379,1.3767,1.3845,1.3839,1.3877,1.3855,1.3905,1.38653,1.3845,1.3845,1.37934,1.38376,1.37835,1.38054,1.38334,1.38725,1.3901,1.39213,1.399,1.39917,1.39864,1.40341,1.40658,1.41037,1.41379,1.41413,1.41743,1.41901,1.42327,1.42223,1.42513,1.42592,1.42107,1.42591,1.42192,1.42644,1.42845,1.42177,1.42362,1.4186,1.41405,1.41113,1.40583,1.4047,1.40111,1.40082,1.40195,1.40503,1.39932,1.39918,1.3968,1.39859,1.40041,1.3972,1.39985,1.41337,1.41218,1.41803,1.42478,1.42606,1.42656,1.42942,1.42898,1.43329,1.43366,1.43319,1.43712,1.42714],"spx":[7446.05,7473.47,7519.12,7520.36,7563.63,7589,7599.96,7609.78,7553.68,7584.31,7383.74,7405.73,7386.65,7266.99,7394.49,7431.46,7554.29,7548.6,7420.1,7500.54,7472.79,7365.46,7358.22,7357.49,7354.02,7440.43,7499.36,7482.86,7483.24,7537.43,7503.85,7482.71,7543.64,7575.39,7515.34,7543.59,7572.4,7533.8,7457.69,7443.28,7509.2,7499,7408.3,7411.98,7413.18,7429,7316.1,7437.64,7489.72,7600.5,7736.52,7725.2,7709.96,7757.64,7753,7728.2,7748,7798.99,7785.76,7745.06,7691.76,7708.2,7641.16,7674.37,7652.86,7677.28,7675.7,7728.5,7709.18,7686.05,7631.47,7666.6,7747.71,7718.6,7673.52,7636.36,7591.7,7656.98,7619.98,7585.73,7551.81,7637.71,7650.07,7764.37,7764.5,7706.25,7704.45,7743.5,7683.69,7671.2,7652.39,7666.45,7722.85,7774.24,7819.33,7802.11,7765.82,7811.98,7807.64,7806.05,7720.14,7745.3,7660.65,7692.02,7714.19,7759.34,7665.57,7625.77,7676.8,7722.6,7743.98,7720.22,7580.07,7541.4,7568.92,7688.62,7353.73,7376.86,7549.94,7520.93,7619.38,7592.4,7561.67,7416.59,7340.53,7323.63,7175.83,6910.39,7237.17,7201.09],"nasdaq":[26293.1,26343.97,26656.18,26674.73,26917.47,26971,27086.81,27093.9,26853.98,26830.96,25709.43,25929.66,25678.82,25169.5,25808.83,25888.84,26683.94,26376.34,26021.66,26516.62,26166.6,25587.04,25476.64,25358.6,25297.62,25820.14,26213.72,26040.68,25832.67,26121.16,25818.69,25870.65,26206.89,26281.61,25873.18,26107.01,26215.1,25882.6,25520.24,25508.07,25837.21,25691,25137.69,24975.82,24932,24876.91,24444,25122.18,25373.85,25913.8,26584.99,26478.6,26348.35,26690.62,26605.1,26445.45,26588,26803.03,26729.16,26644.91,26289.71,26330.5,26067.17,26180.45,25980.19,26151.3,26130.2,26540.4,26402.42,26312.89,26099.77,26217.83,26584.06,26506.99,26421.41,26253.34,26081.72,26333.04,26186.41,25981.57,25978.42,26418.29,26522.54,27122.09,27244.27,26936.03,26939.37,27068.72,26820.38,26797.54,26861.06,26871.6,27190.86,27477.31,27599.79,27538.59,27193.24,27366.07,27245.8,27204.28,26692.77,26712.93,26139.94,26430.79,26424.72,26702.76,26008.76,25955.24,26169.38,26477.81,26549.85,26184.72,25437,25164.32,25372.01,25736.51,24315,24579.42,25253.14,25065.88,25466.19,25366.09,25136.27,24509.76,24328.38,24429.88,23879.2,22617.73,24089.56,23733.54],"dow":[50285.66,50579.66,50461.68,50644.28,50668.97,51034,51078.88,51307.79,50687.07,51561.93,50866.78,50786.01,50872.11,49918.78,50848.75,51202.26,51671,51991.72,51492.55,51853,51717,51665.43,51848.9,51920.62,51876.11,52182.74,52319.2,52305.24,52900.07,53055.91,52925.15,52348.39,52487.41,52637.01,52498.64,52508.27,52658.6,52552.97,52146.42,51839.26,52224.64,52219,51711.65,51947.25,52210.08,52747.32,51594.14,52208.06,52485.03,53178.41,54085.88,54320.7,53885.1,54036.93,53975.98,53791.85,53770,53839.99,53732.41,53459.78,53343.4,53464.9,52759.21,53277.01,53417.16,53577.4,53463.88,53570,53559.34,53184.4,52766.88,53061.95,53686.11,53414.25,52786.07,52380.66,52064.1,52573.29,52421.2,52093.11,51461.9,51779.85,51682.55,52050.17,51865.14,51513.87,51352.17,51828.59,51481.51,51350.99,50909.86,50931.14,51182.11,51273.76,51527.08,51185.02,51236.85,51660.39,51855.75,51676.19,51627.87,52184.2,52008.03,51972.22,52503.61,52864.83,52882.34,52228.99,52361.52,52377.57,52475.1,52342.62,51770.31,51983.98,51786.72,53356.12,51523.06,51285.73,52389.75,52231.89,52486.49,52297.09,52347.55,51608.17,50759.42,50198.17,49097.06,48147.33,49595.31,50018.7],"russell2k":[2872.41,2872.41,2920.54,2917,2930,2943,2901.32,2937.13,2893.5,2930,2824,2850,2857,2835.46,2916.72,2942.24,2957.24,2955,2935,2945,3001.32,2972.54,2986.63,3000.96,2995,3010,3024.37,3012.6,2980.05,3009.54,2982.49,2956.39,2992.55,2992.5,2978,2964.8,2976.4,2974.57,2963,2942.43,2985.17,2960.1,2930.78,2931.11,2948.51,2953.14,2904.82,2946.1,2931.34,2980.71,3034.64,3015.12,2999.83,3032.5,3016.61,3026.77,3044.07,3052.85,3068.42,3055,3017.74,3032.72,2992.43,3016,3000,3005,3000,3013.05,2972.3,2944.39,2920.14,2953.17,2968.27,2975.65,2960.21,2921.72,2891.49,2904.48,2892.24,2867.27,2858.85,2874.63,2860.39,2875.35,2889.91,2838.66,2835.61,2844.32,2817.91,2807.92,2796.88,2806.64,2832.9,2847.15,2830.41,2793.37,2794.3,2807.15,2794.64,2783.55,2729.72,2767.47,2721.57,2728.5,2773.62,2781.23,2784.25,2776.1,2787.81,2818.87,2830.51,2859.19,2811.84,2805.88,2812.45,2856.95,2729.84,2754.05,2840.76,2821.38,2846.26,2799.06,2790.49,2742.94,2701.87,2714.31,2655.11,2581.79,2669.66,2684.94],"tsx":[34471.4,34471.4,34653.9,34412.1,34517.7,34769.1,34734.9,35169.5,34801.5,35217.1,34413.5,34478.7,34411.7,34151.3,34671.5,34937.9,35275.6,35389.6,35125.1,34969.3,35002.2,34927.4,34736.1,34850.2,34980,34823.8,34857,34857,34966.7,35212.3,35272.6,34935.8,35200.5,35305.3,35252.7,35320.5,35416.2,35340.2,35263.9,34960.3,35369.1,35485.1,35192.7,35369.1,35568.1,35749.7,35333.8,35505.8,35226.1,34810,35801.6,36146.4,36136.3,36381.2,36458.3,36475.9,36662.1,36759.3,36730.3,36667.9,36367.9,36401.8,36365.4,36620.2,36714.1,36957.6,36813.7,36834.3,36553.9,36270.5,35825.7,36091.6,36633.1,36513.8,36123.1,35906.6,35506.3,35697.5,35702.5,35582.1,35491.3,35874.3,35806.7,36009.4,36335.6,35751.4,35706.5,35800.9,35489.9,35460.3,35235.9,35154.76,35502.7,35518.6,35649.5,35041.9,35145.4,35664.6,35154.76,35984,35584.5,36137.1,36176.6,35928.6,36108,36325,35973.5,35788.18,35944.16,36172,36265.1,36249,35620.03,35801.1,35532.28,36341.4,35605.3,35789.09,36446.26,36170.5,36411.7,36137.2,36105.9,35722.13,35315.3,34578.1,34028.7,33189.9,34082.1,33962.25],"vix":[16.76,16.7,17.01,16.29,15.74,15.32,16.05,15.77,16.06,15.4,21.51,18.92,19.87,22.22,19.44,17.68,16.2,16.41,18.44,16.4,17.28,19.49,18.63,18.89,18.41,17.65,16.45,16.59,16.15,15.57,16.13,16.9,15.84,15.03,17.16,16.5,15.67,16.73,18.77,18.65,17.05,16.64,18.7,18.58,18.67,18.21,20.66,17.09,15.99,15.86,16.5,15.81,15.15,14.9,15.46,15.28,14.55,14.63,14.25,15.19,15.84,14.89,16.01,15.13,15.85,15.45,15.21,14.51,14.43,14.92,16.34,15.2,14.32,14.53,15.72,16.46,17.84,15.84,17.1,17.2,17.71,15.44,14.81,14.87,14.21,15.18,15.67,14.87,16.07,16.04,16.34,16.39,15.31,15.52,15.01,15.08,15.41,14.84,15.21,15.27,16.87,16.46,19.99,18.44,17.31,16.68,19.03,19.45,18.39,17.52,16.91,17.2,19.42,21.15,20.83,16.61,28.18,25.64,19.92,19.46,17.49,18.7,19.3,22.91,25.46,24.56,28.44,35.89,26.62,26.36],"cpi_yoy":[3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,3.8,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,4.2,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7,3.7],"core_cpi_yoy":[2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.9,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.5,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6,2.6],"core_pce_yoy":[3.2,3.2,3.2,3.2,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.4,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3.3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1,3.1],"ppi_yoy":[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.4,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.3,6.5,6.3,6.3,6.3,6.3,6.3,6.3,6.3],"ism_prices":[84.6,84.6,84.6,84.6,84.6,84.6,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,82.1,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,77.9,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2,75.2],"wti":[99,96.36,93.7,91.5,89.7,87.36,92.54,91.5,96.02,95.17,93,91.2,89.5,92.5,86.38,84.27,80.5,75.83,76,75.4,74.3,73.21,70.34,70,68.5,70.75,69.5,68.7,67.2,68.55,70.44,73.52,72.01,71.34,78.14,79.34,79.86,78.96,80.9,83.24,84.91,87.08,92.07,89.31,82.61,81.12,84.46,83.59,86.8,83.2,75.77,75.22,77.29,77.2,82.13,83.2,83.7,81.25,82.4,84.29,85,85,86.88,86.36,85.25,82.36,81.74,83.53,82.92,85.72,90.22,90.76,91.3,91.48,93.03,96.05,102.48,100.05,101.39,105.83,102.43,101.91,100.3,95.9,94.59,94.47,97.72,95.39,95.15,90.82,91.71,94.11,92.09,90.03,89.9,88.59,91.78,92.15,93.97,94.36,95.32,98.21,101.72,103.83,101.79,98.73,101,105.31,103.58,101.65,104.45,103.6,105.37,97.53,97.1,89.08,91.42,91.67,87.51,86.64,87.07,89.22,88.98,85.96,86.19,83.38,83.27,83.98,81.2,82.93],"brent":[105,104.5,96.76,94.5,93,92.05,94.98,94.58,97.81,96.7,94.8,92.8,92.5,95.5,89.5,86.5,82.5,78.3,78,78.1,77.8,76.5,73.74,73,71.5,73.15,72.8,72,70.8,72.31,74.16,78.19,76.02,76.4,81.5,83,83,83,85,85,91.01,93.4,100.8,96.78,88.36,86.47,86.47,87.93,87.2,83.3,79.36,79.02,82.48,82.3,87.72,88.91,89.24,87.07,87.07,90.9,91,91,93.79,93.41,91.09,88.58,87.74,88.52,87.98,90.66,94.65,94.86,95.52,95.23,97.92,101.21,107.63,104.61,105.68,108.75,105.83,104.82,103.87,100.34,99.25,103.08,106.6,104.32,105.28,102.59,103.53,102.31,102.25,100.32,100.58,100.2,104.28,104.72,106.65,105.69,106.06,105.92,109.86,109.55,108.79,108.82,113.17,116.72,115.81,113.88,111.64,110.63,113.42,104.77,103.6,94.62,98.29,98.32,92.57,91.49,92.76,95.82,95.84,92.44,93.14,91.95,91.98,92.57,89.37,91.4],"gold":[4545.18,4509.38,4506.3,4463,4494.93,4539.27,4484.73,4490,4468.2,4461.79,4330.13,4317.47,4221.66,4047.38,4240,4205,4316.31,4331,4255,4188.14,4188.5,4099.41,4012.52,4034,4060,4015.07,4005.81,4035.28,4126.3,4167.5,4116.6,4076.43,4131.75,4111.96,4000.92,4069.7,4063.7,3988,4004,4008.09,4080.72,4151.9,4052.3,4052.3,4074.3,4025.26,4085.06,4105.96,4051.28,4053.66,4072.6,4277.69,4262,4343,4402.12,4371.34,4414.06,4356.99,4373.48,4425.69,4333,4512.03,4519.2,4608.08,4679.91,4655.03,4623.69,4594.77,4458.71,4452.27,4328.58,4387.77,4473.79,4430.06,4356.03,4401.7,4316.76,4348.87,4298.35,4293.8,4264.07,4341.9,4377.25,4369,4357.68,4286.97,4275.28,4286.74,4115.08,4182,4156.46,4177.446,4141.528,4141.046,4169.389,4100.531,4131.916,4195.232,4169.417,4164.439,4101.659,4175.132,4168.166,4141.535,4120.796,4134.542,4026.143,4000.883,4013.437,4062.288,4070.208,4022.119,3883.589,3944.314,3919.2,4058.018,4114.396,4063.327,4134.028,4030.424,3987.032,3883.655,3875.683,3864.435,3846.803,3723.728,3666.871,3520.57,3643.42,3556.26]},"runs":[[0,"Cost-Push Stalemate"],[4,"Post-Shock Disinflation Transition"],[6,"Cost-Push Stalemate"],[9,"Cost-Push / Hawkish Pivot"],[12,"Disinflation / Hawkish Pivot"],[13,"Stagflationary Supply Shock"],[14,"Stagflationary Pressure / Supply Easing"],[20,"Stagflationary Residual / Supply Normalised"],[34,"Stagflationary Pressure / Supply Easing"],[35,"Disinflation / Hawkish Pivot"],[42,"Cost-Push / Hawkish Pivot"],[43,"Disinflation / Hawkish Pivot"],[52,"Supply Normalisation / Risk Recovery"],[53,"Disinflation / Hawkish Pivot"],[56,"Post-Shock Disinflation Transition"],[68,"Disinflation / Hawkish Pivot"],[70,"Cost-Push / Hawkish Pivot"],[94,"Disinflation / Hawkish Pivot"],[96,"Cost-Push / Hawkish Pivot"],[115,"Disinflation / Hawkish Pivot"],[116,"Cost-Push / Hawkish Pivot"],[118,"Disinflation / Hawkish Pivot"]]};
+const GROUPS = {"rates":{"name":"Rates","rows":[{"s":"US 2Y","k":"usy2","v":4.63,"val":"4.63%","chg":"0bp"},{"s":"US 10Y","k":"usy10","v":4.91,"val":"4.91%","chg":"−1bp"},{"s":"US 30Y","k":"usy30","v":5.3,"val":"5.30%","chg":"+1bp"},{"s":"Dec 25bp hike","k":"fed_hike_prob_dec","v":95,"val":"95%"},{"s":"HY OAS (23 Nov)","k":"credit_hy_oas","v":363,"val":"363bp"}]},"fx":{"name":"FX","rows":[{"s":"DXY","k":"dxy","v":103.82,"val":"103.82","chg":"−0.48%"},{"s":"EURUSD","k":"eurusd","v":1.09657,"val":"1.0966","chg":"+0.57%"},{"s":"USDJPY","k":"usdjpy","v":159.23017,"val":"159.23","chg":"+0.17%"},{"s":"GBPUSD","k":"gbpusd","v":1.31179,"val":"1.3118","chg":"+0.63%"},{"s":"USDCAD","k":"usdcad","v":1.42714,"val":"1.4271","chg":"−0.69%"}]},"equities":{"name":"Equities","rows":[{"s":"S&P 500","k":"spx","v":7201.09,"val":"7,201.09","chg":"−0.50%"},{"s":"Nasdaq","k":"nasdaq","v":23733.54,"val":"23,733.54","chg":"−1.48%"},{"s":"Dow","k":"dow","v":50018.7,"val":"50,018.70","chg":"+0.85%"},{"s":"Russell 2000","k":"russell2k","v":2684.94,"val":"2,684.94","chg":"+0.57%"},{"s":"TSX","k":"tsx","v":33962.25,"val":"33,962.25","chg":"−0.35%"},{"s":"VIX","k":"vix","v":26.36,"val":"26.36","chg":"−0.98%"}]},"inflation":{"name":"Inflation","rows":[{"s":"CPI YoY","k":"cpi_yoy","v":3.7,"val":"3.7%"},{"s":"Core CPI YoY","k":"core_cpi_yoy","v":2.6,"val":"2.6%"},{"s":"Core PCE YoY","k":"core_pce_yoy","v":3.1,"val":"3.1%"},{"s":"PPI YoY","k":"ppi_yoy","v":6.3,"val":"6.3%"},{"s":"ISM Prices","k":"ism_prices","v":75.2,"val":"75.2"},{"s":"WTI reference","k":"wti","v":82.93,"val":"82.93","chg":"+2.13%"},{"s":"Brent Jan","k":"brent","v":91.4,"val":"91.40","chg":"+2.27%"},{"s":"Gold","k":"gold","v":3556.26,"val":"3,556.26","chg":"−2.39%"}]}};
+const TINTS = {"Disinflation / Hawkish Pivot":["#f5edda","#bc9330"],"Cost-Push / Hawkish Pivot":["#dfe6ee","#15304e"],"Cost-Push Stalemate":["#eef2f6","#7a8fa3"],"Post-Shock Disinflation Transition":["#ebf4ee","#185c38"],"Stagflationary Supply Shock":["#fdf0f0","#8b2020"],"Stagflationary Pressure / Supply Easing":["#f6e4e4","#b05a5a"],"Stagflationary Residual / Supply Normalised":["#fdf8ee","#6b4800"],"Supply Normalisation / Risk Recovery":["#e3f1f1","#0e7c7b"]};
+const REGIMES = RV.runs.map((r, i) => ({ from: r[0], to: (RV.runs[i + 1] || [RV.n])[0], name: r[1], tint: (TINTS[r[1]] || ['#eef2f6', '#7a8fa3'])[0], solid: (TINTS[r[1]] || ['#eef2f6', '#7a8fa3'])[1] }));
+const DIMS = [
+  ['Risk Sentiment', 'Risk-off', 'RED', 0.136, 'VIX 26.4'], ['Supply Shock', 'Easing', 'AMBER', 0.471, 'WTI $83; Hormuz ~72% disrupted'],
+  ['Inflation Regime', 'Cost-push transmission', 'RED', 0.4, 'CPI 3.70% / Core 2.60%; ISM Prices 75.2'], ['Policy Stance', 'Hawkish tilt', 'RED', 1.0, 'Hike prob 95% / Cut prob 6%'],
+  ['Growth Signal', 'Resilient', 'GREEN', 0.333, 'NFP +165K; claims 194K'], ['Dollar Regime', 'USD firm', 'AMBER', 0.045, 'DXY 103.8 (−0.48% d/d)'], ['Market Structure', 'Technical neutral', 'AMBER', 0.013, 'SPX −1.9% vs 200DMA']
+];
+const DOCS = [
+  { id: 'd1', kind: 'Daily', title: 'Client Brief: Disinflation / Hawkish Pivot', code: 'Day 217', date: '24 Nov 2026', pages: 'Client surface', daily: true, file: 'briefs/client-brief-2026-11-24.pdf' },
+  { id: 'd2', kind: 'Daily', title: 'Operating-State Brief', code: 'Day 217 · r129', date: '24 Nov 2026', pages: 'Internal surface', daily: true, internal: true, file: 'briefs/brief-2026-11-24.pdf' },
+  { id: 'd4', kind: 'Daily', title: 'Client Brief', code: 'Day 216', date: '23 Nov 2026', pages: 'Client surface', file: 'briefs/client-brief-2026-11-23.pdf' },
+  { id: 'd5', kind: 'Daily', title: 'Operating-State Brief', code: 'Day 216', date: '23 Nov 2026', pages: 'Internal surface', internal: true, file: 'briefs/brief-2026-11-23.pdf' },
+  { id: 'd3', kind: 'Events', title: 'Mid-Day Macro Orientation Note', code: 'EV-1.0 · E5', date: '24 Nov 2026', pages: 'Mockup', file: 'briefs/midday-2026-11-24.pdf' },
+  { id: 'e2', kind: 'Events', title: 'Mid-Day Macro Orientation Note', code: 'EV-1.0', date: '23 Nov 2026', pages: 'Mockup', file: 'briefs/midday-2026-11-23.pdf' },
+  { id: 'e3', kind: 'Events', title: 'Mid-Day Macro Orientation Note', code: 'EV-1.0', date: '20 Nov 2026', pages: 'Mockup', file: 'briefs/midday-2026-11-20.pdf' },
+  { id: 'e4', kind: 'Events', title: 'Intraday Executive Brief', code: 'EV-1.0 · E1 format', date: '20 Nov 2026', pages: 'Mockup', file: 'briefs/intraday-2026-11-20.pdf' },
+  { id: 'x1', kind: 'Executive', title: 'Currency Intelligence Executive Brief', code: 'FX-E1', date: '24 Nov 2026', pages: 'One page', file: 'briefs/fx-e1.pdf' },
+  { id: 'x2', kind: 'Executive', title: 'Positioning Intelligence Executive Brief', code: 'PB-XB-1.0', date: '20 Nov 2026', pages: 'One page', file: 'briefs/positioning-2026-11-20.pdf' },
+  { id: 'x3', kind: 'Executive', title: 'Equity-Market Intelligence Executive Brief', code: 'SEMI-E2', date: '14 Nov 2026', pages: 'One page', file: 'briefs/semi-e2.pdf' },
+  { id: 'x4', kind: 'Executive', title: 'Inflation Intelligence Executive Brief', code: 'IN-E1', date: '3 Nov 2026', pages: 'One page', file: 'briefs/in-e1.pdf' },
+  { id: 'x5', kind: 'Executive', title: 'Weekly Positioning Research Sidecar', code: 'PB-1.0', date: '20 Nov 2026', pages: 'Internal draft', internal: true, file: 'briefs/positioning-sidecar-2026-11-20.pdf' },
+  { id: 's4', kind: 'Special', title: 'NVDA: Special Research', code: 'SR-SN4', date: '23 Nov 2026', pages: 'Draft · intraday', internal: true, file: 'briefs/sr-sn4-nvda.pdf' },
+  { id: 's1', kind: 'Special', title: 'CNQ: Special Research', code: 'SR-SN1', date: '23 Nov 2026', pages: 'Final', file: 'briefs/sr-sn1-cnq.pdf' },
+  { id: 's2', kind: 'Special', title: 'CNR: Special Research', code: 'SR-SN2', date: '23 Nov 2026', pages: 'Edition', file: 'briefs/sr-sn2-cnr.pdf' },
+  { id: 's3', kind: 'Special', title: 'AEM: Special Research', code: 'SR-SN3', date: '23 Nov 2026', pages: 'Edition', file: 'briefs/sr-sn3-aem.pdf' },
+  { id: 's7', kind: 'Special', title: 'E4 Huang Reinstatement Special', code: 'E4', date: '23 Nov 2026', pages: 'Interactive', file: 'briefs/e4-huang-special.html' },
+  { id: 's8', kind: 'Special', title: 'E5 Chip Rotation Special', code: 'E5', date: '24 Nov 2026', pages: 'Interactive', file: 'briefs/e5-chip-rotation-special.html' }
+];
+const PROG = { Daily: 'Daily operating state', Events: 'Event-contingent notes', Executive: 'Executive briefs', Special: 'Special and single-name research' };
+const NAMES = [
+  { tk: 'NVDA', co: 'NVIDIA', ed: 'SR-SN4', status: 'DRAFT', doc: 's4', last: '155.38 (−5.9%)' },
+  { tk: 'CNQ', co: 'Canadian Natural Resources', ed: 'SR-SN1', status: 'FINAL', doc: 's1' },
+  { tk: 'CNR', co: 'Canadian National Railway', ed: 'SR-SN2', status: 'EDITION', doc: 's2' },
+  { tk: 'AEM', co: 'Agnico Eagle Mines', ed: 'SR-SN3', status: 'EDITION', doc: 's3' },
+  { tk: 'CAT', co: 'Caterpillar', ed: 'SR-SN5', status: 'IN BUILD' },
+  { tk: 'WMT', co: 'Walmart', ed: 'SR-SN6', status: 'IN BUILD' }
+];
+const ALERTS = [
+  { id: 'a1', type: 'Event', when: '24 Nov', t: 'Chip give-back, equal-weight ahead', b: 'NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%.' },
+  { id: 'a2', type: 'Policy', when: '24 Nov', t: 'December 25bp hike priced at 95%', b: 'CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve.' },
+  { id: 'a3', type: 'Geo', when: '23 Nov', t: 'Projectiles reported in the strait', b: 'UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded).' },
+  { id: 'a4', type: 'Geo', when: '23 Nov', t: 'Riyadh KAFD tower incident', b: '11 injured per Saudi Civil Defence. Repeat-class entry.' },
+  { id: 'a5', type: 'Event', when: '24 Nov', t: 'Oil channel OFF', b: 'Jan WTI settled 82.05, $12.07 below 95. Brent Jan 91.40.' },
+  { id: 'a8', type: 'Event', when: '24 Nov', t: 'Dollar Regime returns to USD firm', b: 'The dollar index fell 0.48% to 103.82, back below 104.' },
+  { id: 'a9', type: 'Event', when: '24 Nov', t: 'Market Structure 5bp inside the breakdown line', b: 'S&P 1.95% under its 200-day average. Boundary distance 0.013; Technical neutral held.', internal: true },
+  { id: 'a6', type: 'Geo', when: '24 Nov', t: 'Held: tanker strike report, cyberattack investigation', b: 'Not entered. Held pending confirmation.', internal: true },
+  { id: 'a7', type: 'Event', when: '24 Nov', t: 'I10 FAIL logged', b: 'Engine v6.1b. Manifest untouched.', internal: true }
+];
+const NODES = ["Oil","Rates","USD","Credit","Equity","Vol"];
+const CORR = [[1,0.14,0.03,0.09,-0.38,0.37],[0.14,1,0.36,-0.37,0.16,-0.18],[0.03,0.36,1,-0.08,0.02,0],[0.09,-0.37,-0.08,1,-0.62,0.53],[-0.38,0.16,0.02,-0.62,1,-0.89],[0.37,-0.18,0,0.53,-0.89,1]];
+const POS = { 'Asset managers': [['UST 10Y', 71], ['S&P 500', 38], ['Nasdaq 100', 24], ['WTI', 57], ['Gold', 83], ['USD index', 66], ['JPY', 19], ['CAD', 31]],
+  'Leveraged funds': [['UST 10Y', 22], ['S&P 500', 44], ['Nasdaq 100', 61], ['WTI', 35], ['Gold', 58], ['USD index', 74], ['JPY', 12], ['CAD', 27]] };
+const TITLES = { today: 'RegimeVector', markets: 'Markets', research: 'Research', alerts: 'Events', more: 'More', asset: 'Drill-down', reader: 'Reader', positioning: 'Positioning', watchlist: 'Watchlist', names: 'Single-name', name: 'Issuer', search: 'Search', settings: 'Settings' };
+const chgFg = c => !c ? MUTED : c[0] === '+' ? '#185c38' : c[0] === '−' ? '#8b2020' : MUTED;
+const TINT = { RED: ['#fdf0f0', '#8b2020'], AMBER: ['#fdf8ee', '#6b4800'], GREEN: ['#ebf4ee', '#185c38'] };
+const sgn = v => (v > 0 ? '+' : '−') + Math.abs(v).toFixed(2);
+
+class Component extends DCLogic {
+  state = { authed: false, email: '', pw: '', err: '', tab: 'today', stack: [], role: null, group: 'rates', sym: null, range: 'All', docId: 'd1', nameId: 'NVDA',
+    watch: ['US 10Y', 'S&P 500', 'USDCAD', 'Gold'], saved: [], q: '', notif: { daily: true, event: true, regime: true, pos: false }, fs: 16, alertFilter: 'All', read: [], libFilter: 'All', cell: [4, 5], posWho: 'Asset managers' };
+  scrollRef = React.createRef();
+  pdfRef = React.createRef();
+  componentDidMount() { this.renderPdf(); if (this.props.startSignedIn) this.setState({ authed: true, email: 'analyst@firm.com' }); }
+  componentDidUpdate() { this.renderPdf();
+    const s = this.state, cur = s.stack[s.stack.length - 1] || s.tab;
+    if (cur !== this._lastScreen) { this._lastScreen = cur; if (this.scrollRef.current) this.scrollRef.current.scrollTop = 0; }
+  }
+  async renderPdf() {
+    const el = this.pdfRef.current, s = this.state, d = DOCS.find(x => x.id === s.docId);
+    const file = s.authed && s.stack[s.stack.length - 1] === 'reader' && d && /\.pdf$/.test(d.file || '') ? d.file : null;
+    if (!el || !file) { this._pdfKey = null; return; }
+    if (this._pdfKey === file && this._pdfEl === el) return;
+    this._pdfKey = file; this._pdfEl = el; el.innerHTML = '';
+    const lib = window.pdfjsLib;
+    if (!lib) { this._pdfKey = null; clearTimeout(this._pdfT); this._pdfT = setTimeout(() => this.renderPdf(), 400); return; }
+    this.setState({ pdfNote: 'loading', pdfNoteFor: file });
+    try {
+      lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await lib.getDocument(file).promise;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        if (this._pdfKey !== file) return;
+        const pg = await pdf.getPage(i), vp = pg.getViewport({ scale: 2.2 }), c = document.createElement('canvas');
+        c.width = vp.width; c.height = vp.height; c.style.cssText = 'width:100%;height:auto;display:block;background:#fff;border:1px solid #d9e0e7';
+        el.appendChild(c); await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      }
+      if (this._pdfKey === file) this.setState({ pdfNote: pdf.numPages + (pdf.numPages === 1 ? ' page' : ' pages'), pdfNoteFor: file });
+    } catch (e) { if (this._pdfKey === file) this.setState({ pdfNote: 'could not render this edition', pdfNoteFor: file }); }
+  }
+  push(screen, extra) { this.setState(s => ({ ...extra, stack: [...s.stack, screen] })); }
+  seg(opts, cur, set) { return opts.map(o => ({ label: o, bg: o === cur ? ON : 'transparent', fg: o === cur ? '#fff' : 'var(--color-text)', pick: () => set(o) })); }
+  toggleWatch(s) { this.setState(st => ({ watch: st.watch.includes(s) ? st.watch.filter(x => x !== s) : [...st.watch, s] })); }
+  renderVals() {
+    const st = this.state, p = this.props;
+    const ios = (p.platform ?? 'iOS') === 'iOS';
+    const role = st.role ?? p.role ?? 'Client', internal = role === 'Internal';
+    const chartStyle = p.chartStyle ?? 'Bands', mapStyle = p.mapStyle ?? 'Matrix';
+    const screen = !st.authed ? 'login' : (st.stack[st.stack.length - 1] || st.tab);
+    const is = {}; ['login', ...Object.keys(TITLES)].forEach(k => is[k] = k === screen);
+    const openDoc = id => () => this.push('reader', { docId: id });
+    const docsAll = DOCS.filter(d => internal || !d.internal).map(d => ({ ...d, lock: d.internal ? ' · Internal' : '', isPdf: /\.pdf$/.test(d.file || ''), isHtml: /\.html$/.test(d.file || ''), open: openDoc(d.id) }));
+    const doc = docsAll.find(d => d.id === st.docId) || docsAll[0];
+    const tabVals = {};
+    ['today', 'markets', 'research', 'alerts', 'more'].forEach(t => {
+      const on = st.stack.length === 0 && st.tab === t;
+      const T = t[0].toUpperCase() + t.slice(1); tabVals['tabGo' + T] = () => this.setState({ tab: t, stack: [] }); tabVals['tabFg' + T] = on ? ON : MUTED; tabVals['tabBd' + T] = on ? '2px solid ' + ON : '2px solid transparent';
+    });
+    // chart
+    const g = GROUPS[st.group], row = g.rows.find(r => r.s === st.sym) || g.rows[0];
+    const N = RV.n, n = Math.min(N, { '1M': 21, '3M': 63, 'All': N }[st.range]), full = RV.s[row.k], data = full.slice(N - n), start = N - n;
+    const mn = Math.min(...data), mx = Math.max(...data), dp = row.v < 10 ? (row.v < 2 ? 4 : 2) : (row.v > 1000 ? 0 : 2);
+    const strip = chartStyle === 'Strip', rules = chartStyle === 'Rules';
+    const bandsRaw = REGIMES.filter(r => r.to > start).map(r => ({ r, a: Math.max(r.from, start) - start, b: r.to - start }));
+    const chart = { sym: row.s, val: row.val, max: mx.toFixed(dp), min: mn.toFixed(dp),
+      pts: data.map((v, i) => (i / (n - 1) * 100).toFixed(2) + ',' + (92 - (v - mn) / (mx - mn || 1) * 80).toFixed(2)).join(' '),
+      bands: bandsRaw.map(({ r, a, b }, i) => ({ l: (a / n * 100) + '%', w: ((b - a) / n * 100) + '%', t: strip ? 'calc(100% - 8px)' : '0', h: strip ? '8px' : '100%',
+        bg: rules ? 'transparent' : (strip ? r.solid : r.tint), bl: (rules || strip) && i > 0 ? '1px dashed var(--color-accent-700)' : '0' })),
+      legend: [...new Map(bandsRaw.map(({ r }) => [r.name, r])).values()].map(r => ({ name: r.name, sw: rules ? 'transparent' : (strip ? r.solid : r.tint) })) };
+    const allRows = Object.entries(GROUPS).flatMap(([k, gr]) => gr.rows.map(r => ({ ...r, gk: k, group: gr.name })));
+    const openAsset = r => () => this.push('asset', { group: r.gk, sym: r.s });
+    // search
+    const q = st.q.trim().toLowerCase();
+    const pool = [
+      ...allRows.map(r => ({ kind: r.group.toUpperCase(), label: r.s, sub: r.val + (r.chg ? ' · ' + r.chg : ''), open: openAsset(r) })),
+      ...docsAll.map(d => ({ kind: 'EDITION', label: d.title, sub: d.code + ' · ' + d.date, open: d.open })),
+      ...NAMES.map(nm => ({ kind: 'ISSUER', label: nm.tk + ' · ' + nm.co, sub: nm.ed + ' · ' + nm.status, open: () => this.push('name', { nameId: nm.tk }) }))
+    ];
+    const results = q ? pool.filter(r => (r.label + ' ' + r.sub + ' ' + r.kind).toLowerCase().includes(q)).slice(0, 12) : [];
+    const alertsVis = ALERTS.filter(a => internal || !a.internal);
+    const unread = alertsVis.filter(a => !st.read.includes(a.id)).length;
+    const nmRaw = NAMES.find(x => x.tk === st.nameId) || NAMES[0];
+    const nmDoc = docsAll.find(d => d.id === nmRaw.doc);
+    const links = []; for (let i = 0; i < 6; i++) for (let j = i + 1; j < 6; j++) links.push([i, j, CORR[i][j]]);
+    links.sort((a, b) => Math.abs(b[2]) - Math.abs(a[2]));
+    const cellBg = v => v >= 0 ? `color-mix(in srgb, var(--color-accent) ${Math.round(v * 100)}%, transparent)` : `color-mix(in srgb, #8b2020 ${Math.round(-v * 100)}%, transparent)`;
+    const NL = { daily: 'Daily brief published', event: 'Intraday event notes', regime: 'Regime label change', pos: 'Weekly positioning book' };
+    return { ...tabVals, titleFg: screen === 'today' ? '#bc9330' : '#fff',
+      phoneR: ios ? '46px' : '26px', islandW: ios ? '104px' : '12px', homeW: ios ? '128px' : '72px',
+      is, authed: st.authed, isInternal: internal, isClient: !internal, roleLabel: role, title: screen === 'name' ? nmRaw.tk : TITLES[screen], canBack: st.stack.length > 0,
+      email: st.email, pw: st.pw, err: st.err, hasErr: !!st.err,
+      setEmail: e => this.setState({ email: e.target.value, err: '' }), setPw: e => this.setState({ pw: e.target.value, err: '' }),
+      signIn: () => { if (!/^\S+@\S+\.\S+$/.test(st.email)) return this.setState({ err: 'Enter a valid work email.' }); if (st.pw.length < 6) return this.setState({ err: 'Password must be at least 6 characters.' }); this.setState({ authed: true, err: '', tab: 'today', stack: [] }); },
+      signOut: () => this.setState({ authed: false, pw: '', stack: [], tab: 'today' }),
+      back: () => this.setState(s => ({ stack: s.stack.slice(0, -1) })), openSearch: () => { if (screen !== 'search') this.push('search', { q: '' }); },
+      roleSeg: this.seg(['Client', 'Internal'], role, o => this.setState({ role: o })),
+      viewTitle: internal ? "Strategist's view" : "Today's macro view",
+      drivers: [
+        { n: 1, t: 'Chip give-back, equal-weight ahead', b: 'Nvidia −5.9% to 155.38; the semiconductor fund −7.3%. The equal-weight index rose 0.54%, 104bp ahead of the cap-weighted index.' },
+        { n: 2, t: 'Rates still, dollar and gold down', b: '2Y held at 4.63 for a third session, 10Y 4.91, 30Y 5.30. December 25bp hike priced about 95%. Dollar index −0.48% to 103.82; gold −2.4% to 3,556.' },
+        { n: 3, t: 'Oil rebounds', b: 'January WTI settled 82.05 (+1.88) and Brent 91.40 (+2.03) after both touched their lowest since late August, then rose on new attacks on ships in the strait.' } ],
+      latestDocs: docsAll.filter(d => ['d3', 'x1', 's1'].includes(d.id)),
+      dims: DIMS.map(([name, tag, level, bd, data]) => ({ name, tag, level, data, bd: bd.toFixed(3), flag: bd < 0.1 ? ' †' : '', bg: internal ? TINT[level][0] : '#fff', fg: internal ? TINT[level][1] : (bd < 0.1 ? '#bc9330' : '#0c1829') })),
+      groups: Object.entries(GROUPS).map(([k, gr]) => ({ name: gr.name, rows: gr.rows.slice(0, 3), open: () => this.push('asset', { group: k, sym: null }) })),
+      mapMatrix: mapStyle === 'Matrix', mapRanked: mapStyle !== 'Matrix', nodes: NODES,
+      matrix: NODES.map((name, i) => ({ name, cells: NODES.map((_, j) => ({ bg: i === j ? 'transparent' : cellBg(CORR[i][j]), ol: st.cell[0] === i && st.cell[1] === j ? '2px solid var(--color-text)' : 'none', pick: () => i !== j && this.setState({ cell: [i, j] }) })) })),
+      cellRead: NODES[st.cell[0]] + ' → ' + NODES[st.cell[1]] + '  ' + sgn(CORR[st.cell[0]][st.cell[1]]),
+      links: links.slice(0, 8).map(([i, j, v]) => ({ pair: NODES[i] + ' ↔ ' + NODES[j], v: sgn(v), w: Math.abs(v) * 100 + '%', bg: v >= 0 ? 'var(--color-accent)' : '#8b2020' })),
+      groupSeg: Object.entries(GROUPS).map(([k, gr]) => ({ label: gr.name, bg: k === st.group ? ON : 'transparent', fg: k === st.group ? '#fff' : 'var(--color-text)', pick: () => this.setState({ group: k, sym: null }) })),
+      rangeSeg: this.seg(['1M', '3M', 'All'], st.range, o => this.setState({ range: o })), chart,
+      rows: g.rows.map(r => ({ ...r, chg: r.chg || '', chgFg: chgFg(r.chg), bg: r.s === row.s ? 'var(--color-accent-100)' : 'transparent', pick: () => this.setState({ sym: r.s }),
+        star: e => { e.stopPropagation(); this.toggleWatch(r.s); }, starFill: st.watch.includes(r.s) ? 'currentColor' : 'none' })),
+      libSeg: this.seg(['All', 'Daily', 'Events', 'Executive', 'Special'], st.libFilter, o => this.setState({ libFilter: o })),
+      docs: docsAll.filter(d => st.libFilter === 'All' || d.kind === st.libFilter).map((d, i, a) => { const hd = i === 0 || a[i - 1].kind !== d.kind; return { ...d, hasHead: hd, head: PROG[d.kind], count: a.filter(x => x.kind === d.kind).length + ' editions' }; }), doc,
+      pdfRef: this.pdfRef, pdfNote: doc.isHtml ? 'interactive' : (doc.isPdf ? (st.pdfNoteFor === doc.file ? st.pdfNote : 'loading') : ''), zoomW: Math.round(st.fs / 16 * 100) + '%',
+      fsPx: Math.min(22, st.fs) + 'px', fsUp: () => this.setState(s => ({ fs: Math.min(40, s.fs + 4) })), fsDown: () => this.setState(s => ({ fs: Math.max(16, s.fs - 4) })),
+      saveFill: st.saved.includes(doc.id) ? 'currentColor' : 'none',
+      toggleSave: () => this.setState(s => ({ saved: s.saved.includes(doc.id) ? s.saved.filter(x => x !== doc.id) : [...s.saved, doc.id] })),
+      alertSeg: this.seg(['All', 'Event', 'Policy', 'Geo'], st.alertFilter, o => this.setState({ alertFilter: o })),
+      alerts: alertsVis.filter(a => st.alertFilter === 'All' || a.type === st.alertFilter).map(a => ({ ...a, type: a.type + (a.internal ? ' · Internal' : ''), dot: st.read.includes(a.id) ? 'transparent' : 'var(--color-accent)', read: () => this.setState(s => ({ read: s.read.includes(a.id) ? s.read : [...s.read, a.id] })) })),
+      unread, hasUnread: unread > 0, openMidday: openDoc('d3'), openPosBrief: openDoc('x2'),
+      moreLinks: [
+        { t: 'Watchlist', b: st.watch.length + ' instruments · ' + st.saved.length + ' saved editions', open: () => this.push('watchlist') },
+        { t: 'Positioning', b: 'Weekly book, week ending 20 Nov', open: () => this.push('positioning') },
+        { t: 'Single-name research', b: 'SR-SN 1.0 · ' + NAMES.length + ' issuers', open: () => this.push('names') },
+        { t: 'Settings', b: 'Role view, notifications, account', open: () => this.push('settings') } ],
+      posSeg: this.seg(Object.keys(POS), st.posWho, o => this.setState({ posWho: o })),
+      pos: POS[st.posWho].map(([nm, v]) => ({ n: nm, v, l: Math.min(v, 50) + '%', w: Math.abs(v - 50) + '%', bg: v >= 50 ? 'var(--color-accent)' : 'var(--color-neutral-500)' })),
+      watchRows: allRows.filter(r => st.watch.includes(r.s)).map(r => ({ ...r, chg: r.chg || '', chgFg: chgFg(r.chg), open: openAsset(r), star: () => this.toggleWatch(r.s) })),
+      watchEmpty: st.watch.length === 0, savedDocs: docsAll.filter(d => st.saved.includes(d.id)), hasSaved: st.saved.length > 0,
+      names: NAMES.filter(x => internal || x.status !== 'DRAFT').map(x => ({ ...x, open: () => this.push('name', { nameId: x.tk }) })),
+      nm: { tk: nmRaw.tk, co: nmRaw.co, openDoc: nmDoc ? nmDoc.open : () => {},
+        facts: [{ k: 'Edition', v: nmRaw.ed }, { k: 'Status', v: nmRaw.status }, { k: 'Programme', v: 'SR-SN 1.0 under ERSM' }, { k: 'Regime at build', v: 'Disinflation / Hawkish Pivot' }, ...(nmRaw.last ? [{ k: 'Last close, 24 Nov', v: nmRaw.last }] : [])] },
+      q: st.q, setQ: e => this.setState({ q: e.target.value }), results,
+      resultNote: q ? results.length + ' result' + (results.length === 1 ? '' : 's') : 'Try “10Y”, “NVDA”, “positioning” or “FX”.',
+      notifs: Object.keys(NL).map(k => ({ label: NL[k], bg: st.notif[k] ? ON : 'transparent', knob: st.notif[k] ? '#fff' : ON, x: st.notif[k] ? '20px' : '2px', toggle: () => this.setState(s => ({ notif: { ...s.notif, [k]: !s.notif[k] } })) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
