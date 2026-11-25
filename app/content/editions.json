@@ -2,14 +2,40 @@
   "$comment": "Editorial notes per edition date. The archive supplies levels, regime, dimensions, weights and both view texts; this file supplies what the archive does not: the curated driver list and the internal status line. Add an entry when a new edition is built.",
   "2026-11-24": {
     "drivers": [
-      { "t": "Chip give-back, equal-weight ahead", "b": "Nvidia −5.9% to 155.38; the semiconductor fund −7.3%. The equal-weight index rose 0.54%, 104bp ahead of the cap-weighted index." },
-      { "t": "Rates still, dollar and gold down", "b": "2Y held at 4.63 for a third session, 10Y 4.91, 30Y 5.30. December 25bp hike priced about 95%. Dollar index −0.48% to 103.82; gold −2.4% to 3,556." },
-      { "t": "Oil rebounds", "b": "January WTI settled 82.05 (+1.88) and Brent 91.40 (+2.03) after both touched their lowest since late August, then rose on new attacks on ships in the strait." }
+      {
+        "t": "Chip give-back, equal-weight ahead",
+        "b": "Nvidia −5.9% to 155.38; the semiconductor fund −7.3%. The equal-weight index rose 0.54%, 104bp ahead of the cap-weighted index."
+      },
+      {
+        "t": "Rates still, dollar and gold down",
+        "b": "2Y held at 4.63 for a third session, 10Y 4.91, 30Y 5.30. December 25bp hike priced about 95%. Dollar index −0.48% to 103.82; gold −2.4% to 3,556."
+      },
+      {
+        "t": "Oil rebounds",
+        "b": "January WTI settled 82.05 (+1.88) and Brent 91.40 (+2.03) after both touched their lowest since late August, then rose on new attacks on ships in the strait."
+      }
     ],
     "internalStatus": "HY-1.0 LIVE · gate 15/15 PASS · revision #28 in force, first session.",
     "dimData": {
       "Policy Stance": "Hike prob 95% / Cut prob 6%",
       "Dollar Regime": "DXY 103.8 (−0.48% d/d)"
+    }
+  },
+  "2026-11-25": {
+    "drivers": [
+      {
+        "t": "Hot core PCE, AI sell-off, recovery",
+        "b": "Core PCE 3.3% (vs 3.2%). S&P −3.2% at the low, −0.25% at the close; Nvidia −3.9%; equal-weight +108bp ahead of the cap-weighted index; yields lower."
+      },
+      {
+        "t": "Oil up on Saudi terminal attack",
+        "b": "January WTI 83.68 (+1.63), reference 84.88; Brent 94.61 (+3.21) after four drones were intercepted over Ras Tanura."
+      }
+    ],
+    "internalStatus": "HY-1.0 LIVE · gate 20/20 PASS · revision #28 held (10/8/72/10) · quiet 0/10.",
+    "dimData": {
+      "Policy Stance": "Hike prob 98% / Cut prob 6%",
+      "Dollar Regime": "DXY 103.7 (−0.10% d/d)"
     }
   }
 }

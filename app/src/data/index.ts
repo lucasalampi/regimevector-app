@@ -27,7 +27,7 @@ export interface Doc {
   daily?: boolean; internal?: boolean;
 }
 export type DocKind = 'Daily' | 'Events' | 'Executive' | 'Special';
-export interface Issuer { tk: string; co: string; ed: string; status: string; doc?: string; last?: string }
+export interface Issuer { tk: string; co: string; ed: string; status: string; doc?: string; last?: string; lastDate?: string }
 export interface Alert { id: string; type: 'Event' | 'Policy' | 'Geo'; when: string; t: string; b: string; internal?: boolean }
 
 export const ED = edition.edition as {

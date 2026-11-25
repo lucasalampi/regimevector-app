@@ -1,5 +1,5 @@
 {
-  "$comment": "Research library catalogue. `file` is a name in assets/briefs/. `internal: true` hides the row from the Client role. `daily: true` shows the mobile summary above the full edition. `kind` must be a key of `programmes`. Issuers whose edition is internal are hidden from the Client role.",
+  "$comment": "Research library catalogue. `file` is a name in assets/briefs/. `internal: true` hides the row from the Client role. `daily: true` shows the mobile summary above the full edition. `kind` must be a key of `programmes`. Issuers whose edition is internal are hidden from the Client role. Issuer `last` is the close on `lastDate`.",
   "programmes": {
     "Daily": "Daily operating state",
     "Events": "Event-contingent notes",
@@ -7,19 +7,40 @@
     "Special": "Special and single-name research"
   },
   "latest": [
+    "d6",
     "d3",
-    "x1",
-    "s1"
+    "x6"
   ],
   "docs": [
     {
-      "id": "d1",
+      "id": "d6",
       "kind": "Daily",
       "title": "Client Brief: Disinflation / Hawkish Pivot",
+      "code": "Day 218 · Ed 131",
+      "date": "25 Nov 2026",
+      "pages": "Client surface · prototype",
+      "daily": true,
+      "file": "client-brief-2026-11-25.pdf"
+    },
+    {
+      "id": "d7",
+      "kind": "Daily",
+      "title": "Operating-State Brief",
+      "code": "Day 218 · Ed 131",
+      "date": "25 Nov 2026",
+      "pages": "Internal surface",
+      "daily": true,
+      "internal": true,
+      "file": "brief-2026-11-25.pdf"
+    },
+    {
+      "id": "d1",
+      "kind": "Daily",
+      "title": "Client Brief",
       "code": "Day 217",
       "date": "24 Nov 2026",
       "pages": "Client surface",
-      "daily": true,
+      "daily": false,
       "file": "client-brief-2026-11-24.pdf"
     },
     {
@@ -29,7 +50,6 @@
       "code": "Day 217 · r129",
       "date": "24 Nov 2026",
       "pages": "Internal surface",
-      "daily": true,
       "internal": true,
       "file": "brief-2026-11-24.pdf"
     },
@@ -226,7 +246,8 @@
       "ed": "SR-SN4",
       "status": "DRAFT",
       "doc": "s4",
-      "last": "155.38 (−5.9%)"
+      "last": "155.38 (−5.9%)",
+      "lastDate": "24 Nov"
     },
     {
       "tk": "CNQ",

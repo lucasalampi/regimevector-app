@@ -15,7 +15,7 @@ export default function Issuer() {
   const canOpen = doc && (!doc.internal || role === 'Internal');
   const facts = [
     { k: 'Edition', v: nm.ed }, { k: 'Status', v: nm.status }, { k: 'Programme', v: 'SR-SN 1.0 under ERSM' },
-    { k: 'Regime at build', v: ED.regime }, ...(nm.last ? [{ k: `Last close, ${ED.dateShort}`, v: nm.last }] : []),
+    { k: 'Regime at build', v: ED.regime }, ...(nm.last ? [{ k: `Last close, ${nm.lastDate ?? ED.dateShort}`, v: nm.last }] : []),
   ];
   return (
     <Screen gap={18}>

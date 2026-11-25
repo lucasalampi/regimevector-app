@@ -2,14 +2,129 @@
   "$comment": "Event feed. `type`: Event | Policy | Geo. `internal: true` hides from Client. `middayDoc` and `positioningDoc` point at research doc ids.",
   "middayDoc": "d3",
   "alerts": [
-    { "id": "a1", "type": "Event", "when": "24 Nov", "t": "Chip give-back, equal-weight ahead", "b": "NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%." },
-    { "id": "a2", "type": "Policy", "when": "24 Nov", "t": "December 25bp hike priced at 95%", "b": "CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve." },
-    { "id": "a3", "type": "Geo", "when": "23 Nov", "t": "Projectiles reported in the strait", "b": "UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded)." },
-    { "id": "a4", "type": "Geo", "when": "23 Nov", "t": "Riyadh KAFD tower incident", "b": "11 injured per Saudi Civil Defence. Repeat-class entry." },
-    { "id": "a5", "type": "Event", "when": "24 Nov", "t": "Oil channel OFF", "b": "Jan WTI settled 82.05, $12.07 below 95. Brent Jan 91.40." },
-    { "id": "a8", "type": "Event", "when": "24 Nov", "t": "Dollar Regime returns to USD firm", "b": "The dollar index fell 0.48% to 103.82, back below 104." },
-    { "id": "a9", "type": "Event", "when": "24 Nov", "t": "Market Structure 5bp inside the breakdown line", "b": "S&P 1.95% under its 200-day average. Boundary distance 0.013; Technical neutral held.", "internal": true },
-    { "id": "a6", "type": "Geo", "when": "24 Nov", "t": "Held: tanker strike report, cyberattack investigation", "b": "Not entered. Held pending confirmation.", "internal": true },
-    { "id": "a7", "type": "Event", "when": "24 Nov", "t": "I10 FAIL logged", "b": "Engine v6.1b. Manifest untouched.", "internal": true }
+    {
+      "id": "b1",
+      "type": "Event",
+      "when": "25 Nov",
+      "t": "Market Structure → Technical breakdown",
+      "b": "S&P closed 2.25% under its 200-day average, through the −2% line, after a 3.2% intraday drop. Boundary distance 0.042."
+    },
+    {
+      "id": "b2",
+      "type": "Policy",
+      "when": "25 Nov",
+      "t": "Core PCE 3.3%, above forecasts",
+      "b": "October core PCE 3.3% (vs 3.2%), headline 3.8%. December 25bp hike priced ~98%; yields still fell (10Y 4.85, −6bp)."
+    },
+    {
+      "id": "b3",
+      "type": "Geo",
+      "when": "25 Nov",
+      "t": "Drones intercepted over Ras Tanura",
+      "b": "Four drones aimed at the Saudi oil terminal shot down. Repeat-class entry; weights held 10/8/72/10."
+    },
+    {
+      "id": "b4",
+      "type": "Geo",
+      "when": "25 Nov",
+      "t": "Coalition strikes on Hodeidah port",
+      "b": "Saudi-led strikes after an evacuation order (SPA). Repeat-class entry; Houthi threat to Saudi Red Sea ports logged as words."
+    },
+    {
+      "id": "b5",
+      "type": "Event",
+      "when": "25 Nov",
+      "t": "Brent $0.39 from $95",
+      "b": "Brent Jan 94.61 (+3.21). WTI reference 84.88, $5.12 below $90, the closest this month. Oil channel still off."
+    },
+    {
+      "id": "b6",
+      "type": "Event",
+      "when": "25 Nov",
+      "t": "High-yield spreads widen 9bp",
+      "b": "HY OAS 372bp as of 24 Nov (+42bp over 20 sessions). Credit NORMAL/WIDENING; confirming the equity signal."
+    },
+    {
+      "id": "b7",
+      "type": "Geo",
+      "when": "25 Nov",
+      "t": "Held: mine claims, US-bases headline",
+      "b": "Iranian mine-hit claims logged at zero; US-bases video headline unconfirmed, not logged.",
+      "internal": true
+    },
+    {
+      "id": "b8",
+      "type": "Event",
+      "when": "25 Nov",
+      "t": "Gate 17/17 · HY 20/20 · chain clean",
+      "b": "Nov-24 DXY/TSX finals reconciled; GoC Nov-24 row filled. Owed: CME finals (FEB derived), GoC and OAS Nov-25.",
+      "internal": true
+    },
+    {
+      "id": "a1",
+      "type": "Event",
+      "when": "24 Nov",
+      "t": "Chip give-back, equal-weight ahead",
+      "b": "NVDA −5.9%. Nasdaq −1.48% against Russell 2000 +0.57% and Dow +0.85%."
+    },
+    {
+      "id": "a2",
+      "type": "Policy",
+      "when": "24 Nov",
+      "t": "December 25bp hike priced at 95%",
+      "b": "CME FedWatch. 2Y 4.63, 10Y 4.91, 30Y 5.30 on the official par curve."
+    },
+    {
+      "id": "a3",
+      "type": "Geo",
+      "when": "23 Nov",
+      "t": "Projectiles reported in the strait",
+      "b": "UKMTO via Reuters. Repeat-class entry. Hormuz disruption 71.7 (guarded)."
+    },
+    {
+      "id": "a4",
+      "type": "Geo",
+      "when": "23 Nov",
+      "t": "Riyadh KAFD tower incident",
+      "b": "11 injured per Saudi Civil Defence. Repeat-class entry."
+    },
+    {
+      "id": "a5",
+      "type": "Event",
+      "when": "24 Nov",
+      "t": "Oil channel OFF",
+      "b": "Jan WTI settled 82.05, $12.07 below 95. Brent Jan 91.40."
+    },
+    {
+      "id": "a8",
+      "type": "Event",
+      "when": "24 Nov",
+      "t": "Dollar Regime returns to USD firm",
+      "b": "The dollar index fell 0.48% to 103.82, back below 104."
+    },
+    {
+      "id": "a9",
+      "type": "Event",
+      "when": "24 Nov",
+      "t": "Market Structure 5bp inside the breakdown line",
+      "b": "S&P 1.95% under its 200-day average. Boundary distance 0.013; Technical neutral held.",
+      "internal": true
+    },
+    {
+      "id": "a6",
+      "type": "Geo",
+      "when": "24 Nov",
+      "t": "Held: tanker strike report, cyberattack investigation",
+      "b": "Not entered. Held pending confirmation.",
+      "internal": true
+    },
+    {
+      "id": "a7",
+      "type": "Event",
+      "when": "24 Nov",
+      "t": "I10 FAIL logged",
+      "b": "Engine v6.1b. Manifest untouched.",
+      "internal": true
+    }
   ]
 }

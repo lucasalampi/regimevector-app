@@ -121,6 +121,19 @@ function fmtMove(d, unit) {
 const shortDate = iso => { const d = new Date(iso + 'T12:00:00Z'); return d.getUTCDate() + ' ' + d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }); };
 const longDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).replace(',', '');
 
+/** ISO date of the last real observation when the latest edition only carries a value forward, else null. */
+function staleAsof(r) {
+  const keys = r.expr ? operands(r.expr) : [r.key];
+  let asof = null;
+  for (const k of keys) {
+    const own = typeof A[k + '_asof'] === 'string' && A[k + '_asof'] < last.date ? A[k + '_asof'] : null;
+    const missing = lastObs[k] < N - 1 ? eds[lastObs[k]].date : null;
+    const d = [own, missing].filter(Boolean).sort()[0] ?? null;
+    if (d && (!asof || d < asof)) asof = d;
+  }
+  return asof;
+}
+
 const groups = instruments.groups.map(g => ({
   id: g.id, name: g.name,
   rows: g.rows.filter(r => series[r.key]).map(r => {
@@ -130,14 +143,15 @@ const groups = instruments.groups.map(g => ({
     const mv = moveOf(r);
     // Latest session move; archive *_prev fields win where they exist (they are the attested prior close).
     const prev = (!r.expr && typeof A[r.key + '_prev'] === 'number') ? A[r.key + '_prev'] : s[N - 2];
-    const stale = lastObs[r.key] < N - 1; // not re-observed in the latest edition: a carried value, not a 0 move
+    // Carried, not re-observed: missing from the latest edition, or the archive's own *_asof date is older than the edition.
+    const stale = staleAsof(r) != null;
     const chg = freq === 'daily' && !stale && prev != null && v != null
       ? fmtMove(mv.mode === 'pct' ? (v / prev - 1) * 100 : (v - prev) * mv.scale, mv.unit) : null;
     const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'));
     return {
       s: label, k: r.key, v, val: fmtValue(v, r), chg, fmt: r.fmt, dp: r.dp ?? DP[r.fmt] ?? 2, ...mv, freq,
       from: coverage[r.key], sub: r.sub ?? null, note: r.note ?? null, derived: !!r.expr,
-      asof: stale ? eds[lastObs[r.key]].date : null,
+      asof: staleAsof(r),
     };
   }),
 }));
