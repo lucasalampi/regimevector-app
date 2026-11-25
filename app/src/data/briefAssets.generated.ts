@@ -12,6 +12,7 @@ export const BRIEF_ASSETS: Record<string, number> = {
   "fx-e1.pdf": require('../../assets/briefs/fx-e1.pdf'),
   "positioning-2026-11-20.pdf": require('../../assets/briefs/positioning-2026-11-20.pdf'),
   "semi-e2.pdf": require('../../assets/briefs/semi-e2.pdf'),
+  "curve-analytics-e3r2.pdf": require('../../assets/briefs/curve-analytics-e3r2.pdf'),
   "in-e1.pdf": require('../../assets/briefs/in-e1.pdf'),
   "positioning-sidecar-2026-11-20.pdf": require('../../assets/briefs/positioning-sidecar-2026-11-20.pdf'),
   "sr-sn4-nvda.pdf": require('../../assets/briefs/sr-sn4-nvda.pdf'),

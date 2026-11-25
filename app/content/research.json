@@ -19,6 +19,7 @@
     { "id": "x1", "kind": "Executive", "title": "Currency Intelligence Executive Brief", "code": "FX-E1", "date": "24 Nov 2026", "pages": "One page", "file": "fx-e1.pdf" },
     { "id": "x2", "kind": "Executive", "title": "Positioning Intelligence Executive Brief", "code": "PB-XB-1.0", "date": "20 Nov 2026", "pages": "One page", "file": "positioning-2026-11-20.pdf" },
     { "id": "x3", "kind": "Executive", "title": "Equity-Market Intelligence Executive Brief", "code": "SEMI-E2", "date": "14 Nov 2026", "pages": "One page", "file": "semi-e2.pdf" },
+    { "id": "x6", "kind": "Executive", "title": "Curve Analytics Executive Brief", "code": "CA-E3 rev. 2", "date": "3 Nov 2026", "pages": "One page", "file": "curve-analytics-e3r2.pdf" },
     { "id": "x4", "kind": "Executive", "title": "Inflation Intelligence Executive Brief", "code": "IN-E1", "date": "3 Nov 2026", "pages": "One page", "file": "in-e1.pdf" },
     { "id": "x5", "kind": "Executive", "title": "Weekly Positioning Research Sidecar", "code": "PB-1.0", "date": "20 Nov 2026", "pages": "Internal draft", "internal": true, "file": "positioning-sidecar-2026-11-20.pdf" },
     { "id": "s4", "kind": "Special", "title": "NVDA: Special Research", "code": "SR-SN4", "date": "23 Nov 2026", "pages": "Draft · intraday", "internal": true, "file": "sr-sn4-nvda.pdf" },
