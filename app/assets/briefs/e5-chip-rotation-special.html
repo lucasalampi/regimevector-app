@@ -1,0 +1,309 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>E5 Chip Rotation Special</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: RV house web surface (regimeiq_tokens + A-1): navy masthead with gold signature rule, navy section bars with gold top rule, hairline instrument panels, cream view panel; single 1080px column */
+:root{
+ --ink:#0b0f1a; --navy:#0c1829; --navy-mid:#15304e; --slate:#3a4d61; --silver:#7a8fa3;
+ --rule:#c4cdd6; --rule-soft:#e4e9ee; --hair:#d9e0e7; --gold:#bc9330; --gold-pale:#f5edda; --cream2:#fdf8ee;
+ --canvas:#f4f7fa; --surface:#ffffff; --row-a:#f3f5f7; --teal:#0e7c7b;
+ --green:#185c38; --green-pale:#ebf4ee; --amber:#6b4800; --amber-pale:#fdf8ee; --red:#8b2020; --red-pale:#fdf0f0;
+ --bar-sub:#9fb0c2; --mast-sub:#a9b8c8; --on-navy:#ffffff;
+ --font:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+ --fs-h1:28px; --fs-h3:15px; --fs-body:13px; --fs-small:11.5px; --fs-caption:10px; --fs-micro:8.5px;
+ --track-eyebrow:.14em; --track-label:.06em; --radius-chip:4px; --sig:2px; --content-w:1080px;
+ /* legacy aliases used by the page script */
+ --bg:var(--canvas); --panel:var(--surface); --muted:var(--slate); --faint:var(--silver);
+ --up:var(--green); --upbg:var(--green-pale); --dn:var(--red); --dnbg:var(--red-pale); --amb:var(--amber); --ambbg:var(--amber-pale); --goldbg:var(--gold-pale);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+ --ink:#e7edf4; --navy:#060d17; --navy-mid:#16304f; --slate:#a9b8c8; --silver:#7f93a8; --rule:#2c3e55; --rule-soft:#1c2a3c; --hair:#24344a;
+ --gold:#d4ab4a; --gold-pale:#272012; --cream2:#241e10; --canvas:#0a121e; --surface:#101b2a; --row-a:#132133; --teal:#3fb3b1;
+ --green:#5cc08a; --green-pale:#10281c; --amber:#e0b45a; --amber-pale:#2a2212; --red:#e07a7a; --red-pale:#2c1416; color-scheme:dark}}
+:root[data-theme="dark"]{
+ --ink:#e7edf4; --navy:#060d17; --navy-mid:#16304f; --slate:#a9b8c8; --silver:#7f93a8; --rule:#2c3e55; --rule-soft:#1c2a3c; --hair:#24344a;
+ --gold:#d4ab4a; --gold-pale:#272012; --cream2:#241e10; --canvas:#0a121e; --surface:#101b2a; --row-a:#132133; --teal:#3fb3b1;
+ --green:#5cc08a; --green-pale:#10281c; --amber:#e0b45a; --amber-pale:#2a2212; --red:#e07a7a; --red-pale:#2c1416; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font:var(--fs-body)/1.5 var(--font);-webkit-font-smoothing:antialiased;margin:0;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:var(--content-w);margin:0 auto;display:flex;flex-direction:column;gap:20px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+/* governance mark */
+.mark{background:var(--amber-pale);color:var(--amber);border:1px solid var(--rule-soft);font:600 var(--fs-caption)/1.4 var(--font);letter-spacing:var(--track-label);text-transform:uppercase;padding:6px 12px;text-align:center}
+
+/* masthead */
+.mast{background:var(--navy);border-top:var(--sig) solid var(--gold);color:var(--on-navy);padding:22px 26px 20px;display:flex;flex-wrap:wrap;gap:14px 32px;justify-content:space-between;align-items:flex-end}
+.mast>div:first-child{min-width:0;flex:1 1 520px}
+.mast .wm{font:700 var(--fs-caption)/1 var(--font);letter-spacing:var(--track-eyebrow);color:var(--gold);text-transform:uppercase}
+.mast h1{font:700 var(--fs-h1)/1.18 var(--font);letter-spacing:-.015em;margin:10px 0 6px;text-wrap:balance;color:#fff}
+.mast .sub{color:#dfe6ee;font-size:var(--fs-small)}
+.mast .meta{color:var(--mast-sub);font-size:var(--fs-small);text-align:right;line-height:1.7;font-variant-numeric:tabular-nums;border-left:1px solid #22395a;padding-left:18px}
+
+/* key-value strip (A-1 .kv) */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--hair);background:var(--surface)}
+.stat{padding:12px 14px;border-right:1px solid var(--hair);min-width:0}
+.stat:last-child{border-right:0}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{border-bottom:1px solid var(--hair)}.stat:nth-child(2n){border-right:0}}
+.stat .l{font:600 var(--fs-micro)/1.3 var(--font);color:var(--silver);letter-spacing:var(--track-label);text-transform:uppercase}
+.stat .v{font:700 24px/1.15 var(--font);letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin-top:6px;color:var(--ink)}
+.stat .s{font-size:var(--fs-caption);color:var(--slate);margin-top:3px}
+.up{color:var(--green)!important}.dn{color:var(--red)!important}
+
+/* sections: navy bar with gold top rule over a hairline panel */
+section{background:var(--surface);border:1px solid var(--hair);border-top:0}
+.bar{background:var(--navy-mid);border-top:2px solid var(--gold);color:#fff;padding:8px 14px;display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:space-between;align-items:baseline;margin:0 -1px}
+.bar h2{font:700 var(--fs-small)/1.3 var(--font);letter-spacing:.1em;text-transform:uppercase;margin:0;color:#fff}
+.bar span{font-size:var(--fs-caption);color:var(--bar-sub)}
+.in{padding:16px}
+
+/* strategist's view: internal cream panel, 1px gold border */
+.view{background:var(--gold-pale);border:1px solid var(--gold);padding:16px 18px;font-size:14px;line-height:1.62;color:var(--ink)}
+.view small{display:block;margin-top:10px;color:var(--slate);font-size:var(--fs-caption);letter-spacing:.02em}
+
+/* segmented control + tabs */
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--radius-chip);overflow:hidden;margin-bottom:14px}
+.seg button{font:600 var(--fs-small) var(--font);padding:7px 14px;border:0;background:var(--surface);color:var(--slate);cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--navy-mid);color:#fff}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tabs button{font:600 var(--fs-small) var(--font);padding:6px 12px;border:1px solid var(--rule);border-radius:var(--radius-chip);background:var(--surface);color:var(--slate);cursor:pointer}
+.tabs button:not([aria-selected="true"]):hover,.seg button:not([aria-pressed="true"]):hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--navy-mid);color:#fff;border-color:var(--navy-mid)}
+
+/* regime strip: contiguous hairline cells, internal tint scheme */
+.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--rule)}
+@media (max-width:760px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dim{border:0;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:0 -1px -1px 0;padding:11px 6px;text-align:center;cursor:pointer;background:var(--surface);color:var(--ink);font:inherit;min-width:0}
+.dim .n{font:700 var(--fs-caption)/1.3 var(--font);letter-spacing:.02em}
+.dim .t{font:700 var(--fs-caption)/1.3 var(--font);margin-top:5px;overflow-wrap:anywhere}
+.dim .b{font-size:var(--fs-caption);color:var(--slate);margin-top:3px;font-variant-numeric:tabular-nums}
+.dim.r{background:var(--red-pale)}.dim.r .t{color:var(--red)}
+.dim.a{background:var(--amber-pale)}.dim.a .t{color:var(--amber)}
+.dim.g{background:var(--green-pale)}.dim.g .t{color:var(--green)}
+.dim[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--navy-mid)}
+.flip{display:inline-block;font:700 var(--fs-micro) var(--font);letter-spacing:.04em;color:var(--red);border:1px solid var(--red);border-radius:2px;padding:0 4px;margin-left:4px}
+.detail{margin-top:12px;font-size:var(--fs-body);color:var(--slate);min-height:40px;border-left:2px solid var(--rule);padding-left:10px}
+.detail b{color:var(--ink)}
+
+/* gauges */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:22px 28px}
+.gauge h3{font:600 var(--fs-body) var(--font);margin:0 0 2px;color:var(--ink)}
+.gauge .g2{font-size:var(--fs-small);color:var(--slate);font-variant-numeric:tabular-nums}
+svg{display:block;width:100%;height:auto}
+svg text{fill:var(--slate);font-family:var(--font)}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--rule-soft)}
+.tl li:last-child{border-bottom:0}
+.tl .d{font:700 var(--fs-small) var(--font);color:var(--gold);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.tl .x{font-size:var(--fs-body)}
+.tl .src{font-size:var(--fs-caption);color:var(--silver);margin-top:2px}
+
+/* tables: navy header row, zebra rows */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:var(--fs-body);min-width:580px}
+th{background:var(--navy-mid);color:#fff;font:600 var(--fs-caption) var(--font);text-transform:uppercase;letter-spacing:var(--track-label);text-align:left;padding:7px 10px}
+td{padding:8px 10px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:nth-child(odd) td{background:var(--row-a)}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{font:600 var(--fs-caption) var(--font);padding:2px 7px;border-radius:var(--radius-chip);white-space:nowrap}
+.pill.ok{background:var(--green-pale);color:var(--green)}.pill.no{background:var(--red-pale);color:var(--red)}.pill.amb{background:var(--amber-pale);color:var(--amber)}
+
+/* footnotes */
+.foot{font-size:var(--fs-small);color:var(--slate);line-height:1.62}
+.foot a{color:var(--navy-mid);text-underline-offset:2px}
+:root[data-theme="dark"] .foot a{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .foot a{color:var(--gold)}}
+.foot b{color:var(--ink)}
+@media (prefers-reduced-motion:no-preference){.m{transition:x .5s ease,width .5s ease}}
+</style>
+
+<div class="wrap">
+ <div class="mark">Event special · Mockup · Not engine output · Intraday shadow replay is not classification · Weights as archived 23 Nov, not revised</div>
+
+ <header class="mast">
+  <div>
+   <div class="wm">RegimeVector · E5 intraday special</div>
+   <h1>Chips give back the Huang rally as the market broadens</h1>
+   <div class="sub">Control watch C-2026-11-24-4730e5 · F5 equity with cross-asset spillover (breadth) · ESCALATE by the operator</div>
+  </div>
+  <div class="meta" id="meta"></div>
+ </header>
+
+ <div class="stats" id="stats"></div>
+
+ <section>
+  <div class="bar"><h2>Strategist's view</h2><span>A-2 · internal · operator-approved</span></div>
+  <div class="in"><div class="view" id="view"></div></div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>Regime strip</h2><span>Select a dimension for its intraday input</span></div>
+  <div class="in">
+   <div class="seg" role="group" aria-label="Regime state shown">
+    <button id="bArch" aria-pressed="false">Archived 23 Nov close</button>
+    <button id="bShadow" aria-pressed="true">Shadow replay at snapshot</button>
+   </div>
+   <div class="strip" id="strip"></div>
+   <div class="detail" id="detail"></div>
+   <p class="foot" style="margin:8px 0 0">Composite under replay: <b>Disinflation / Hawkish Pivot</b>, unchanged. One row changes tag: Dollar, from the archived USD_STRONG to USD_FIRM on the constructed DXY. The kit codes only the 100–104 band, so the change is logged for the daily build. Market Structure holds TECHNICAL_NEUTRAL on a thin margin.</p>
+  </div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>Band positions</h2><span>hollow = 23 Nov close · filled = snapshot · gold lines = coded edges</span></div>
+  <div class="in"><div class="gauges" id="gauges"></div></div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>Cross-asset tape</h2><span>session change vs feed prior close, %</span></div>
+  <div class="in">
+   <div class="tabs" role="tablist" id="tabs"></div>
+   <div id="xbars"></div>
+  </div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>S&amp;P 500 path and the −2% line</h2><span>daily closes · dashed red = mid-session · gold = Market Structure edge</span></div>
+  <div class="in"><div id="path"></div>
+   <p class="foot" id="pathnote" style="margin:6px 0 0"></p></div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>Catalyst timeline</h2><span>public sources only (I12)</span></div>
+  <div class="in"><ol class="tl" id="tl"></ol></div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>What the close must confirm</h2><span>CP3 · live check against the snapshot</span></div>
+  <div class="in scroll"><table id="cp3"></table></div>
+ </section>
+
+ <section>
+  <div class="bar"><h2>Sources and governance</h2><span>findings logged, not patched</span></div>
+  <div class="in foot" id="foot"></div>
+ </section>
+</div>
+
+<script>
+const D = {"ts": {"eq": "12:41", "idx_eu": "12:00", "idx_jp": "01:45", "fx": "12:56"}, "date": "2026-11-24", "view": "The label holds, and today undoes most of yesterday's single-name relief. Semiconductors give back about seven percent as the Huang rebound fades, yet equal-weight leads cap-weight by more than a point: a rotation toward older-economy and defensive sectors, not a broad de-risking. Market Structure stays inside its −2% line on a thin margin after the session low breached it. The constructed dollar slips back under 104, while Policy remains the anchor: December hike pricing is intact and metals fall.", "approved": "24 Nov 13:00 ET", "spx": 7213.52, "spx_prev": 7237.1666, "spx_hi": 7223.9502, "spx_lo": 7138.9302, "vix": 26.23, "vix_prev": 26.62, "dma": 7343.64, "v": {"sv": -1.7719, "sv_lo": -2.7876, "fv_eq": 82.4969, "fv_lo": 80.5394, "fv_hi": 82.6735, "dxy_c": 103.7534, "dxy_c_prev": 104.3025, "dxy_eq": 103.7534, "hyx": -0.1153, "g4": -0.4445, "rsp_spy": 1.1695, "vix_d": -0.39, "dd_high": 7.7476, "rk_bd": 0.123, "sp_bd": 0.4998, "ms_bd": 0.057, "dx_bd": 0.0617}, "hist": [["10-08", 7765.36], ["10-09", 7811.54], ["10-12", 7807.24], ["10-13", 7805.45], ["10-14", 7718.94], ["10-15", 7744.06], ["10-16", 7659.44], ["10-19", 7690.73], ["10-20", 7712.57], ["10-21", 7757.17], ["10-22", 7663.43], ["10-23", 7623.68], ["10-26", 7676.77], ["10-27", 7722.6], ["10-28", 7743.98], ["10-29", 7720.39], ["10-30", 7580.07], ["11-02", 7541.4], ["11-03", 7568.92], ["11-04", 7688.62], ["11-05", 7353.73], ["11-06", 7376.86], ["11-09", 7549.94], ["11-10", 7520.93], ["11-11", 7619.38], ["11-12", 7592.4], ["11-13", 7561.67], ["11-16", 7416.59], ["11-17", 7340.53], ["11-18", 7323.63], ["11-19", 7175.83], ["11-20", 6910.39], ["11-23", 7237.17]], "groups": {"Equities": [["Nasdaq Comp.", -1.309193249914209], ["S&P 500", -0.3267383674710356], ["Dow Jones", 0.8837121897211642], ["S&P 500 equal-wt", 0.8316887510572357], ["Russell 2000", 0.8203507187476422], ["S&P/TSX", -0.19421161516637309], ["Euro Stoxx 50", -1.1640587190632656], ["EM Equity", -1.954003112571323], ["Japan (EWJ)", -0.1093210586881499], ["China large-cap", -0.6481188744862365]], "Sectors": [["Semiconductors", -6.671302533791124], ["Technology", -2.974504249291776], ["Cons. Discretionary", 0.7782433934832689], ["Industrials", -0.36929894749799796], ["Communication", 1.4092664092664187], ["Materials", 0.44088176352705677], ["Financials", 0.9662174303683768], ["Utilities", 0.5424746075715525], ["Health Care", 2.9874038568721506], ["Real Estate", 1.118881118881121], ["Cons. Staples", 2.1243637973002993], ["Energy", 1.0105227993987054]], "Megacaps": [["NVDA", -6.852468948803391], ["AVGO", -3.1254983256258972], ["META", -0.5390394912985319], ["MSFT", 1.4761421319796852], ["AMZN", -0.8418497200360142], ["GOOGL", -1.0776320453739885], ["AAPL", 1.226079981666106]], "Rates & credit": [["UST 1-3Y (SHY)", -0.0061297045482300305], ["UST 7-10Y (IEF)", 0.10366652116979846], ["UST 20Y+ (TLT)", -0.0488431876606743], ["TIPS", -0.02368096997251712], ["IG Credit", -0.0914076782449813], ["HY Credit", -0.07187663355984197], ["Regional banks", 0.6614897900488748]], "Commodities & FX": [["Gold (GLD)", -1.864632754789497], ["Silver (SLV)", -4.664610639938315], ["Copper (CPER)", -4.25909494232477], ["WTI (USO)", 1.5971805638872238], ["Brent (BNO)", 1.6854924108718805], ["Nat gas (UNG)", 5.680527383367151], ["USD (UUP)", -0.5097380792478234], ["EUR vs USD", 0.6348610440147784], ["JPY vs USD", -0.12325869589333571], ["GBP vs USD", 0.6892471562248259], ["CHF vs USD", 0.7461528928782823], ["CAD vs USD", 0.5771949044316771], ["Bitcoin", -2.0527276739140787]]}, "shadow": [{"name": "Risk Sentiment", "atag": "RISK_OFF", "abd": 0.162, "acol": "r", "tag": "RISK_OFF", "col": "r", "bd": 0.12300000000000004, "note": "VIX 26.23 (high 32.38); bands 18 / 25 / 35", "flip": false}, {"name": "Supply Shock", "atag": "EASING", "abd": 0.413, "acol": "a", "tag": "EASING", "col": "a", "bd": 0.4997940411917616, "note": "fv-equiv ≈ 82.50 (USO +1.60%); session 80.5–82.7; bands 75 / 90 / 110", "flip": false}, {"name": "Inflation Regime", "atag": "COST_PUSH_TRANSMISSION", "abd": 0.4, "acol": "r", "tag": "COST_PUSH_TRANSMISSION", "col": "r", "bd": 0.4, "note": "monthly inputs — unchanged intraday", "flip": false}, {"name": "Policy Stance", "atag": "HAWKISH_TILT", "abd": 1.0, "acol": "r", "tag": "HAWKISH_TILT", "col": "r", "bd": 1.0, "note": "not readable intraday; ETF-implied 2Y ≈ +0bp (flat, below p90); December hike pricing intact per Reuters", "flip": false}, {"name": "Growth Signal", "atag": "RESILIENT", "abd": 0.333, "acol": "g", "tag": "RESILIENT", "col": "g", "bd": 0.333, "note": "monthly inputs — unchanged intraday", "flip": false}, {"name": "Dollar Regime", "atag": "USD_STRONG", "abd": 0.053, "acol": "a", "tag": "USD_FIRM", "col": "a", "bd": 0.06166020722835697, "note": "DXY constructed (ICE weights, EODHD pairs) 103.75 vs 104.30 prior close; bands 100 / 104", "flip": true}, {"name": "Market Structure", "atag": "TECHNICAL_NEUTRAL", "abd": 0.138, "acol": "a", "tag": "TECHNICAL_NEUTRAL", "col": "a", "bd": 0.057031662772141334, "note": "SPX 7,214 = -1.77% vs 200DMA 7,344; bands −8 / −2 / +2 / +8", "flip": false}], "nvda_prev": 165.05, "gauges": [{"name": "Risk Sentiment", "unit": "VIX", "prev": 26.62, "now": 26.23, "edges": [18, 25, 35], "min": 10, "max": 45, "labels": ["ON", "TRANSITIONAL", "OFF", "ACUTE"]}, {"name": "Market Structure", "unit": "% vs 200DMA", "prev": -1.45, "now": -1.772, "edges": [-8, -2, 2, 8], "min": -10, "max": 10, "labels": ["", "BREAKDOWN", "NEUTRAL", "ADVANCE", ""]}, {"name": "Dollar Regime", "unit": "DXY (constructed)", "prev": 104.3, "now": 103.75, "edges": [100, 104], "min": 98, "max": 106, "labels": ["", "USD_FIRM", "STRONG (not coded)"]}, {"name": "Supply Shock", "unit": "WTI fv-equiv $", "prev": 81.2, "now": 82.5, "edges": [75, 90, 110], "min": 70, "max": 115, "labels": ["", "EASING", "PERSISTENT", ""]}]};
+const $ = id => document.getElementById(id);
+const sg = (x,d=2)=> (x>=0?"+":"−")+Math.abs(x).toFixed(d);
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs={},parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+$("meta").innerHTML = `Tue 24 Nov 2026<br>Equities ${D.ts.eq} ET · FX ${D.ts.fx} ET · EODHD delayed<br>Archive n=129 · last edition 23 Nov (Day 216)`;
+const g = (grp,name)=>D.groups[grp].find(r=>r[0]===name)[1];
+const stats=[
+ ["NVDA",g("Megacaps","NVDA"),"%",`vs ${D.nvda_prev.toFixed(2)} prior close`],
+ ["Semiconductors (SMH)",g("Sectors","Semiconductors"),"%","sector laggard"],
+ ["Equal-wt minus cap-wt",D.v.rsp_spy,"pp","RSP vs SPY: broad · CTL fire 1.109"],
+ ["VIX",D.vix,"lvl",`${sg(D.v.vix_d)} pts from ${D.vix_prev.toFixed(2)}`],
+ ["DXY (constructed)",D.v.dxy_eq,"lvl",`from ${D.v.dxy_c_prev.toFixed(2)} · band edge 104`]];
+$("stats").innerHTML = stats.map(([l,v,u,s])=>`<div class="stat"><div class="l">${l}</div><div class="v ${u==="lvl"?"":(v>=0?"up":"dn")}">${u==="lvl"?v.toFixed(2):sg(v)+(u==="%"?"%":" pp")}</div><div class="s">${s}</div></div>`).join("");
+$("view").innerHTML = D.view + `<small>Approved by the operator, ${D.approved}. No trade, level or odds language (A-2, I11).</small>`;
+
+// regime strip
+let mode="shadow", sel="Market Structure";
+function strip(){
+ $("strip").innerHTML = D.shadow.map(d=>{
+  const t = mode==="arch"? d.atag : d.tag, c = mode==="arch"? d.acol : d.col, bd = mode==="arch"? d.abd : d.bd;
+  return `<button class="dim ${c}" aria-pressed="${d.name===sel}" data-n="${d.name}"><div class="n">${d.name}</div><div class="t">${t}${mode==="shadow"&&d.flip?'<span class="flip">FLIP</span>':""}</div><div class="b">bd ${bd==null?"n/r":bd.toFixed(3)}</div></button>`}).join("");
+ const d=D.shadow.find(x=>x.name===sel);
+ $("detail").innerHTML = `<b>${d.name}.</b> Archived ${d.atag} (bd ${d.abd.toFixed(3)}) → replay ${d.tag} (bd ${d.bd==null?"n/r":d.bd.toFixed(3)}). Input: ${d.note}.`;
+ document.querySelectorAll(".dim").forEach(b=>b.onclick=()=>{sel=b.dataset.n;strip()});
+}
+$("bArch").onclick=()=>{mode="arch";$("bArch").setAttribute("aria-pressed","true");$("bShadow").setAttribute("aria-pressed","false");strip()};
+$("bShadow").onclick=()=>{mode="shadow";$("bShadow").setAttribute("aria-pressed","true");$("bArch").setAttribute("aria-pressed","false");strip()};
+strip();
+
+// gauges
+function gauge(G){
+ const W=420,H=86,L=14,R=406,x=v=>L+(Math.min(Math.max(v,G.min),G.max)-G.min)/(G.max-G.min)*(R-L);
+ const box=document.createElement("div");box.className="gauge";
+ box.innerHTML=`<h3>${G.name}</h3><div class="g2">${G.unit}: ${G.prev} → <b>${G.now}</b></div>`;
+ const s=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":`${G.name}: ${G.prev} to ${G.now}`},box);
+ el("rect",{x:L,y:34,width:R-L,height:8,rx:4,fill:css("--rule-soft")},s);
+ const bounds=[G.min,...G.edges,G.max];
+ for(let i=0;i<bounds.length-1;i++){const lab=G.labels[i];if(!lab)continue;const cx=(x(bounds[i])+x(bounds[i+1]))/2;const t=el("text",{x:cx,y:62,"text-anchor":"middle","font-size":11},s);t.textContent=lab}
+ G.edges.forEach(e=>{el("line",{x1:x(e),x2:x(e),y1:28,y2:48,stroke:css("--gold"),"stroke-width":2},s);const t=el("text",{x:x(e),y:76,"text-anchor":"middle","font-size":10},s);t.textContent=e});
+ const up=G.now>=G.prev;
+ el("line",{x1:x(G.prev),x2:x(G.now),y1:38,y2:38,stroke:css("--navy-mid"),"stroke-width":3},s);
+ el("circle",{cx:x(G.prev),cy:38,r:6,fill:css("--panel"),stroke:css("--ink"),"stroke-width":1.6},s);
+ el("circle",{cx:x(G.now),cy:38,r:7,fill:css("--navy-mid"),stroke:css("--surface"),"stroke-width":1.5},s);
+ const t=el("text",{x:x(G.now),y:20,"text-anchor":"middle","font-size":11,"font-weight":600},s);t.style.fill=css("--ink");t.textContent=G.now;
+ return box;
+}
+function gauges(){$("gauges").innerHTML="";D.gauges.forEach(G=>$("gauges").appendChild(gauge(G)))}
+
+// cross-asset
+const groups=Object.keys(D.groups); let grp="Equities";
+function tabs(){$("tabs").innerHTML=groups.map(k=>`<button role="tab" aria-selected="${k===grp}" data-g="${k}">${k}</button>`).join("");document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{grp=b.dataset.g;tabs();xbars()})}
+function xbars(){
+ const rows=[...D.groups[grp]].sort((a,b)=>b[1]-a[1]);const rh=28,W=1000,LW=190,H=rows.length*rh+16;
+ const mx=Math.max(...rows.map(r=>Math.abs(r[1])),1);const lo=Math.min(0,...rows.map(r=>r[1])),hi=Math.max(0,...rows.map(r=>r[1]));
+ const pad=(hi-lo)*0.18||1, x=v=>LW+(v-(lo-pad))/((hi+pad)-(lo-pad))*(W-LW-10);
+ const s=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":`${grp} session changes`});
+ el("line",{x1:x(0),x2:x(0),y1:0,y2:H-18,stroke:css("--muted"),"stroke-width":1},s);
+ rows.forEach((r,i)=>{const y=i*rh+4;const lab=el("text",{x:LW-8,y:y+15,"text-anchor":"end","font-size":13},s);lab.textContent=r[0];
+  const a=x(Math.min(0,r[1])),b=x(Math.max(0,r[1]));el("rect",{class:"m",x:a,y:y+4,width:Math.max(1,b-a),height:rh-11,fill:r[1]>=0?css("--up"):css("--dn")},s);
+  const v=el("text",{x:r[1]>=0?b+5:a-5,y:y+14,"text-anchor":r[1]>=0?"start":"end","font-size":12.5,"font-weight":600},s);v.style.fill=css("--ink");v.textContent=sg(r[1])});
+ $("xbars").innerHTML="";$("xbars").appendChild(s);
+}
+
+// spx path
+function path(){
+ const H0=D.hist, n=H0.length, W=900,H=230,L=52,R=860,T=14,B=196;
+ const ys=[...H0.map(h=>h[1]),D.spx,D.dma,D.dma*0.98]; const lo=Math.min(...ys)-40, hi=Math.max(...ys)+40;
+ const x=i=>L+i/(n)*(R-L), y=v=>T+(hi-v)/(hi-lo)*(B-T);
+ const s=el("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"S&P 500 daily closes with 200-day average and the −2% edge"});
+ [7000,7200,7400,7600,7800].forEach(v=>{if(v<lo||v>hi)return;el("line",{x1:L,x2:R,y1:y(v),y2:y(v),stroke:css("--hair")},s);const t=el("text",{x:L-6,y:y(v)+4,"text-anchor":"end","font-size":11},s);t.textContent=v.toLocaleString()});
+ el("line",{x1:L,x2:R,y1:y(D.dma),y2:y(D.dma),stroke:css("--faint"),"stroke-dasharray":"5 4"},s);
+ let t=el("text",{x:L+4,y:y(D.dma)-5,"font-size":11},s);t.textContent=`200DMA ${Math.round(D.dma).toLocaleString()}`;
+ el("line",{x1:L,x2:R,y1:y(D.dma*0.98),y2:y(D.dma*0.98),stroke:css("--gold"),"stroke-width":1.5},s);
+ t=el("text",{x:L+4,y:y(D.dma*0.98)+14,"font-size":11},s);t.textContent=`−2% edge ${Math.round(D.dma*0.98).toLocaleString()}`;
+ el("polyline",{points:H0.map((h,i)=>`${x(i)},${y(h[1])}`).join(" "),fill:"none",stroke:css("--navy-mid"),"stroke-width":2.2},s);
+ el("line",{x1:x(n-1),y1:y(H0[n-1][1]),x2:x(n),y2:y(D.spx),stroke:css("--dn"),"stroke-width":2,"stroke-dasharray":"4 3"},s);
+ el("line",{x1:x(n),x2:x(n),y1:y(D.spx_hi),y2:y(D.spx_lo),stroke:css("--dn"),"stroke-width":1,opacity:.6},s);
+ el("circle",{cx:x(n),cy:y(D.spx),r:4.5,fill:css("--dn")},s);
+ t=el("text",{x:x(n)-10,y:y(D.spx)-12,"text-anchor":"end","font-size":11.5,"font-weight":600},s);t.style.fill=css("--dn");t.textContent=`${D.ts.eq} ET ${D.spx.toLocaleString(undefined,{maximumFractionDigits:0})}`;
+ [0,9,18,27].forEach(i=>{const tt=el("text",{x:x(i),y:B+18,"text-anchor":"middle","font-size":11},s);tt.textContent=H0[i][0]});
+ const tt=el("text",{x:x(n),y:B+18,"text-anchor":"middle","font-size":11},s);tt.textContent="11-24";
+ $("path").innerHTML="";$("path").appendChild(s);
+ $("pathnote").innerHTML=`Snapshot ${D.spx.toFixed(0)} is ${sg(D.v.sv)}% vs the 200DMA; session range ${D.spx_lo.toFixed(0)}–${D.spx_hi.toFixed(0)} (low ${sg(D.v.sv_lo)}%). The vertical red tick is today's range: the session low sat below the −2% edge.`;
+}
+
+// timeline
+const TL=[
+ ["23 Nov","Board reinstates Huang as NVIDIA CEO; NVDA up 31% at the E4 snapshot; closes at 165.05 (feed prior close). E4 note; control watch C-2026-11-23 lit supply and equity+x.","NVIDIA release · EODHD · ledger #15–17"],
+ ["24 Nov, Tokyo","Nikkei 225 closes up 3.9% on its first session after Monday's holiday; Reuters ties the Asian rally to Huang's return.","Reuters via GV Wire · EODHD"],
+ ["24 Nov, open","Chips lead the US open lower; Reuters: investors \"cautious about further AI-driven gains and US inflation\". Al Jazeera cites reports of possible new China tariffs (single source).","Reuters via GV Wire · Al Jazeera"],
+ ["24 Nov, morning","Rotation \"into older-economy stocks\" (Reuters); health care leads. NY Fed's Williams points toward tighter policy; gold falls on hawkish Fed signals.","Reuters via GV Wire · Motley Fool"],
+ [`24 Nov, ${D.ts.eq} ET`,`Snapshot: NVDA ${sg(g("Megacaps","NVDA"))}%, SMH ${sg(g("Sectors","Semiconductors"))}%, S&P 500 ${sg(g("Equities","S&P 500"))}%, equal-weight ${sg(g("Equities","S&P 500 equal-wt"))}%. Control watch C-2026-11-24-4730e5 lit equity+x on breadth; operator ESCALATE.`,"EODHD · ledger #18–19"]];
+$("tl").innerHTML=TL.map(([d,x,src])=>`<li><div class="d">${d}</div><div><div class="x">${x}</div><div class="src">${src}</div></div></li>`).join("");
+
+// CP3
+const CP=[
+ ["S&P 500 vs −2% line",`${D.spx.toFixed(0)} (${sg(D.v.sv)}%)`,`close ≥ ${Math.round(D.dma*0.98).toLocaleString()}`,D.spx>=D.dma*0.98,"Market Structure holds TECHNICAL_NEUTRAL"],
+ ["Constructed DXY vs 104",D.v.dxy_eq.toFixed(2),"archived close vs 104",D.v.dxy_eq<104,"Dollar leg leaves USD_STRONG"],
+ ["Breadth (RSP − SPY)",sg(D.v.rsp_spy)+" pp","official closes vs fire 1.109",D.v.rsp_spy>=1.109,"Does the F5 breadth lever hold"],
+ ["VIX vs 25 / 35",D.vix.toFixed(2),"Cboe 4:15 settle",D.vix>=25&&D.vix<35,"Risk stays RISK_OFF"],
+ ["NVDA persistence",sg(g("Megacaps","NVDA"))+"%","close ÷ snapshot","na","Does the give-back hold"]];
+$("cp3").innerHTML=`<tr><th>Leg</th><th>Snapshot</th><th>Canonical test</th><th>At snapshot</th><th>Why it matters</th></tr>`+CP.map(([a,b,c,ok,e])=>`<tr><td>${a}</td><td class="n">${b}</td><td>${c}</td><td>${ok==="na"?'<span class="pill amb">at close</span>':(ok?'<span class="pill ok">inside</span>':'<span class="pill no">outside</span>')}</td><td>${e}</td></tr>`).join("");
+
+$("foot").innerHTML=`<p style="margin:0 0 8px">Sources: <a href="https://gvwire.com/2026/11/24/stocks-slide-as-nvidia-rally-fizzles-out-dollar-falls/" target="_blank" rel="noopener">Reuters via GV Wire</a> · <a href="https://finance.yahoo.com/markets/live/stock-market-today-tuesday-november-24-dow-sp-500-nasdaq-chip-stocks-nvidia-140629923.html" target="_blank" rel="noopener">Yahoo Finance live</a> · <a href="https://www.aljazeera.com/economy/2026/11/24/nvidia-stock-cools-after-huangs-return-driven-surge" target="_blank" rel="noopener">Al Jazeera</a> · <a href="https://www.fool.com/coverage/stock-market-today/2026/11/24/stock-market-midday-nov-24-nvidia-drops-9-as-wall-street-s-historic-ai-rally-loses-momentum/" target="_blank" rel="noopener">Motley Fool</a> · market data EODHD (delayed 15–20 min), Treasury par and real curves via EODHD.</p>
+<p style="margin:0 0 8px">Intraday figures differ by source and time. The China tariff report is single-source. No catalyst is attributed for the dollar's fall.</p>
+<p style="margin:0 0 8px">Findings: the control-watch fire was marginal (breadth +1.109 against a 1.109 fire level), and by the snapshot the gold confirmation had slipped below its 90th percentile. VIX feed session high 32.38 is implausible (display only). The Nikkei print is today's Tokyo close. The archived Dollar tag USD_STRONG is not a coded band, so the replay's USD_FIRM is logged, not adopted. BOUNDARY not evaluated (no vendored engine).</p>
+<p style="margin:0">Governance: never classifies, never writes the archive, weights, flags or declarations. Companion to the 4-page Mid-Day Macro Orientation Note (EV-FMT-1.1), on operator instruction for E5. Ledger: #18 CTL_FIRE, #19 ADJUDICATION, #20 TRIGGER.</p>`;
+
+function all(){gauges();tabs();xbars();path()}
+all();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",all);
+new MutationObserver(all).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+</script>
+
+</body></html>

@@ -1,0 +1,15 @@
+{
+  "$comment": "Editorial notes per edition date. The archive supplies levels, regime, dimensions, weights and both view texts; this file supplies what the archive does not: the curated driver list and the internal status line. Add an entry when a new edition is built.",
+  "2026-11-24": {
+    "drivers": [
+      { "t": "Chip give-back, equal-weight ahead", "b": "Nvidia −5.9% to 155.38; the semiconductor fund −7.3%. The equal-weight index rose 0.54%, 104bp ahead of the cap-weighted index." },
+      { "t": "Rates still, dollar and gold down", "b": "2Y held at 4.63 for a third session, 10Y 4.91, 30Y 5.30. December 25bp hike priced about 95%. Dollar index −0.48% to 103.82; gold −2.4% to 3,556." },
+      { "t": "Oil rebounds", "b": "January WTI settled 82.05 (+1.88) and Brent 91.40 (+2.03) after both touched their lowest since late August, then rose on new attacks on ships in the strait." }
+    ],
+    "internalStatus": "HY-1.0 LIVE · gate 15/15 PASS · revision #28 in force, first session.",
+    "dimData": {
+      "Policy Stance": "Hike prob 95% / Cut prob 6%",
+      "Dollar Regime": "DXY 103.8 (−0.48% d/d)"
+    }
+  }
+}

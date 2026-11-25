@@ -1,0 +1,10 @@
+{
+  "$comment": "Weekly positioning book. Values are 1Y percentiles of net position. ILLUSTRATIVE until wired to the PB-1.0 pb_input feed.",
+  "illustrative": true,
+  "weekEnding": "20 Nov 2026",
+  "briefDoc": "x2",
+  "books": {
+    "Asset managers": [["UST 10Y", 71], ["S&P 500", 38], ["Nasdaq 100", 24], ["WTI", 57], ["Gold", 83], ["USD index", 66], ["JPY", 19], ["CAD", 31]],
+    "Leveraged funds": [["UST 10Y", 22], ["S&P 500", 44], ["Nasdaq 100", 61], ["WTI", 35], ["Gold", 58], ["USD index", 74], ["JPY", 12], ["CAD", 27]]
+  }
+}

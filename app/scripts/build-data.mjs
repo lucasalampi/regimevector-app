@@ -1,0 +1,189 @@
+#!/usr/bin/env node
+// Build the app's data bundle from a RegimeVector macro archive plus the editorial
+// content manifests in content/.
+//
+//   node scripts/build-data.mjs [path/to/macro_archive_YYYY-MM-DD.json]
+//
+// With no argument it uses the newest macro_archive_*.json in ../project/uploads.
+// Writes src/data/edition.generated.json and src/data/briefAssets.generated.ts.
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const rel = (...p) => path.join(ROOT, ...p);
+const readJson = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+const MINUS = '−';
+
+function fail(msg) { console.error('build-data: ' + msg); process.exit(1); }
+
+function findArchive() {
+  const arg = process.argv[2];
+  if (arg) return path.resolve(arg);
+  const dir = rel('..', 'project', 'uploads');
+  const hits = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => /^macro_archive_.*\.json$/.test(f)).sort() : [];
+  if (!hits.length) fail('no archive given and none found in ' + dir);
+  return path.join(dir, hits[hits.length - 1]);
+}
+
+const archivePath = findArchive();
+const archive = readJson(archivePath);
+const eds = archive.editions;
+if (!Array.isArray(eds) || !eds.length) fail('archive has no editions');
+const instruments = readJson(rel('content', 'instruments.json'));
+const notesAll = readJson(rel('content', 'editions.json'));
+const research = readJson(rel('content', 'research.json'));
+const events = readJson(rel('content', 'events.json'));
+const positioning = readJson(rel('content', 'positioning.json'));
+
+const last = eds[eds.length - 1];
+const A = last.assets || {};
+const N = eds.length;
+const notes = notesAll[last.date] || {};
+if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json entry for ${last.date}; drivers will be empty`);
+
+// ---------- series (forward-filled, leading gaps back-filled) ----------
+const seriesKeys = new Set([
+  ...instruments.groups.flatMap(g => g.rows.map(r => r.key)),
+  ...instruments.transmission.nodes.map(n => n.key),
+]);
+const series = {};
+for (const k of seriesKeys) {
+  let lastV = null;
+  const s = eds.map(e => { const v = e.assets?.[k]; if (typeof v === 'number') lastV = v; return lastV; });
+  const first = s.find(v => v != null);
+  if (first == null) { console.warn(`build-data: series ${k} has no values; skipped`); continue; }
+  series[k] = s.map(v => (v == null ? first : +v.toFixed(6)));
+}
+
+// ---------- formatting ----------
+const fmtNum = (v, dp) => v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+function fmtValue(v, row) {
+  switch (row.fmt) {
+    case 'yield': return v.toFixed(row.dp ?? 2) + '%';
+    case 'prob': return Math.round(v) + '%';
+    case 'bp': return Math.round(v) + 'bp';
+    case 'fx': return v.toFixed(row.dp ?? 4);
+    case 'level': return v.toFixed(row.dp ?? 1);
+    default: return fmtNum(v, row.dp ?? 2);
+  }
+}
+const signed = (x, s) => (x > 0 ? '+' : x < 0 ? MINUS : '') + s;
+function fmtChange(v, prev, kind) {
+  if (kind === 'none' || prev == null || v == null) return null;
+  if (kind === 'bp') { const d = Math.round((v - prev) * 100); return signed(d, Math.abs(d) + 'bp'); }
+  const p = (v / prev - 1) * 100; return signed(+p.toFixed(2), Math.abs(p).toFixed(2) + '%');
+}
+const shortDate = iso => { const d = new Date(iso + 'T12:00:00Z'); return d.getUTCDate() + ' ' + d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }); };
+const longDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).replace(',', '');
+
+const groups = instruments.groups.map(g => ({
+  id: g.id, name: g.name,
+  rows: g.rows.filter(r => series[r.key]).map(r => {
+    const v = A[r.key] ?? series[r.key][N - 1];
+    const prev = A[r.key + '_prev'] ?? (eds[N - 2]?.assets?.[r.key] ?? null);
+    const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'));
+    return { s: label, k: r.key, v, val: fmtValue(v, r), chg: fmtChange(v, prev, r.chg) };
+  }),
+}));
+
+// ---------- regime runs ----------
+const labelOf = e => e.regime_tags?.composite || e.composite_label || 'Unclassified';
+const runs = [];
+eds.forEach((e, i) => { const l = labelOf(e); if (!runs.length || runs[runs.length - 1][1] !== l) runs.push([i, l]); });
+
+// ---------- dimensions ----------
+const TAG_WORDS = { RISK_OFF: 'Risk-off', RISK_ON: 'Risk-on' };
+const prettyTag = t => TAG_WORDS[t] || t.split('_').map((w, i) => (w === 'USD' ? w : i === 0 ? w[0] + w.slice(1).toLowerCase() : w.toLowerCase())).join(' ').replace(/\b(Cost|cost) push\b/, '$1-push');
+const cleanData = s => String(s || '').replace(/\s*\[[^\]]*\]/g, '').replace(/(^|[\s(])-(?=\d)/g, '$1' + MINUS).trim();
+const dimsRaw = last.regime_tags?.dimensions || {};
+const dims = Object.entries(dimsRaw).map(([name, d]) => ({
+  name, tag: prettyTag(d.tag), level: String(d.color || 'amber').toUpperCase(), bd: d.boundary_distance,
+  data: notes.dimData?.[name] ?? cleanData(d.data),
+}));
+const weakest = dims.reduce((m, d) => (m == null || d.bd < m.bd ? d : m), null);
+
+// ---------- transmission ----------
+const T = instruments.transmission;
+const changes = T.nodes.map(n => {
+  const s = series[n.key]; const out = [];
+  for (let i = 1; i < s.length; i++) out.push(n.change === 'diff' ? s[i] - s[i - 1] : s[i] / s[i - 1] - 1);
+  return out.slice(-T.window);
+});
+const corr = (x, y) => {
+  const n = x.length, mx = x.reduce((a, b) => a + b, 0) / n, my = y.reduce((a, b) => a + b, 0) / n;
+  let c = 0, vx = 0, vy = 0;
+  for (let i = 0; i < n; i++) { c += (x[i] - mx) * (y[i] - my); vx += (x[i] - mx) ** 2; vy += (y[i] - my) ** 2; }
+  return vx && vy ? c / Math.sqrt(vx * vy) : 0;
+};
+const matrix = changes.map(a => changes.map(b => +corr(a, b).toFixed(2)));
+
+// ---------- research assets ----------
+const briefDir = rel('assets', 'briefs');
+for (const d of research.docs) if (!fs.existsSync(path.join(briefDir, d.file))) fail(`research doc ${d.id} points at missing assets/briefs/${d.file}`);
+const docIds = new Set(research.docs.map(d => d.id));
+for (const ref of [...research.latest, ...research.issuers.map(i => i.doc).filter(Boolean), events.middayDoc, positioning.briefDoc])
+  if (!docIds.has(ref)) fail(`content references unknown research doc id "${ref}"`);
+
+const assetLines = research.docs.map(d => `  ${JSON.stringify(d.file)}: require('../../assets/briefs/${d.file}'),`);
+fs.writeFileSync(rel('src', 'data', 'briefAssets.generated.ts'),
+  `// GENERATED by scripts/build-data.mjs — do not edit.\n// Static requires so Metro bundles every brief listed in content/research.json.\nexport const BRIEF_ASSETS: Record<string, number> = {\n${assetLines.join('\n')}\n};\n`);
+
+// ---------- vendored pdf.js (reader works offline) ----------
+const pdfjsSrc = rel('node_modules', 'pdfjs-dist', 'build');
+const pdfjsOut = rel('assets', 'pdfjs');
+if (fs.existsSync(pdfjsSrc)) {
+  fs.mkdirSync(pdfjsOut, { recursive: true });
+  for (const f of ['pdf.min.js', 'pdf.worker.min.js']) fs.copyFileSync(path.join(pdfjsSrc, f), path.join(pdfjsOut, f + '.txt'));
+} else if (!fs.existsSync(path.join(pdfjsOut, 'pdf.min.js.txt'))) {
+  fail('pdfjs-dist is not installed and assets/pdfjs is empty; run npm install');
+}
+
+// ---------- scenario matrix in force (names + SN-1.0 order come from the registry, not the cell keys) ----------
+const w = last.scenario_weights || {};
+const registry = archive.metadata?.governance?.scenario_matrix || {};
+const effectiveDate = m => (m.effective?.match(/\d{4}-\d{2}-\d{2}/)?.[0]) || m.registered || '';
+const matrixKey = Object.keys(registry)
+  .filter(k => registry[k].cells && effectiveDate(registry[k]) <= last.date && !(registry[k].closed && registry[k].closed < last.date))
+  .sort((a, b) => effectiveDate(registry[a]).localeCompare(effectiveDate(registry[b])))
+  .pop();
+const scen = matrixKey ? registry[matrixKey] : null;
+if (!scen) console.warn('build-data: no scenario matrix in force; falling back to cell keys');
+const order = scen?.resolution_order ?? Object.keys(scen?.cells ?? w);
+// The last revision that moved weights: compare with the most recent edition carrying different weights.
+const same = (a, b) => order.every(k => (a?.[k] ?? 0) === (b?.[k] ?? 0));
+let revIdx = N - 1;
+while (revIdx > 0 && same(eds[revIdx - 1].scenario_weights, w)) revIdx--;
+const priorW = revIdx > 0 ? eds[revIdx - 1].scenario_weights : null;
+const revNo = String(A.revision ?? '').match(/#\d+/)?.[0] ?? null;
+const scenarios = {
+  matrix: matrixKey ?? null,
+  revision: revNo,
+  since: priorW ? shortDate(eds[revIdx].date) : null,
+  caption: [matrixKey ? `Matrix ${matrixKey}` : null, revNo ? `revision ${revNo}` : null, priorW ? `since ${shortDate(eds[revIdx].date)}` : null].filter(Boolean).join(' · '),
+  cells: order.map(k => ({
+    key: k,
+    name: scen?.cells?.[k]?.name ?? k[0].toUpperCase() + k.slice(1),
+    v: w[k] ?? 0,
+    chg: priorW ? Math.round(((w[k] ?? 0) - (priorW[k] ?? 0)) * 100) : 0,
+  })),
+};
+const out = {
+  generatedFrom: path.basename(archivePath),
+  edition: {
+    n: N, date: last.date, dateLong: longDate(last.date), dateShort: shortDate(last.date), day: last.day_of_series,
+    regime: labelOf(last), trend: last.regime_tags?.composite_trend ?? '',
+    tenure: last.hy_state?.published_tenure ?? null,
+    weakest: weakest ? { name: weakest.name, bd: weakest.bd } : null,
+    internalStatus: notes.internalStatus ?? `HY-1.0 ${last.hy_state?.mode ?? ''} · gate ${A.hy_gate ?? 'n/a'}`,
+    views: { client: last.macro_view_client ?? '', internal: last.strategist_view ?? '' },
+    scenarios,
+    dims, drivers: notes.drivers ?? [],
+  },
+  archive: { n: N, first: eds[0].date },
+  series, runs, groups,
+  transmission: { window: T.window, nodes: T.nodes.map(n => n.name), matrix },
+  regimeTints: instruments.regimeTints,
+};
+fs.writeFileSync(rel('src', 'data', 'edition.generated.json'), JSON.stringify(out) + '\n');
+console.log(`build-data: Edition ${N} (${last.date}) from ${path.basename(archivePath)} → src/data/edition.generated.json (${Object.keys(series).length} series, ${runs.length} regime runs, ${research.docs.length} briefs)`);

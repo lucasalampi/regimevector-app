@@ -1,0 +1,39 @@
+{
+  "$comment": "Research library catalogue. `file` is a name in assets/briefs/. `internal: true` hides the row from the Client role. `daily: true` shows the mobile summary above the full edition. `kind` must be a key of `programmes`.",
+  "programmes": {
+    "Daily": "Daily operating state",
+    "Events": "Event-contingent notes",
+    "Executive": "Executive briefs",
+    "Special": "Special and single-name research"
+  },
+  "latest": ["d3", "x1", "s1"],
+  "docs": [
+    { "id": "d1", "kind": "Daily", "title": "Client Brief: Disinflation / Hawkish Pivot", "code": "Day 217", "date": "24 Nov 2026", "pages": "Client surface", "daily": true, "file": "client-brief-2026-11-24.pdf" },
+    { "id": "d2", "kind": "Daily", "title": "Operating-State Brief", "code": "Day 217 · r129", "date": "24 Nov 2026", "pages": "Internal surface", "daily": true, "internal": true, "file": "brief-2026-11-24.pdf" },
+    { "id": "d4", "kind": "Daily", "title": "Client Brief", "code": "Day 216", "date": "23 Nov 2026", "pages": "Client surface", "file": "client-brief-2026-11-23.pdf" },
+    { "id": "d5", "kind": "Daily", "title": "Operating-State Brief", "code": "Day 216", "date": "23 Nov 2026", "pages": "Internal surface", "internal": true, "file": "brief-2026-11-23.pdf" },
+    { "id": "d3", "kind": "Events", "title": "Mid-Day Macro Orientation Note", "code": "EV-1.0 · E5", "date": "24 Nov 2026", "pages": "Mockup", "file": "midday-2026-11-24.pdf" },
+    { "id": "e2", "kind": "Events", "title": "Mid-Day Macro Orientation Note", "code": "EV-1.0", "date": "23 Nov 2026", "pages": "Mockup", "file": "midday-2026-11-23.pdf" },
+    { "id": "e3", "kind": "Events", "title": "Mid-Day Macro Orientation Note", "code": "EV-1.0", "date": "20 Nov 2026", "pages": "Mockup", "file": "midday-2026-11-20.pdf" },
+    { "id": "e4", "kind": "Events", "title": "Intraday Executive Brief", "code": "EV-1.0 · E1 format", "date": "20 Nov 2026", "pages": "Mockup", "file": "intraday-2026-11-20.pdf" },
+    { "id": "x1", "kind": "Executive", "title": "Currency Intelligence Executive Brief", "code": "FX-E1", "date": "24 Nov 2026", "pages": "One page", "file": "fx-e1.pdf" },
+    { "id": "x2", "kind": "Executive", "title": "Positioning Intelligence Executive Brief", "code": "PB-XB-1.0", "date": "20 Nov 2026", "pages": "One page", "file": "positioning-2026-11-20.pdf" },
+    { "id": "x3", "kind": "Executive", "title": "Equity-Market Intelligence Executive Brief", "code": "SEMI-E2", "date": "14 Nov 2026", "pages": "One page", "file": "semi-e2.pdf" },
+    { "id": "x4", "kind": "Executive", "title": "Inflation Intelligence Executive Brief", "code": "IN-E1", "date": "3 Nov 2026", "pages": "One page", "file": "in-e1.pdf" },
+    { "id": "x5", "kind": "Executive", "title": "Weekly Positioning Research Sidecar", "code": "PB-1.0", "date": "20 Nov 2026", "pages": "Internal draft", "internal": true, "file": "positioning-sidecar-2026-11-20.pdf" },
+    { "id": "s4", "kind": "Special", "title": "NVDA: Special Research", "code": "SR-SN4", "date": "23 Nov 2026", "pages": "Draft · intraday", "internal": true, "file": "sr-sn4-nvda.pdf" },
+    { "id": "s1", "kind": "Special", "title": "CNQ: Special Research", "code": "SR-SN1", "date": "23 Nov 2026", "pages": "Final", "file": "sr-sn1-cnq.pdf" },
+    { "id": "s2", "kind": "Special", "title": "CNR: Special Research", "code": "SR-SN2", "date": "23 Nov 2026", "pages": "Edition", "file": "sr-sn2-cnr.pdf" },
+    { "id": "s3", "kind": "Special", "title": "AEM: Special Research", "code": "SR-SN3", "date": "23 Nov 2026", "pages": "Edition", "file": "sr-sn3-aem.pdf" },
+    { "id": "s7", "kind": "Special", "title": "E4 Huang Reinstatement Special", "code": "E4", "date": "23 Nov 2026", "pages": "Interactive", "file": "e4-huang-special.html" },
+    { "id": "s8", "kind": "Special", "title": "E5 Chip Rotation Special", "code": "E5", "date": "24 Nov 2026", "pages": "Interactive", "file": "e5-chip-rotation-special.html" }
+  ],
+  "issuers": [
+    { "tk": "NVDA", "co": "NVIDIA", "ed": "SR-SN4", "status": "DRAFT", "doc": "s4", "last": "155.38 (−5.9%)" },
+    { "tk": "CNQ", "co": "Canadian Natural Resources", "ed": "SR-SN1", "status": "FINAL", "doc": "s1" },
+    { "tk": "CNR", "co": "Canadian National Railway", "ed": "SR-SN2", "status": "EDITION", "doc": "s2" },
+    { "tk": "AEM", "co": "Agnico Eagle Mines", "ed": "SR-SN3", "status": "EDITION", "doc": "s3" },
+    { "tk": "CAT", "co": "Caterpillar", "ed": "SR-SN5", "status": "IN BUILD" },
+    { "tk": "WMT", "co": "Walmart", "ed": "SR-SN6", "status": "IN BUILD" }
+  ]
+}
