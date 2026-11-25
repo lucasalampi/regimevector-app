@@ -76,7 +76,7 @@ function windowStats(r, span) {
 }
 
 // ---------- SVG ----------
-function spark(r, n = 21, w = 64, h = 14) {
+function spark(r, n = 21, w = 52, h = 12) {
   const s = D.series[r.k], vals = s.slice(Math.max(r.from, N - n)).filter(v => v != null);
   if (vals.length < 2) return '';
   const lo = Math.min(...vals), hi = Math.max(...vals), k = hi - lo || 1;
@@ -86,11 +86,11 @@ function spark(r, n = 21, w = 64, h = 14) {
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="${isStep(r) ? '#15304e' : up ? '#185c38' : '#8b2020'}" stroke-width="1"/></svg>`;
 }
 
-function chart(r, w = 330, h = 128) {
+function chart(r, w = 220, h = 104) {
   const s = D.series[r.k], from = r.from, end = N - 1;
   const vals = s.slice(from).filter(v => v != null);
   let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
-  const L = 6, R = 42, T = 8, B = 30, pw = w - L - R, ph = h - T - B;
+  const L = 4, R = 36, T = 6, B = 24, pw = w - L - R, ph = h - T - B;
   const x = i => L + (i / end) * pw, y = v => T + (1 - (v - lo) / (hi - lo)) * ph;
   let d = '';
   for (let i = from; i <= end; i++) { const v = s[i]; if (v == null) continue; d += !d ? `M${x(i).toFixed(1)},${y(v).toFixed(1)}` : isStep(r) ? `H${x(i).toFixed(1)}V${y(v).toFixed(1)}` : `L${x(i).toFixed(1)},${y(v).toFixed(1)}`; }
@@ -123,7 +123,7 @@ const alerts = events.alerts.filter(a => (INTERNAL || !a.internal) && themes.som
 const view = INTERNAL ? ED.views.internal : ED.views.client;
 const tagCell = d => `<span class="lvl ${INTERNAL ? d.level.toLowerCase() : ''}">${esc(d.tag)}${d.bd < 0.1 ? ' †' : ''}</span>`;
 const levelColor = { RED: '#8b2020', AMBER: '#6b4800', GREEN: '#185c38' };
-const KEY_CHARTS = ['usy10', 'x_us2s10s', 'x_spx200', 'vix', 'dxy', 'usdcad', 'brent', 'credit_hy_oas'];
+const KEY_CHARTS = ['usy10', 'x_us2s10s', 'x_spx200', 'vix', 'dxy', 'usdcad', 'brent', 'gold', 'credit_hy_oas'];
 const REGIME_KEYS = ['usy10', 'x_us2s10s', 'spx', 'vix', 'dxy', 'brent', 'gold', 'credit_hy_oas'];
 const bigRuns = [...new Map(RUNS.map(r => [r.name, r])).values()];
 
@@ -159,8 +159,8 @@ function instrumentTables() {
         <td class="num">${esc(fmtValue(all.hi, r))}</td><td class="num">${esc(fmtValue(all.lo, r))}</td><td class="num">${Math.round(all.pos * 100)}%</td>
         <td class="num">${all.vol == null ? '—' : r.unit === '%' ? all.vol.toFixed(1) + '%' : fmtChange(all.vol, r.unit, r.unit === 'bp' ? 1 : 2).replace(/^\+/, '')}</td><td>${spark(r)}</td></tr>`;
     }).join('')).join('');
-    return `<h3>${esc(g.name)} <span class="h-meta">${g.rows.length} instruments</span></h3>
-      <table class="t"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th><th class="num">1M</th><th class="num">3M</th><th class="num">High</th><th class="num">Low</th><th class="num">Pos.</th><th class="num">Vol</th><th>21 sessions</th></tr></thead><tbody>${body}</tbody></table>`;
+    return `<h2>${esc(g.name)} <span class="h-meta">${g.rows.length}</span></h2>
+      <table class="t small"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th><th class="num">1M</th><th class="num">3M</th><th class="num">High</th><th class="num">Low</th><th class="num">Pos.</th><th class="num">Vol</th><th>21 sess.</th></tr></thead><tbody>${body}</tbody></table>`;
   }).join('');
 }
 
@@ -174,12 +174,12 @@ function transmission() {
 function eventsSection() {
   const days = [...new Set(alerts.map(a => a.date))].sort().reverse();
   const th = Object.fromEntries(themes.map(t => [t.id, t]));
-  return days.map(day => `<h3>${day === ED.date ? 'Today · ' : ''}${short(day)} <span class="h-meta">${alerts.filter(a => a.date === day).length} items</span></h3>` +
+  return days.map(day => `<div class="day">${day === ED.date ? 'Today · ' : ''}${short(day)} · ${alerts.filter(a => a.date === day).length} items</div>` +
     alerts.filter(a => a.date === day).map(a => {
       const t = th[a.theme];
       const links = (a.links ?? []).map(k => byKey(k)).filter(Boolean).map(r => `${esc(r.s)} ${esc(r.val)}${r.chg ? ' ' + esc(r.chg) : ''}`).join(' · ');
       return `<div class="ev" style="border-left-color:${t.color}"><div class="ev-k" style="color:${t.color}">${esc(t.name)} <span class="muted">· ${a.type}${a.internal ? ' · INTERNAL' : ''}</span></div>
-        <div class="ev-t">${esc(a.t)}</div><div class="ev-b">${esc(a.b)}</div>${links ? `<div class="ev-l">${day === ED.date ? 'Levels' : 'Levels now (25 Nov)'}: ${links}</div>` : ''}</div>`;
+        <div class="ev-t">${esc(a.t)}</div><div class="ev-b">${esc(a.b)}</div>${links ? `<div class="ev-l">${day === ED.date ? 'Levels' : `Now (${short(ED.date)})`}: ${links}</div>` : ''}</div>`;
     }).join('')).join('');
 }
 
@@ -205,7 +205,7 @@ async function shots(browser) {
   const out = [];
   for (const [label, url] of list) {
     await page.goto(base + url, { waitUntil: 'networkidle' }); await page.waitForTimeout(700);
-    const buf = await page.screenshot({ type: 'jpeg', quality: 70 });
+    const buf = await page.screenshot({ type: 'jpeg', quality: 72, clip: { x: 0, y: 0, width: 390, height: 440 } });
     out.push({ label, src: 'data:image/jpeg;base64,' + buf.toString('base64') });
   }
   server.close();
@@ -219,150 +219,144 @@ const fonts = [font(400, 'Inter_400Regular'), font(500, 'Inter_500Medium'), font
 function html(screens) {
   const top = ED.scenarios.cells.reduce((m, c, i, a) => (c.v > a[m].v ? i : m), 0);
   const fills = ['#dfe6ee', '#c4cdd6', '#9fb0c2', '#c4cdd6'];
-  const runRows = [...RUNS].reverse().map(r => `<tr><td><span class="sw" style="background:${r.solid}"></span>${esc(r.name)}${r.to === N ? ' <b>· current</b>' : ''}</td><td class="num">${short(DATES[r.from])}</td><td class="num">${short(DATES[r.to - 1])}</td><td class="num">${r.to - r.from}</td></tr>`).join('');
+  const runs = [...RUNS].reverse();
+  const half = Math.ceil(runs.length / 2);
+  const runTable = list => `<table class="t tight"><thead><tr><th>Published label</th><th class="num">From</th><th class="num">To</th><th class="num">Sess.</th></tr></thead><tbody>${list.map(r => `<tr><td><span class="sw" style="background:${r.solid}"></span>${esc(r.name)}${r.to === N ? ' <b>· now</b>' : ''}</td><td class="num">${short(DATES[r.from])}</td><td class="num">${short(DATES[r.to - 1])}</td><td class="num">${r.to - r.from}</td></tr>`).join('')}</tbody></table>`;
   const sha = (() => { try { return fs.readFileSync(rel('..', 'project', 'uploads', D.generatedFrom + '.sha256'), 'utf8').split(/\s/)[0]; } catch { return null; } })();
+  const ddCell = r => `<td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(r.asof ? 'as of ' + short(r.asof) : isStep(r) ? (r.freq === 'monthly' ? 'monthly' : 'policy') : r.chg ?? '—')}</td>`;
+  const headline = ['usy2', 'usy10', 'usy30', 'x_us2s10s', 'fed_hike_prob_dec', 'credit_hy_oas', 'spx', 'x_spx200', 'vix', 'dxy', 'usdcad', 'eurusd', 'wti', 'brent', 'gold', 'core_pce_yoy'].map(byKey).filter(Boolean);
+  const hl = list => `<table class="t tight"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th></tr></thead><tbody>${list.map(r => `<tr><td>${esc(r.s)}</td><td class="num b">${esc(r.val)}</td>${ddCell(r)}</tr>`).join('')}</tbody></table>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <title>RegimeVector · Edition ${ED.n} · ${ED.dateLong} · ${role} edition</title>
 <meta name="author" content="RegimeVector"><meta name="subject" content="Cross-asset regime state, Edition ${ED.n}">
 <style>
 ${fonts}
-@page{size:Letter;margin:16mm 14mm 16mm 14mm}
+@page{size:Letter;margin:11mm 12mm 13mm 12mm}
 *{box-sizing:border-box}
-body{font-family:Inter,Helvetica,Arial,sans-serif;font-size:9.2pt;line-height:1.45;color:#0b0f1a;margin:0}
-h1{font-size:15pt;margin:0 0 3mm;padding-bottom:2mm;border-bottom:1.6pt solid #bc9330;break-after:avoid}
-h2{font-size:11pt;margin:6mm 0 2mm;color:#15304e;break-after:avoid}
-h3{font-size:9.5pt;margin:4mm 0 1.5mm;text-transform:uppercase;letter-spacing:.06em;color:#15304e;break-after:avoid}
-.h-meta{font-weight:500;color:#7a8fa3;text-transform:none;letter-spacing:0;margin-left:2mm}
-section{break-before:page}
-p{margin:0 0 2mm}
+body{font-family:Inter,Helvetica,Arial,sans-serif;font-size:8.4pt;line-height:1.4;color:#0b0f1a;margin:0}
+h1{font-size:11.5pt;margin:5mm 0 2mm;padding-bottom:1.2mm;border-bottom:1.2pt solid #bc9330;break-after:avoid;color:#0b0f1a}
+h2{font-size:8pt;margin:3mm 0 1.2mm;text-transform:uppercase;letter-spacing:.08em;color:#15304e;break-after:avoid}
+h3{font-size:7.6pt;margin:2.5mm 0 1mm;text-transform:uppercase;letter-spacing:.08em;color:#15304e;break-after:avoid}
+.h-meta{font-weight:500;color:#7a8fa3;text-transform:none;letter-spacing:0;margin-left:1.5mm}
+.page{break-before:page}
+p{margin:0 0 1.5mm}
 .muted{color:#5a6e83}.b{font-weight:600}.up{color:#185c38}.down{color:#8b2020}
-.cover{background:#0c1829;color:#fff;padding:9mm 10mm 7mm;border-bottom:2.4pt solid #bc9330;margin:-1mm 0 5mm}
-.cover .brand{font-size:26pt;font-weight:700;letter-spacing:-.01em}.cover .brand span{color:#bc9330}
-.cover .sub{font-size:11pt;margin-top:2mm}.cover .meta{color:#a9b8c8;margin-top:1.5mm}
-.badge{display:inline-block;font-size:7.5pt;font-weight:700;letter-spacing:.1em;padding:1mm 2mm;border:.8pt solid #bc9330;color:#bc9330;margin-top:3mm}
-.card{border:.6pt solid #d9e0e7;border-left:2.4pt solid #bc9330;background:#fff;padding:3mm 4mm;margin:0 0 3mm;break-inside:avoid}
-.kick{font-size:7.2pt;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#5a6e83}
+.band{display:flex;justify-content:space-between;align-items:flex-end;background:#0c1829;color:#fff;padding:4.5mm 5mm 3.5mm;border-bottom:2pt solid #bc9330}
+.band .brand{font-size:17pt;font-weight:700;letter-spacing:-.01em;line-height:1}.band .brand span{color:#bc9330}
+.band .t1{font-size:8.6pt;margin-top:1.2mm}.band .t2{color:#a9b8c8;font-size:7.6pt}
+.band .right{text-align:right}
+.badge{display:inline-block;font-size:6.6pt;font-weight:700;letter-spacing:.1em;padding:.7mm 1.6mm;border:.7pt solid #bc9330;color:#bc9330;margin-top:1.5mm}
+.row{display:grid;gap:4mm}.r2{grid-template-columns:1fr 1fr}.r37{grid-template-columns:38fr 62fr}.r55{grid-template-columns:56fr 44fr}
+.card{border:.5pt solid #d9e0e7;border-left:2pt solid #bc9330;background:#fff;padding:2.4mm 3mm;break-inside:avoid}
+.kick{font-size:6.6pt;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#5a6e83}
 .kick.gold{color:#bc9330}
-.regime{font-size:17pt;font-weight:700;letter-spacing:-.01em;margin:.5mm 0}
-.view{background:#fbf6ea;border-left:2.4pt solid #bc9330;padding:3mm 4mm;font-size:10pt;line-height:1.55;break-inside:avoid}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:3mm 5mm}
-.wbar{display:flex;height:4mm;border:.6pt solid #d9e0e7;margin:1.5mm 0}
-.wl{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm}.wl b{font-size:12pt;display:block}
-table.t{width:100%;border-collapse:collapse;margin:0 0 2mm;font-variant-numeric:tabular-nums}
-.t th{font-size:7pt;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5a6e83;text-align:left;padding:1.2mm 1.5mm;border-bottom:1pt solid #0b0f1a;vertical-align:bottom}
-.t td{padding:1.1mm 1.5mm;border-bottom:.5pt solid #d9e0e7;vertical-align:middle}
+.regime{font-size:13pt;font-weight:700;letter-spacing:-.01em;margin:.4mm 0 .6mm;line-height:1.15}
+.view{background:#fbf6ea;border-left:2pt solid #bc9330;padding:2.4mm 3.2mm;font-size:8.8pt;line-height:1.5;break-inside:avoid;margin-top:.8mm}
+.wbar{display:flex;height:3mm;border:.5pt solid #d9e0e7;margin:1.2mm 0}
+.wl{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5mm;font-size:7.2pt}.wl b{font-size:10.5pt;display:block}
+table.t{width:100%;border-collapse:collapse;margin:0;font-variant-numeric:tabular-nums}
+.t th{font-size:6.4pt;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#5a6e83;text-align:left;padding:.8mm 1.2mm;border-bottom:.8pt solid #0b0f1a;vertical-align:bottom}
+.t td{padding:.75mm 1.2mm;border-bottom:.4pt solid #e1e7ed;vertical-align:middle}
 .t tr{break-inside:avoid}.t thead{display:table-header-group}
 .t .num{text-align:right;white-space:nowrap}
-.t tr.sub td{font-size:7pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#15304e;background:#eef2f6;padding-top:1.6mm}
-.t tr.foot td{border-top:1pt solid #0b0f1a;border-bottom:0}
-.t.small td,.t.small th{font-size:7.6pt}
-.t.tight td{padding:.55mm 1.5mm;font-size:7.4pt}
+.t tr.sub td{font-size:6.4pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#15304e;background:#eef2f6;padding:.9mm 1.2mm .6mm}
+.t tr.foot td{border-top:.8pt solid #0b0f1a;border-bottom:0}
+.t.small td,.t.small th{font-size:7.2pt}
+.t.tight td{padding:.45mm 1.2mm;font-size:7.2pt}
 .keep{break-inside:avoid}
-.mxt td.mx{width:14%;font-weight:600}.mxt th{text-align:left}
-.rv{font-size:6.5pt;font-weight:700;color:#bc9330;border:.5pt solid #bc9330;padding:0 .8mm;margin-left:1mm}
+.mxt td.mx{font-weight:600;text-align:center}.mxt th{text-align:left}.mxt thead th{text-align:center}
+.rv{font-size:5.8pt;font-weight:700;color:#bc9330;border:.4pt solid #bc9330;padding:0 .6mm;margin-left:.8mm;vertical-align:.3mm}
 .lvl.red{color:#8b2020}.lvl.amber{color:#6b4800}.lvl.green{color:#185c38}
-.sw{display:inline-block;width:2.4mm;height:2.4mm;margin-right:1.5mm;vertical-align:-.2mm}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:4mm 6mm}
-.chart{break-inside:avoid}.chart .ct{display:flex;justify-content:space-between;font-size:8.4pt;font-weight:600;margin-bottom:1mm}
+.sw{display:inline-block;width:2mm;height:2mm;margin-right:1.2mm;vertical-align:-.1mm}
+.charts{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm 4mm}
+.chart{break-inside:avoid}.chart .ct{display:flex;justify-content:space-between;font-size:7.4pt;font-weight:600;margin-bottom:.4mm}
 .chart .ct span{font-weight:500;color:#5a6e83}
+.chart svg{width:100%;height:auto;display:block}
 svg .ax{font-family:Inter,Helvetica,sans-serif;font-size:7px;fill:#7a8fa3}
-.legend{display:flex;flex-wrap:wrap;gap:1mm 4mm;font-size:7.4pt;color:#5a6e83;margin:1mm 0 3mm}
-.ev{border-left:2pt solid;padding:1.5mm 0 1.5mm 3mm;margin:0 0 2mm;break-inside:avoid}
-.ev-k{font-size:7pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ev-t{font-weight:600;font-size:9.6pt}.ev-b{color:#3a4d61}.ev-l{font-size:7.8pt;color:#15304e;margin-top:.8mm}
-.note{font-size:7.6pt;color:#5a6e83}
-.shots{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}.shot{break-inside:avoid}.shot img{width:100%;border:.6pt solid #c4cdd6;display:block}.shot div{font-size:7.6pt;font-weight:600;margin-top:1mm}
-.toc li{margin:.6mm 0}
-.disc{font-size:7.6pt;color:#5a6e83;border-top:.6pt solid #d9e0e7;padding-top:2mm;margin-top:4mm}
+.legend{display:flex;flex-wrap:wrap;gap:.6mm 3mm;font-size:6.8pt;color:#5a6e83;margin:.8mm 0 2mm}
+.cols2{column-count:2;column-gap:6mm}
+.ev{border-left:1.6pt solid;padding:.8mm 0 .8mm 2.4mm;margin:0 0 1.8mm;break-inside:avoid}
+.ev-k{font-size:6.2pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.ev-t{font-weight:600;font-size:8.4pt;line-height:1.3}.ev-b{color:#3a4d61;font-size:7.6pt}.ev-l{font-size:6.8pt;color:#15304e;margin-top:.5mm}
+.day{font-size:7pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#15304e;padding:.8mm 2mm;margin:0 0 1.5mm;break-after:avoid;column-span:none}
+.note{font-size:6.9pt;color:#5a6e83;line-height:1.35}
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm 5mm}.shot{break-inside:avoid}.shot img{width:100%;border:.5pt solid #c4cdd6;display:block}.shot div{font-size:7pt;font-weight:600;margin-top:.8mm}
+.meth p{font-size:7pt;line-height:1.35;margin-bottom:1mm}.meth h3{margin:1.6mm 0 .6mm}
+.disc{font-size:6.9pt;color:#5a6e83;border-top:.5pt solid #d9e0e7;padding-top:1.5mm;margin-top:3mm}
 </style></head><body>
 
-<div class="cover">
-  <div class="brand">Regime<span>Vector</span></div>
-  <div class="sub">Cross-asset regime state · Edition ${ED.n}</div>
-  <div class="meta">${esc(ED.dateLong)} · Day ${ED.day} · close ${esc(ED.dateShort)} · ${role} edition</div>
-  <div class="badge">${INTERNAL ? 'INTERNAL · NOT FOR DISTRIBUTION' : 'CLIENT EDITION · DESCRIPTIVE ANALYTICS · NOT INVESTMENT ADVICE'}</div>
-</div>
-
-<div class="grid2">
-  <div class="card"><div class="kick gold">Current regime</div><div class="regime">${esc(ED.regime)}</div>
-    <div class="muted">Tenure ${ED.tenure} sessions · since ${short(DATES[RUNS[RUNS.length - 1].from])}${INTERNAL && ED.weakest ? ` · weakest boundary ${esc(ED.weakest.name)} ${ED.weakest.bd.toFixed(3)}` : ''}</div>
-    ${INTERNAL ? `<div class="note">${esc(ED.internalStatus)}</div>` : ''}</div>
-  <div class="card" style="border-left-color:#15304e"><div class="kick">In this report</div>
-    <ol class="toc" style="margin:1mm 0 0;padding-left:4mm"><li>Edition summary</li><li>Regime dimensions and timeline</li><li>Cross-asset instruments (${rows.length})</li><li>Charts and regime behaviour</li><li>Transmission map</li><li>Events by theme</li><li>Research library</li>${screens.length ? '<li>Interface</li>' : ''}<li>Methodology and data</li></ol></div>
+<div class="band">
+  <div><div class="brand">Regime<span>Vector</span></div><div class="t1">Cross-asset regime state · Edition ${ED.n}</div></div>
+  <div class="right"><div class="t1">${esc(ED.dateLong)} · Day ${ED.day}</div><div class="t2">Close ${esc(ED.dateShort)} · ${role} edition</div>
+    <div class="badge">${INTERNAL ? 'INTERNAL · NOT FOR DISTRIBUTION' : 'CLIENT EDITION · NOT INVESTMENT ADVICE'}</div></div>
 </div>
 
 <h1>1 · Edition summary</h1>
-<div class="kick">${INTERNAL ? "Strategist's view" : "Today's macro view"}</div>
+<div class="row r37">
+  <div class="card"><div class="kick gold">Current regime</div><div class="regime">${esc(ED.regime)}</div>
+    <div class="muted" style="font-size:7.4pt">Tenure ${ED.tenure} sessions · since ${short(DATES[RUNS[RUNS.length - 1].from])}${INTERNAL && ED.weakest ? `<br>Weakest boundary ${esc(ED.weakest.name)} ${ED.weakest.bd.toFixed(3)}` : ''}</div>
+    ${INTERNAL ? `<div class="note" style="margin-top:.8mm">${esc(ED.internalStatus)}</div>` : ''}</div>
+  <div class="card" style="border-left-color:#15304e"><div class="kick">Scenario weights · ${esc(ED.scenarios.caption)}</div>
+    <div class="wbar">${ED.scenarios.cells.map((c, i) => `<div style="width:${c.v * 100}%;background:${i === top ? '#bc9330' : fills[i]}"></div>`).join('')}</div>
+    <div class="wl">${ED.scenarios.cells.map(c => `<div><span class="muted">${esc(c.name)}</span><b>${Math.round(c.v * 100)}%${c.chg ? ` <span class="muted" style="font-size:7pt;font-weight:500">${c.chg > 0 ? '+' : MINUS}${Math.abs(c.chg)}</span>` : ''}</b></div>`).join('')}</div>
+    <div class="note" style="margin-top:.8mm">Change in points vs the prior revision. Analyst-assigned, revised only on named catalysts, not calibrated.</div></div>
+</div>
+<div class="kick" style="margin-top:2.5mm">${INTERNAL ? "Strategist's view" : "Today's macro view"}</div>
 <div class="view">${esc(view)}</div>
+<div class="row r55" style="margin-top:2.5mm">
+  <div><h2 style="margin-top:0">Top market drivers</h2>
+    <table class="t keep"><tbody>${ED.drivers.map((d, i) => `<tr><td class="b" style="width:4mm;color:#15304e;vertical-align:top">${i + 1}</td><td><b>${esc(d.t)}</b><br><span class="muted">${esc(d.b)}</span></td></tr>`).join('')}</tbody></table>
+    <h2>Regime dimensions</h2>
+    <table class="t tight"><thead><tr><th>Dimension</th><th>Reading</th>${INTERNAL ? '<th class="num">Dist.</th>' : ''}<th>Data</th></tr></thead><tbody>
+    ${ED.dims.map(d => `<tr><td>${esc(d.name)}</td><td class="b">${tagCell(d)}</td>${INTERNAL ? `<td class="num" style="color:${levelColor[d.level] ?? '#0b0f1a'}">${d.bd.toFixed(3)}</td>` : ''}<td class="muted">${esc(d.data)}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="note" style="margin-top:.6mm">† Boundary-flagged: within 0.1 of a change in reading.</div></div>
+  <div><h2 style="margin-top:0">Headline levels · close ${esc(ED.dateShort)}</h2>${hl(headline)}</div>
+</div>
 
-<h2>Scenario weights</h2>
-<div class="wbar">${ED.scenarios.cells.map((c, i) => `<div style="width:${c.v * 100}%;background:${i === top ? '#bc9330' : fills[i]}"></div>`).join('')}</div>
-<div class="wl">${ED.scenarios.cells.map(c => `<div><span class="muted">${esc(c.name)}</span><b>${Math.round(c.v * 100)}%${c.chg ? ` <span class="muted" style="font-size:8pt;font-weight:500">${c.chg > 0 ? '+' : MINUS}${Math.abs(c.chg)}</span>` : ''}</b></div>`).join('')}</div>
-<p class="note">${esc(ED.scenarios.caption)}; change in points vs the prior revision. Weights are analyst-assigned, revised only on named catalysts, and not calibrated against outcomes.</p>
+<h1>2 · Cross-asset instruments <span class="h-meta">${rows.length} instruments</span></h1>
+<p class="note">Level at the ${esc(ED.dateShort)} close · D/D latest session · 1M / 3M over 21 / 63 editions · High, Low, Pos. (0% = low, 100% = high) and realised Vol over the full archive (annualised for prices; per-session s.d. for bp / pp series) · "as of" = carried forward · <span class="rv" style="margin-left:0">RV</span> derived RegimeVector analytic.</p>
+${instrumentTables()}
 
-<h2>Top market drivers</h2>
-<table class="t keep"><tbody>${ED.drivers.map((d, i) => `<tr><td class="b" style="width:5mm;color:#15304e">${i + 1}</td><td><b>${esc(d.t)}</b><br><span class="muted">${esc(d.b)}</span></td></tr>`).join('')}</tbody></table>
-
-<h2>Headline levels · close ${esc(ED.dateShort)}</h2>
-<table class="t"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th></tr></thead><tbody>
-${(() => { const ks = ['usy2', 'usy10', 'usy30', 'x_us2s10s', 'fed_hike_prob_dec', 'credit_hy_oas', 'spx', 'x_spx200', 'vix', 'dxy', 'usdcad', 'eurusd', 'wti', 'brent', 'gold', 'core_pce_yoy'].map(byKey).filter(Boolean);
-  const c = r => `<td>${esc(r.s)}</td><td class="num b">${esc(r.val)}</td><td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(r.asof ? 'as of ' + short(r.asof) : isStep(r) ? (r.freq === 'monthly' ? 'monthly' : 'policy') : r.chg ?? '—')}</td>`;
-  let out = ''; for (let i = 0; i < ks.length; i += 2) out += `<tr>${c(ks[i])}${ks[i + 1] ? c(ks[i + 1]) : '<td></td><td></td><td></td>'}</tr>`; return out; })()}
-</tbody></table>
-
-<section><h1>2 · Regime dimensions and timeline</h1>
-<table class="t"><thead><tr><th>Dimension</th><th>Reading</th>${INTERNAL ? '<th>Level</th><th class="num">Boundary dist.</th>' : ''}<th>Data</th></tr></thead><tbody>
-${ED.dims.map(d => `<tr><td>${esc(d.name)}</td><td class="b">${tagCell(d)}</td>${INTERNAL ? `<td style="color:${levelColor[d.level] ?? '#0b0f1a'}">${d.level}</td><td class="num">${d.bd.toFixed(3)}</td>` : ''}<td class="muted">${esc(d.data)}</td></tr>`).join('')}
-</tbody></table>
-<p class="note">† Boundary-flagged: the dimension sits within 0.1 of a change in reading. Edition ${ED.n}, ${esc(ED.dateShort)}.</p>
-<h2>Regime timeline · ${N} editions (${short(DATES[0])} – ${short(DATES[N - 1])})</h2>
+<div class="keep"><h1>3 · Regime timeline <span class="h-meta">${N} editions · ${short(DATES[0])} – ${short(DATES[N - 1])}</span></h1>
 ${regimeStrip()}
 <div class="legend">${bigRuns.map(r => `<span><span class="sw" style="background:${r.solid}"></span>${esc(r.name)}</span>`).join('')}</div>
-<table class="t small tight"><thead><tr><th>Published label (most recent first)</th><th class="num">From</th><th class="num">To</th><th class="num">Sessions</th></tr></thead><tbody>${runRows}</tbody></table>
-</section>
+<div class="row r2">${runTable(runs.slice(0, half))}${runTable(runs.slice(half))}</div></div>
 
-<section><h1>3 · Cross-asset instruments</h1>
-<p class="note">Level at the ${esc(ED.dateShort)} close; D/D is the latest session move; 1M / 3M are changes over 21 / 63 editions; High, Low, Position (0% = low, 100% = high) and realised Vol cover the full archive (Vol: annualised for prices, per-session standard deviation for bp / pp series). "as of" marks a value the edition carried forward; RV marks a derived RegimeVector analytic. Units: yields and spreads in bp, probabilities and percent levels in pp, prices in %.</p>
-${instrumentTables()}
-</section>
-
-<section><h1>4 · Charts and regime behaviour</h1>
-<p class="note">Full archive; the ribbon under each plot is the published regime label for each edition (colours as in section 2). Gold marker and tag: latest level.</p>
+<h1>4 · Charts, regime behaviour and transmission</h1>
+<p class="note">Full archive. Ribbon under each plot: published regime label per edition (colours as in section 3). Gold marker and tag: latest level.</p>
 <div class="charts">${KEY_CHARTS.map(byKey).filter(Boolean).map(r => `<div class="chart"><div class="ct">${esc(r.s)}<span>${esc(r.val)}${r.chg && !r.asof ? ' · ' + esc(r.chg) : r.asof ? ' · as of ' + short(r.asof) : ''}</span></div>${chart(r)}</div>`).join('')}</div>
-<div class="keep"><h2>Behaviour by regime</h2>
-${regimeBehaviour()}
-<p class="note">Descriptive: each session's move is grouped by the regime label published on that edition. Labels with fewer than seven sessions are omitted. Not a forecast.</p></div>
-</section>
+<div class="keep"><h2>Behaviour by regime <span class="h-meta">average move per session · descriptive, not a forecast</span></h2>
+${regimeBehaviour()}</div>
+<div class="keep"><h2>Transmission map <span class="h-meta">correlation of daily changes, last ${D.transmission.window} editions</span></h2>
+${transmission()}</div>
 
-<section><h1>5 · Transmission map</h1>
-${transmission()}
-</section>
+<h1>5 · Events by theme <span class="h-meta">${alerts.length} items · ${themes.map(t => esc(t.short)).join(' · ')}</span></h1>
+<p class="note">Mid-day orientation notes are offered only on their publication day; none was issued for ${esc(ED.dateShort)}.</p>
+<div class="cols2">${eventsSection()}</div>
 
-<section><h1>6 · Events by theme</h1>
-<p class="note">Themes: ${themes.map(t => esc(t.name)).join(' · ')}. Mid-day orientation notes are offered only on their publication day; none was issued for ${esc(ED.dateShort)}.</p>
-${eventsSection()}
-</section>
-
-<section><h1>7 · Research library</h1>
-<table class="t small"><thead><tr><th>Programme</th><th>Title</th><th>Code</th><th class="num">Date</th><th class="num">Pages</th><th>Surface</th></tr></thead><tbody>
-${docs.map(d => `<tr><td>${esc(research.programmes[d.kind])}</td><td>${esc(d.title)}</td><td>${esc(d.code)}</td><td class="num">${esc(d.date)}</td><td class="num">${D.pdfMeta[d.file]?.pages ?? (/\.html$/.test(d.file) ? 'interactive' : '—')}</td><td class="muted">${esc(d.pages)}${d.internal ? ' · Internal' : ''}</td></tr>`).join('')}
+<h1>6 · Research library <span class="h-meta">${docs.length} editions</span></h1>
+<table class="t tight"><thead><tr><th>Programme</th><th>Title</th><th>Code</th><th class="num">Date</th><th class="num">Pp.</th><th>Surface</th></tr></thead><tbody>
+${docs.map(d => `<tr><td class="muted">${esc(research.programmes[d.kind])}</td><td>${esc(d.title)}</td><td>${esc(d.code)}</td><td class="num">${esc(d.date)}</td><td class="num">${D.pdfMeta[d.file]?.pages ?? (/\.html$/.test(d.file) ? 'int.' : '—')}</td><td class="muted">${esc(d.pages)}${d.internal ? ' · Internal' : ''}</td></tr>`).join('')}
 </tbody></table>
-</section>
 
-${screens.length ? `<section><h1>8 · Interface</h1><p class="note">${role} view of the RegimeVector app at the ${esc(ED.dateShort)} close (web build, phone width).</p>
-<div class="shots">${screens.map(s => `<div class="shot"><img src="${s.src}" alt="${esc(s.label)}"><div>${esc(s.label)}</div></div>`).join('')}</div></section>` : ''}
-
-<section><h1>${screens.length ? 9 : 8} · Methodology and data</h1>
-<h3>Source</h3>
-<p>RegimeVector macro archive <b>${esc(D.generatedFrom)}</b>${sha ? `, SHA-256 <span style="font-family:monospace;font-size:7.6pt">${sha}</span>` : ''}; ${N} editions from ${esc(D.archive.first)} to ${esc(ED.date)}. Editorial content (drivers, events, research catalogue) from the app's content manifests for this edition.</p>
+<div class="meth"><h1>7 · Methodology and data</h1>
+<div class="row r2 keep">
+<div><h3 style="margin-top:0">Source</h3>
+<p>RegimeVector macro archive <b>${esc(D.generatedFrom)}</b>; ${N} editions, ${esc(D.archive.first)} to ${esc(ED.date)}.${sha ? ` SHA-256 <span style="font-family:monospace;font-size:6.4pt;word-break:break-all">${sha}</span>.` : ''} Drivers, events and the research catalogue from the app's content manifests.</p>
 <h3>Classification</h3>
-<p>RegimeVector classifies the macro state daily across seven dimensions under a fixed, deterministic ruleset. Scenario weights are revised only on named, corroborated catalysts; regime labels change only on realised transmission. Readings are rule-based classification robustness, not statistical confidence.</p>
-<h3>Instruments and units</h3>
-<p>Values are carried forward across an edition that did not re-observe a field, but nothing is filled before an instrument's first observation. Derived (RV) instruments are computed edition by edition from archive fields: ${rows.filter(r => r.derived).map(r => `${esc(r.s)} (${esc((r.note ?? '').replace(/\.$/, ''))})`).join('; ')}.</p>
-<p>Monthly releases and policy rates are step series and carry no per-session statistics. Transmission correlations use differences for yield and spread nodes and percent changes for prices.</p>
+<p>Seven dimensions classified daily under a fixed, deterministic ruleset. Scenario weights move only on named, corroborated catalysts; labels change only on realised transmission. Readings are rule-based classification robustness, not statistical confidence.</p></div>
+<div><h3 style="margin-top:0">Instruments and units</h3>
+<p>Values carry forward across an edition that did not re-observe a field; nothing is filled before an instrument's first observation. Monthly releases and policy rates are step series without per-session statistics. Transmission correlations use differences for yield and spread nodes, percent changes for prices.</p>
 <h3>Companion files</h3>
-<p>RegimeVector_Edition${ED.n}_${ED.date}_instruments.csv (every instrument with the statistics in section 3) and RegimeVector_Edition${ED.n}_${ED.date}_series.csv (one row per edition, one column per instrument, with the published regime label).</p>
-<div class="disc">Research content is interpretive commentary on a classified state. It is not investment advice, an offer or a solicitation. All statistics are descriptive. ${INTERNAL ? 'INTERNAL edition: includes internal views, boundary distances, internal research and internal events; not for distribution.' : 'Client edition: internal views, boundary distances, internal research and internal events are excluded. Weekly positioning is omitted while its data is illustrative.'} © ${ED.date.slice(0, 4)} RegimeVector.</div>
-</section>
+<p>…_instruments.csv: every instrument with the section 2 statistics. …_series.csv: one row per edition, one column per instrument, with the published regime label.</p></div>
+</div>
+<div class="keep"><h3>Derived RV analytics</h3>
+<p style="font-size:6.8pt">${rows.filter(r => r.derived).map(r => `<b>${esc(r.s)}</b> ${esc((r.note ?? '').replace(/\.$/, ''))}`).join(' · ')}.</p>
+<div class="disc">Research content is interpretive commentary on a classified state. It is not investment advice, an offer or a solicitation. All statistics are descriptive. ${INTERNAL ? 'INTERNAL edition: includes internal views, boundary distances, internal research and internal events; not for distribution.' : 'Client edition: internal views, boundary distances, internal research and internal events are excluded. Weekly positioning is omitted while its data is illustrative.'} © ${ED.date.slice(0, 4)} RegimeVector.</div></div>
+</div>
+
+${screens.length ? `<div class="keep"><h1>Appendix · Interface <span class="h-meta">${role} view at the ${esc(ED.dateShort)} close · web build, phone width</span></h1>
+<div class="shots">${screens.map(s => `<div class="shot"><img src="${s.src}" alt="${esc(s.label)}"><div>${esc(s.label)}</div></div>`).join('')}</div></div>` : ''}
 </body></html>`;
 }
 

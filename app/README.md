@@ -97,7 +97,7 @@ This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, t
 8. Interface screenshots
 9. Methodology and data provenance
 
-**Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF is about 1 MB. The report reads the same generated data as the app, so its figures match the interface.
+**Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF runs to 6–7 pages and about 0.7 MB. The report reads the same generated data as the app, so its figures match the interface.
 
 **Client edition:** excludes the strategist view, boundary distances, internal research, internal events and the Desk ops theme. Positioning is omitted from both editions while its data is illustrative.
 
