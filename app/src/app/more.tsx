@@ -2,17 +2,18 @@ import { router, type Href } from 'expo-router';
 import { Text, View } from 'react-native';
 import { ChevronRight } from '@/components/icons';
 import { Screen, Tap } from '@/components/ui';
-import { ISSUERS, POSITIONING } from '@/data';
+import { POSITIONING, visibleIssuers } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED } from '@/theme';
 
 export default function More() {
   const watch = useApp(s => s.watch);
   const saved = useApp(s => s.saved);
+  const issuers = visibleIssuers(useApp(s => s.role)).length;
   const links: { t: string; b: string; href: Href }[] = [
     { t: 'Watchlist', b: `${watch.length} instruments · ${saved.length} saved editions`, href: '/watchlist' },
     { t: 'Positioning', b: `Weekly book, week ending ${POSITIONING.weekEnding.replace(/ \d{4}$/, '')}`, href: '/positioning' },
-    { t: 'Single-name research', b: `SR-SN 1.0 · ${ISSUERS.length} issuers`, href: '/names' },
+    { t: 'Single-name research', b: `SR-SN 1.0 · ${issuers} issuers`, href: '/names' },
     { t: 'Settings', b: 'Role view, notifications, account', href: '/settings' },
   ];
   return (

@@ -23,7 +23,8 @@ The app needs no backend. Sign-in is mocked: any valid email and a password of 6
 | `/markets` | Regime dimensions, cross-asset close, transmission map |
 | `/asset?group=&sym=` | Drill-down chart over the whole archive with regime shading, 1M/3M/All, watch stars |
 | `/research` | Library grouped by programme, with filters |
-| `/reader/[id]` | Reader: daily summary, full edition (PDF pages or interactive special), zoom, save |
+| `/reader/[id]` | Reader: daily summary, fit-width edition pages, save |
+| `/viewer/[id]` | Full-screen edition: zoom, text selection, page counter |
 | `/events` | Event feed with unread state and the mid-day note |
 | `/more`, `/watchlist`, `/positioning`, `/names`, `/name/[tk]`, `/search`, `/settings` | Secondary screens |
 
@@ -52,7 +53,12 @@ The script fails loudly if a listed brief file is missing or if content refers t
 
 ## Reader
 
-PDFs are bundled with the app and rendered page by page with **pdf.js 3.11.174**, the same build the prototype used. It is vendored into `assets/pdfjs`, so the reader **works offline**; the prototype loaded it from a CDN. Native renders through `react-native-webview`, sized to its content inside the screen's scroll; web uses a `srcdoc` iframe. The E4 and E5 specials run as interactive pages, sandboxed to scripts only on web. On native, links in them open in the system browser.
+Editions are bundled with the app and rendered with **pdf.js 3.11.174**, vendored in `assets/pdfjs` so the reader works offline.
+
+- **Reader (`/reader/[id]`)** shows the edition's pages at the phone's width, drawn at the screen's full resolution. Page count and page shapes are measured at build time by `build-data`, so the pages take their final size before they draw and nothing jumps while scrolling. Tapping a page, or **Read full screen**, opens the viewer at that page.
+- **Viewer (`/viewer/[id]?page=n`)** is full screen with the tab bar hidden. The document scrolls on its own and draws pages as they come into view. **−/+** step through Fit, 125%, 150%, 200%, 250%, 300% and 400%, and each step redraws the pages sharp rather than stretching them; wider pages pan sideways. Text is selectable, and the bar shows "Page X of N" as you scroll. On phones, pinch-to-zoom also works.
+- **Interactive specials (E4, E5)** are full-page layouts. The Reader shows a preview with **Open interactive edition**, and they run full screen in the viewer: sandboxed to scripts only on web; on native, links open in the system browser.
+- **Research list rows** show each edition's page count, or "Interactive".
 
 ## Roles
 
@@ -66,7 +72,7 @@ Deep links to internal content redirect when the role is **Client**.
 
 ## Persistence
 
-`zustand` with AsyncStorage (localStorage on web) keeps the session, role, watchlist, saved editions, read events, notification toggles, reader zoom and chart display.
+`zustand` with AsyncStorage (localStorage on web) keeps the session, role, watchlist, saved editions, read events, notification toggles and chart display.
 
 ## Not yet real
 

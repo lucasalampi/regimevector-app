@@ -1,5 +1,5 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ export default function RootLayout() {
   const hydrated = useHydrated();
   const authed = useApp(s => s.authed);
   const ready = fontsLoaded && hydrated;
+  // The full-screen edition viewer gives the tab bar's space to the document.
+  const fullScreen = usePathname().startsWith('/viewer');
 
   return (
     <SafeAreaProvider>
@@ -34,6 +36,7 @@ export default function RootLayout() {
                   <Stack.Screen name="more" options={{ animation: 'none' }} />
                   <Stack.Screen name="asset" />
                   <Stack.Screen name="reader/[id]" />
+                  <Stack.Screen name="viewer/[id]" options={{ animation: 'fade_from_bottom' }} />
                   <Stack.Screen name="positioning" />
                   <Stack.Screen name="watchlist" />
                   <Stack.Screen name="names" />
@@ -44,7 +47,7 @@ export default function RootLayout() {
               </Stack>
             ) : null}
           </View>
-          {ready && authed ? <TabBar /> : null}
+          {ready && authed && !fullScreen ? <TabBar /> : null}
         </View>
       </View>
     </SafeAreaProvider>

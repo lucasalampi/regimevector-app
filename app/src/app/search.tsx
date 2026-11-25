@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { openDoc } from '@/components/edition';
 import { Screen, Tap } from '@/components/ui';
-import { ALL_ROWS, ISSUERS, visibleDocs } from '@/data';
+import { ALL_ROWS, visibleDocs, visibleIssuers } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
@@ -16,8 +16,7 @@ export default function Search() {
   const pool = [
     ...ALL_ROWS.map(r => ({ kind: r.group.toUpperCase(), label: r.s, sub: r.val + (r.chg ? ' · ' + r.chg : ''), open: () => router.push({ pathname: '/asset', params: { group: r.gk, sym: r.s } }) })),
     ...visibleDocs(role).map(d => ({ kind: 'EDITION', label: d.title, sub: `${d.code} · ${d.date}`, open: () => openDoc(d) })),
-    ...ISSUERS.filter(n => role === 'Internal' || n.status !== 'DRAFT')
-      .map(n => ({ kind: 'ISSUER', label: `${n.tk} · ${n.co}`, sub: `${n.ed} · ${n.status}`, open: () => router.push({ pathname: '/name/[tk]', params: { tk: n.tk } }) })),
+    ...visibleIssuers(role).map(n => ({ kind: 'ISSUER', label: `${n.tk} · ${n.co}`, sub: `${n.ed} · ${n.status}`, open: () => router.push({ pathname: '/name/[tk]', params: { tk: n.tk } }) })),
   ];
   const results = needle ? pool.filter(r => `${r.label} ${r.sub} ${r.kind}`.toLowerCase().includes(needle)).slice(0, 12) : [];
 

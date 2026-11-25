@@ -1,13 +1,12 @@
 import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 import { blueprint, Screen, Tap } from '@/components/ui';
-import { ISSUERS } from '@/data';
+import { visibleIssuers } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED } from '@/theme';
 
 export default function Names() {
-  const internal = useApp(s => s.role) === 'Internal';
-  const names = ISSUERS.filter(x => internal || x.status !== 'DRAFT');
+  const names = visibleIssuers(useApp(s => s.role));
   return (
     <Screen pad={[14, 18, 28]} gap={0}>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>

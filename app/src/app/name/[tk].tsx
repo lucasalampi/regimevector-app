@@ -2,15 +2,15 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 import { openDoc } from '@/components/edition';
 import { blueprint, PrimaryButton, Screen } from '@/components/ui';
-import { docById, ED, ISSUERS } from '@/data';
+import { docById, ED, visibleIssuers } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED } from '@/theme';
 
 export default function Issuer() {
   const { tk } = useLocalSearchParams<{ tk: string }>();
   const role = useApp(s => s.role);
-  const nm = ISSUERS.find(x => x.tk === tk);
-  if (!nm || (nm.status === 'DRAFT' && role !== 'Internal')) return <Redirect href="/names" />;
+  const nm = visibleIssuers(role).find(x => x.tk === tk);
+  if (!nm) return <Redirect href="/names" />;
   const doc = nm.doc ? docById(nm.doc) : undefined;
   const canOpen = doc && (!doc.internal || role === 'Internal');
   const facts = [

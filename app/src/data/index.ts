@@ -48,7 +48,12 @@ export const POSITIONING = positioning as unknown as {
 export const ALL_ROWS = GROUPS.flatMap(g => g.rows.map(r => ({ ...r, gk: g.id, group: g.name })));
 export type FlatRow = (typeof ALL_ROWS)[number];
 
+/** Issuers whose edition is internal stay hidden from Client. */
+export const visibleIssuers = (role: Role) => ISSUERS.filter(i => role === 'Internal' || !(i.doc && DOCS.find(d => d.id === i.doc)?.internal));
 export const visibleDocs = (role: Role) => DOCS.filter(d => role === 'Internal' || !d.internal);
 export const visibleAlerts = (role: Role) => ALERTS.filter(a => role === 'Internal' || !a.internal);
 export const docById = (id: string) => DOCS.find(d => d.id === id);
+const PDF_META = (edition as unknown as { pdfMeta: Record<string, { pages: number; aspects: number[] }> }).pdfMeta ?? {};
+/** Build-time page count and page shapes for a PDF edition. */
+export const pdfMeta = (d: Pick<Doc, 'file'>) => PDF_META[d.file];
 export const docFormat = (d: Doc) => (/\.pdf$/i.test(d.file) ? 'pdf' : /\.html?$/i.test(d.file) ? 'html' : 'other');

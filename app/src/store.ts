@@ -16,8 +16,6 @@ interface AppState {
   saved: string[];
   read: string[];
   notif: Record<NotifKey, boolean>;
-  /** Reader zoom, 16 = 100%. */
-  fs: number;
   chartStyle: ChartStyle;
   mapStyle: MapStyle;
   signIn: (email: string, role: Role) => void;
@@ -27,7 +25,6 @@ interface AppState {
   toggleSaved: (id: string) => void;
   markRead: (id: string) => void;
   toggleNotif: (k: NotifKey) => void;
-  zoom: (dir: 1 | -1) => void;
   setChartStyle: (s: ChartStyle) => void;
   setMapStyle: (s: MapStyle) => void;
 }
@@ -44,7 +41,6 @@ export const useApp = create<AppState>()(
       saved: [],
       read: [],
       notif: { daily: true, event: true, regime: true, pos: false },
-      fs: 16,
       chartStyle: 'Bands',
       mapStyle: 'Matrix',
       // Mock auth: any valid email + 6-char password. Replace with the real identity provider.
@@ -55,11 +51,14 @@ export const useApp = create<AppState>()(
       toggleSaved: id => set(st => ({ saved: toggle(st.saved, id) })),
       markRead: id => set(st => (st.read.includes(id) ? st : { read: [...st.read, id] })),
       toggleNotif: k => set(st => ({ notif: { ...st.notif, [k]: !st.notif[k] } })),
-      zoom: dir => set(st => ({ fs: Math.max(16, Math.min(40, st.fs + dir * 4)) })),
       setChartStyle: chartStyle => set({ chartStyle }),
       setMapStyle: mapStyle => set({ mapStyle }),
     }),
-    { name: 'rv-app', version: 1, storage: createJSONStorage(() => AsyncStorage) },
+    {
+      name: 'rv-app', version: 2, storage: createJSONStorage(() => AsyncStorage),
+      // v1 kept a reader font/zoom size; zoom now lives in the full-screen viewer.
+      migrate: s => { const { fs: _fs, ...rest } = (s ?? {}) as Record<string, unknown>; return rest as unknown as AppState; },
+    },
   ),
 );
 

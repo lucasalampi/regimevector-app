@@ -16,7 +16,7 @@ export const TABS = [
 
 const TITLES: Record<string, string> = {
   '/': 'RegimeVector', '/markets': 'Markets', '/research': 'Research', '/events': 'Events', '/more': 'More',
-  '/asset': 'Drill-down', '/reader': 'Reader', '/positioning': 'Positioning', '/watchlist': 'Watchlist',
+  '/asset': 'Drill-down', '/reader': 'Reader', '/viewer': 'Edition', '/positioning': 'Positioning', '/watchlist': 'Watchlist',
   '/names': 'Single-name', '/name': 'Issuer', '/search': 'Search', '/settings': 'Settings',
 };
 
