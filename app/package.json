@@ -36,7 +36,8 @@
     "web": "expo start --web",
     "build:data": "node scripts/build-data.mjs",
     "typecheck": "tsc --noEmit",
-    "export:web": "expo export --platform web"
+    "export:web": "expo export --platform web",
+    "export:edition": "node scripts/export-edition.mjs && node scripts/export-edition.mjs --internal"
   },
   "private": true
 }

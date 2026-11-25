@@ -1,0 +1,44 @@
+group,section,instrument,key,derived,level,unit_of_change,dd_change,as_of,chg_1m,chg_3m,archive_high,archive_low,position_in_range,realised_vol,vol_basis,coverage_from,frequency,note
+Rates,Treasury curve,US 2Y,usy2,no,4.61,bp,-2bp,,-6.0000,28.5000,4.92,3.98,0.6702,5.6291,per-session bp,2026-05-21,daily,
+Rates,Treasury curve,US 10Y,usy10,no,4.85,bp,-6bp,,-20.0000,13.0000,5.31,4.38,0.5054,4.8474,per-session bp,2026-05-21,daily,
+Rates,Treasury curve,US 30Y,usy30,no,5.24,bp,-6bp,,-13.0000,3.0000,5.67,4.86,0.4691,4.2585,per-session bp,2026-05-21,daily,
+Rates,Treasury curve,2s10s,x_us2s10s,yes,24,bp,-4bp,,-14.0000,-15.5000,53,20.6,0.1049,3.3801,per-session bp,2026-05-21,daily,US 10Y minus US 2Y.
+Rates,Treasury curve,10s30s,x_us10s30s,yes,39,bp,0bp,,7.0000,-10.0000,59,28.8,0.3377,1.8459,per-session bp,2026-05-21,daily,US 30Y minus US 10Y.
+Rates,Treasury curve,2s10s30s fly,x_usfly,yes,-15,bp,-4bp,,-21.0000,-5.5000,12,-20,0.1563,2.9816,per-session bp,2026-05-21,daily,2 × 10Y − 2Y − 30Y. Positive = belly cheap to the wings.
+Rates,Policy,Fed funds,fed_funds,no,4,bp,,,0.0000,25.0000,4,3.75,1.0000,,per-session bp,2026-05-21,policy,
+Rates,Policy,Dec 25bp hike,fed_hike_prob_dec,no,98,pp,+3.0pp,,13.0000,41.0000,100,20,0.9750,8.6742,per-session pp,2026-05-21,daily,
+Rates,Policy,2Y − Fed funds,x_us2yff,yes,61,bp,-2bp,,-6.0000,3.5000,93,23,0.5429,5.8589,per-session bp,2026-05-21,daily,Front end over the policy rate: roughly what the market prices beyond the current setting.
+Rates,Credit,HY OAS (24 Nov),credit_hy_oas,no,372,bp,,2026-11-24,58.0000,112.0000,376,260,0.9655,5.7033,per-session bp,2026-05-21,daily,
+Rates,Credit,IG OAS,credit_ig_oas,no,98,bp,,2026-11-24,12.0000,19.0000,98,73,1.0000,1.0817,per-session bp,2026-05-21,daily,
+Rates,Credit,CCC OAS,credit_ccc_oas,no,1405,bp,,2026-11-24,98.0000,379.0000,1405,935,1.0000,10.4768,per-session bp,2026-05-21,daily,
+Rates,Credit,HY − IG,x_hyig,yes,274,bp,,2026-11-24,46.0000,93.0000,278,181,0.9588,5.0009,per-session bp,2026-05-21,daily,High-yield over investment-grade option-adjusted spread.
+Rates,Credit,HYG (HY ETF),credit_proxy_hyg,no,76.52,%,+0.12%,,-1.3790,-4.0381,80.31,76.33,0.0477,4.0167,annualised %,2026-05-21,daily,
+Rates,Canada,Canada 2Y,ca2y,no,3.24,bp,,2026-11-24,-17.0000,23.0000,3.41,3.01,0.5750,5.6331,per-session bp,2026-09-01,daily,
+Rates,Canada,Canada 10Y,ca10y,no,3.67,bp,,2026-11-24,-20.0000,-8.0000,3.99,3.63,0.1111,4.7353,per-session bp,2026-09-01,daily,
+Rates,Canada,Canada 2s10s,ca_2s10s,no,43,bp,,2026-11-24,-3.0000,-31.0000,74,43,0.0000,2.3685,per-session bp,2026-09-01,daily,
+FX,Dollar,DXY,dxy,no,103.71,%,-0.10%,,1.4874,4.0200,104.32,98.787,0.8898,4.8732,annualised %,2026-05-21,daily,
+FX,Majors,EURUSD,eurusd,no,1.09798,%,+0.13%,,-1.5794,-5.2085,1.16791,1.09037,0.0981,4.9350,annualised %,2026-05-21,daily,
+FX,Majors,USDJPY,usdjpy,no,159.20102,%,-0.02%,,0.7769,-0.5398,163.9,153.527,0.5470,7.2639,annualised %,2026-05-22,daily,
+FX,Majors,GBPUSD,gbpusd,no,1.31227,%,+0.04%,,-1.5278,-2.6802,1.35469,1.30353,0.1708,5.6146,annualised %,2026-09-02,daily,
+FX,Majors,USDCAD,usdcad,no,1.42054,%,-0.46%,,1.5165,2.1604,1.43712,1.376,0.7287,4.4697,annualised %,2026-05-21,daily,
+FX,Differentials,Canada − US 2Y,ca_us_2y,no,-139,bp,,2026-11-24,-13.0000,-1.0000,-124,-162,0.6053,4.5442,per-session bp,2026-09-01,daily,Canada 2Y minus US 2Y: the front-end rate gap behind USDCAD.
+FX,Differentials,Canada − US 10Y,ca_us_10y,no,-124,bp,,2026-11-24,-6.0000,-20.0000,-98,-138,0.3500,3.0538,per-session bp,2026-09-01,daily,Canada 10Y minus US 10Y.
+FX,Differentials,Fed − BoC policy,x_fedboc,yes,150,bp,,,0.0000,0.0000,175,150,0.0000,,per-session bp,2026-05-21,policy,Fed funds minus the Bank of Canada rate.
+Equities,Indices,S&P 500,spx,no,7182.78,%,-0.25%,,-7.2469,-6.8282,7819.33,6910.39,0.2997,16.6445,annualised %,2026-05-21,daily,
+Equities,Indices,Nasdaq,nasdaq,no,23585.8,%,-0.62%,,-11.1641,-10.6680,27599.79,22617.73,0.1943,24.1307,annualised %,2026-05-21,daily,
+Equities,Indices,Dow,dow,no,50182.95,%,+0.33%,,-4.3681,-6.3040,54320.7,48147.33,0.3297,14.7516,annualised %,2026-05-21,daily,
+Equities,Indices,Russell 2000,russell2k,no,2704.06,%,+0.71%,,-4.4674,-9.0247,3068.42,2581.79,0.2513,18.4286,annualised %,2026-05-22,daily,
+Equities,Indices,TSX,tsx,no,34179.99,%,+0.64%,,-5.7496,-6.4943,36957.6,33189.9,0.2628,15.0724,annualised %,2026-05-22,daily,
+Equities,Volatility,VIX,vix,no,28.29,%,+7.32%,,67.2975,96.0499,35.89,14.21,0.6494,169.5887,annualised %,2026-05-21,daily,
+Equities,Market structure,S&P vs 200-day,x_spx200,yes,-2.245443,pp,-0.3pp,,-8.3102,-10.6281,11.325707,-5.861077,0.2104,1.0793,per-session pp,2026-05-21,daily,S&P 500 against its 200-day average. The Market Structure dimension reads this line.
+Equities,Market structure,S&P from 52w high,x_spxdd,yes,-8.140723,pp,-0.2pp,,-7.1771,-6.9892,0,-11.62427,0.2997,0.9858,per-session pp,2026-05-21,daily,Drawdown from the 52-week high.
+Equities,Market structure,Russell 2000 / S&P,x_rtyspx,yes,97.948914,%,+0.97%,,2.9967,-2.3574,106.122236,91.995968,0.4214,10.4576,annualised %,2026-05-22,daily,"Small caps relative to the S&P 500, rebased to 100 at the start of the archive."
+Equities,Market structure,Nasdaq / Dow,x_ndxdow,yes,89.886979,%,-0.95%,,-7.1064,-4.6576,102.896638,89.84195,0.0034,17.3197,annualised %,2026-05-21,daily,"Growth-heavy Nasdaq relative to the Dow, rebased to 100."
+Inflation,Prints,CPI YoY,cpi_yoy,no,3.7,pp,,,0.0000,0.3000,4.2,3.4,0.3750,,per-session pp,2026-05-21,monthly,
+Inflation,Prints,Core CPI YoY,core_cpi_yoy,no,2.6,pp,,,0.0000,0.1000,2.9,2.4,0.4000,,per-session pp,2026-05-21,monthly,
+Inflation,Prints,Core PCE YoY,core_pce_yoy,no,3.3,pp,,,0.3000,0.0000,3.4,3,0.7500,,per-session pp,2026-05-21,monthly,
+Inflation,Prints,PPI YoY,ppi_yoy,no,6.3,pp,,,0.0000,-0.2000,6.5,5.4,0.8182,,per-session pp,2026-05-21,monthly,
+Inflation,Prints,ISM Prices,ism_prices,no,75.2,pt,,,-2.7000,-6.9000,84.6,75.2,0.0000,,per-session pt,2026-05-21,monthly,
+Inflation,Commodities,WTI reference,wti,no,84.88,%,+2.35%,,-18.7362,2.3637,105.83,67.2,0.4577,49.6172,annualised %,2026-05-21,daily,
+Inflation,Commodities,Brent Jan,brent,no,94.61,%,+3.51%,,-15.2544,7.5358,116.72,70.8,0.5185,48.5221,annualised %,2026-05-21,daily,
+Inflation,Commodities,Gold,gold,no,3547.53,%,-0.25%,,-12.8415,-20.4360,4679.91,3520.57,0.0233,26.6748,annualised %,2026-05-21,daily,

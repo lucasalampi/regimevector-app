@@ -77,6 +77,32 @@ A value the latest edition did not re-observe shows **"as of <date>"** instead o
 
 The script fails loudly if a listed brief file is missing or if content refers to an unknown document id.
 
+## Edition report (portable PDF + CSV)
+
+```bash
+npm run export:web        # optional: interface screenshots come from dist/
+npm run export:edition    # writes ../exports/
+```
+
+This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, together with the CSV companions `_instruments.csv` and `_series.csv`.
+
+**What's in the PDFs:**
+1. Edition summary
+2. Regime dimensions and timeline
+3. All instruments, with D/D, 1M and 3M changes, range, position, volatility and sparkline
+4. Charts and behaviour by regime
+5. Transmission map
+6. Events by theme
+7. Research index
+8. Interface screenshots
+9. Methodology and data provenance
+
+**Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF is about 1 MB. The report reads the same generated data as the app, so its figures match the interface.
+
+**Client edition:** excludes the strategist view, boundary distances, internal research, internal events and the Desk ops theme. Positioning is omitted from both editions while its data is illustrative.
+
+**Requirement:** Playwright with Chromium (`npm i -D playwright && npx playwright install chromium`).
+
 ## Events and the mid-day note
 
 `content/events.json` holds client **themes** (id, name, colour, tracked instrument; `internal` themes are hidden from Client) and **alerts** (`theme`, ISO `date`, `type`, `links` to instruments).
