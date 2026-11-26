@@ -751,24 +751,450 @@
           "dp": 1,
           "freq": "monthly",
           "sub": "Prints"
-        },
+        }
+      ]
+    },
+    {
+      "id": "commodities",
+      "name": "Commodities",
+      "rows": [
         {
           "label": "WTI reference",
           "key": "wti",
           "fmt": "index",
-          "sub": "Commodities"
+          "sub": "Energy"
         },
         {
           "label": "Brent Jan",
           "key": "brent",
           "fmt": "index",
-          "sub": "Commodities"
+          "sub": "Energy"
+        },
+        {
+          "label": "Henry Hub gas",
+          "key": "cmd_snap_hh",
+          "fmt": "index",
+          "note": "US natural gas, $/MMBtu. OilPriceAPI market snapshot captured each evening; in the archive from 9 Nov.",
+          "sub": "Energy"
+        },
+        {
+          "label": "TTF gas (€/MWh)",
+          "key": "cmd_snap_ttf_eur",
+          "fmt": "index",
+          "note": "European benchmark gas. OilPriceAPI market snapshot captured each evening; in the archive from 9 Nov.",
+          "sub": "Energy"
+        },
+        {
+          "label": "Hormuz disruption",
+          "key": "hormuz_disruption_pct",
+          "fmt": "prob",
+          "dp": 1,
+          "freq": "policy",
+          "note": "Archive estimate of Strait of Hormuz flow disruption, % of normal; revised as evidence arrives, so it draws as steps. Full archive history.",
+          "sub": "Energy"
+        },
+        {
+          "label": "Deal probability",
+          "key": "deal_probability_pct",
+          "fmt": "prob",
+          "freq": "policy",
+          "note": "Archive probability of a negotiated settlement. Revised irregularly; drawn as steps. Full archive history.",
+          "sub": "Energy"
         },
         {
           "label": "Gold",
           "key": "gold",
           "fmt": "index",
-          "sub": "Commodities"
+          "sub": "Metals"
+        },
+        {
+          "label": "Silver",
+          "key": "cmd_silver_spot",
+          "fmt": "index",
+          "note": "Spot silver, $/oz (EODHD XAG); in the archive from 9 Nov.",
+          "sub": "Metals"
+        },
+        {
+          "label": "Copper ($/lb)",
+          "key": "cmd_snap_copper",
+          "fmt": "index",
+          "note": "COMEX copper. OilPriceAPI market snapshot captured each evening; in the archive from 9 Nov.",
+          "sub": "Metals"
+        },
+        {
+          "label": "Broad commodities (PDBC)",
+          "key": "x_cbroad",
+          "fmt": "index",
+          "expr": {
+            "op": "basket",
+            "keys": [
+              "cmd_px_pdbc"
+            ]
+          },
+          "note": "Diversified commodity ETF (PDBC) rebased to 100 = 9 Nov close: the benchmark for the sleeve relatives.",
+          "sub": "Sleeves"
+        },
+        {
+          "label": "Energy sleeve",
+          "key": "x_cenergy",
+          "fmt": "index",
+          "expr": {
+            "op": "basket",
+            "keys": [
+              "cmd_px_uso",
+              "cmd_px_bno",
+              "cmd_px_ung"
+            ]
+          },
+          "note": "Equal-weight energy sleeve (USO, BNO, UNG), compounded from daily ETF returns; 100 = 9 Nov close. Membership as published by the archive commodity layer (CM-1.1).",
+          "sub": "Sleeves"
+        },
+        {
+          "label": "Precious sleeve",
+          "key": "x_cprecious",
+          "fmt": "index",
+          "expr": {
+            "op": "basket",
+            "keys": [
+              "cmd_px_gld",
+              "cmd_px_slv",
+              "cmd_px_pplt",
+              "cmd_px_pall"
+            ]
+          },
+          "note": "Equal-weight precious-metals sleeve (GLD, SLV, PPLT, PALL), compounded from daily ETF returns; 100 = 9 Nov close. Membership as published by the archive commodity layer (CM-1.1).",
+          "sub": "Sleeves"
+        },
+        {
+          "label": "Base-metals sleeve",
+          "key": "x_cbase",
+          "fmt": "index",
+          "expr": {
+            "op": "basket",
+            "keys": [
+              "cmd_px_cper",
+              "cmd_px_dbb"
+            ]
+          },
+          "note": "Equal-weight base-metals sleeve (CPER, DBB), compounded from daily ETF returns; 100 = 9 Nov close. Membership as published by the archive commodity layer (CM-1.1).",
+          "sub": "Sleeves"
+        },
+        {
+          "label": "Agriculture sleeve",
+          "key": "x_cags",
+          "fmt": "index",
+          "expr": {
+            "op": "basket",
+            "keys": [
+              "cmd_px_dba",
+              "cmd_px_weat",
+              "cmd_px_corn",
+              "cmd_px_soyb"
+            ]
+          },
+          "note": "Equal-weight agriculture sleeve (DBA, WEAT, CORN, SOYB), compounded from daily ETF returns; 100 = 9 Nov close. Membership as published by the archive commodity layer (CM-1.1).",
+          "sub": "Sleeves"
+        },
+        {
+          "label": "Commodity ETFs % advancing",
+          "key": "x_cadv",
+          "fmt": "prob",
+          "expr": {
+            "op": "advshare",
+            "keys": [
+              "cmd_px_uso",
+              "cmd_px_bno",
+              "cmd_px_ung",
+              "cmd_px_gld",
+              "cmd_px_slv",
+              "cmd_px_pplt",
+              "cmd_px_pall",
+              "cmd_px_cper",
+              "cmd_px_dbb",
+              "cmd_px_dba",
+              "cmd_px_weat",
+              "cmd_px_corn",
+              "cmd_px_soyb"
+            ]
+          },
+          "note": "Share of the 13 sleeve ETFs that closed higher on the day. Above 50%: broad commodity participation.",
+          "sub": "Breadth"
+        },
+        {
+          "label": "Sleeves above 9 Nov level",
+          "key": "x_cabove",
+          "fmt": "prob",
+          "expr": {
+            "op": "abovebase",
+            "keys": [
+              "x_cenergy",
+              "x_cprecious",
+              "x_cbase",
+              "x_cags"
+            ]
+          },
+          "note": "Share of the four sleeves trading above their 9 Nov starting level (100).",
+          "sub": "Breadth"
+        },
+        {
+          "label": "Leader − laggard sleeve (20-obs)",
+          "key": "cmd_dispersion_pp",
+          "fmt": "pp",
+          "dp": 2,
+          "note": "Archive commodity layer: best minus worst sleeve return over the last 20 observations, in pp. Today: agriculture leads, precious lags; the layer rates dispersion NORMAL.",
+          "sub": "Breadth"
+        },
+        {
+          "label": "Energy vs broad",
+          "key": "x_crel_energy",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "x_cenergy",
+            "b": "x_cbroad"
+          },
+          "note": "Energy sleeve relative to broad commodities (PDBC). 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Precious vs broad",
+          "key": "x_crel_precious",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "x_cprecious",
+            "b": "x_cbroad"
+          },
+          "note": "Precious-metals sleeve relative to broad commodities. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Base metals vs broad",
+          "key": "x_crel_base",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "x_cbase",
+            "b": "x_cbroad"
+          },
+          "note": "Base-metals sleeve relative to broad commodities. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Agriculture vs broad",
+          "key": "x_crel_ags",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "x_cags",
+            "b": "x_cbroad"
+          },
+          "note": "Agriculture sleeve relative to broad commodities. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Base metals vs precious",
+          "key": "x_crel_baseprec",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "x_cbase",
+            "b": "x_cprecious"
+          },
+          "note": "Cyclical against defensive metals: a growth read alongside copper / gold. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Oil vs gold (USO / GLD)",
+          "key": "x_crel_oilgold",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "cmd_px_uso",
+            "b": "cmd_px_gld"
+          },
+          "note": "Crude against gold: supply-shock and inflation impulse versus haven demand. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Energy equities vs crude (XLE / USO)",
+          "key": "x_crel_xleuso",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "cmd_px_xle",
+            "b": "cmd_px_uso"
+          },
+          "note": "Energy producers against the commodity they sell. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Miners vs metals (XME / DBB)",
+          "key": "x_crel_xmedbb",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "cmd_px_xme",
+            "b": "cmd_px_dbb"
+          },
+          "note": "Metals and mining equities against industrial metals. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Commodities vs S&P 500",
+          "key": "x_crel_spx",
+          "fmt": "index",
+          "expr": {
+            "op": "rel",
+            "a": "cmd_px_pdbc",
+            "b": "spx"
+          },
+          "note": "Broad commodities (PDBC) against the S&P 500. 100 = 9 Nov. Rising: the first leg outperforms.",
+          "sub": "Relative performance"
+        },
+        {
+          "label": "Gold / silver ratio",
+          "key": "cmd_gold_silver_ratio",
+          "fmt": "level",
+          "dp": 1,
+          "note": "Spot gold ÷ spot silver (archive commodity layer). Rising: silver underperforming, a defensive tilt.",
+          "sub": "Ratios"
+        },
+        {
+          "label": "Copper / gold (CPER / GLD)",
+          "key": "cmd_cu_au_proxy_ratio",
+          "fmt": "index",
+          "dp": 4,
+          "note": "Archive ETF proxy for the copper-to-gold ratio, a growth gauge; the layer reads it as DEFENSIVE_LEANING.",
+          "sub": "Ratios"
+        },
+        {
+          "label": "Brent − WTI front ($/bbl)",
+          "key": "cmd_snap_brent_wti_front_spread",
+          "fmt": "level",
+          "dp": 2,
+          "note": "Front-month Brent minus WTI, $/bbl. OilPriceAPI market snapshot captured each evening; in the archive from 9 Nov.",
+          "sub": "Ratios"
+        },
+        {
+          "label": "3-2-1 crack ($/bbl)",
+          "key": "cmd_snap_crack_321",
+          "fmt": "level",
+          "dp": 2,
+          "note": "Refining margin, $/bbl: two barrels of gasoline and one of diesel against three of crude. OilPriceAPI market snapshot captured each evening; in the archive from 9 Nov.",
+          "sub": "Ratios"
+        },
+        {
+          "label": "USO · WTI crude",
+          "key": "cmd_px_uso",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "BNO · Brent crude",
+          "key": "cmd_px_bno",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "UNG · natural gas",
+          "key": "cmd_px_ung",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "GLD · gold",
+          "key": "cmd_px_gld",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "SLV · silver",
+          "key": "cmd_px_slv",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "PPLT · platinum",
+          "key": "cmd_px_pplt",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "PALL · palladium",
+          "key": "cmd_px_pall",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "CPER · copper",
+          "key": "cmd_px_cper",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "DBB · base metals",
+          "key": "cmd_px_dbb",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "DBA · agriculture",
+          "key": "cmd_px_dba",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "WEAT · wheat",
+          "key": "cmd_px_weat",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "CORN · corn",
+          "key": "cmd_px_corn",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "SOYB · soybeans",
+          "key": "cmd_px_soyb",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "KRBN · carbon",
+          "key": "cmd_px_krbn",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "XLE · energy equities",
+          "key": "cmd_px_xle",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
+        },
+        {
+          "label": "XME · metals & mining",
+          "key": "cmd_px_xme",
+          "fmt": "index",
+          "note": "US ETF close (EODHD); in the archive from 9 Nov.",
+          "sub": "ETF closes"
         }
       ]
     }

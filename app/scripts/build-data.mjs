@@ -50,13 +50,14 @@ if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json ent
 // archive fields and exist only where every input does.
 const allRows = instruments.groups.flatMap(g => g.rows);
 // Ops on raw edition values (no carry-forward: a missing day stays empty).
-const RAW_OPS = new Set(['coalesce', 'breadth', 'relret', 'geo']);
+const RAW_OPS = new Set(['coalesce', 'breadth', 'relret', 'geo', 'basket', 'advshare', 'abovebase']);
 const operands = e => {
   if (e.op === 'fly') return [e.w1, e.body, e.w2];
   if (e.op === 'coalesce') return e.keys;
   if (e.op === 'breadth') return ['br_adv', 'br_dec'];
   if (e.op === 'relret') return [...e.a, e.b];
   if (e.op === 'geo') return [e.minus];
+  if (e.op === 'basket' || e.op === 'advshare' || e.op === 'abovebase') return e.keys;
   return [e.a, e.b];
 };
 const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
@@ -84,6 +85,31 @@ function rawOp(e) {
     const m = series[e.minus];
     return eds.map((x, i) => { const v = num(x.assets?.geo_state?.[e.j]?.[e.f]); return v == null || m?.[i] == null ? null : (v - m[i]) * (e.scale ?? 1); });
   }
+  if (e.op === 'basket') {
+    // Equal-weight basket: mean of member daily returns (members observed on both days), compounded; 100 = first full close.
+    let lvl = null;
+    return eds.map((x, i) => {
+      const now = e.keys.map(k => num(x.assets?.[k]));
+      if (lvl == null) { if (now.every(v => v != null)) lvl = 100; return lvl; }
+      const prev = e.keys.map(k => num(eds[i - 1].assets?.[k]));
+      const rs = now.map((v, j) => (v != null && prev[j] != null ? v / prev[j] - 1 : null)).filter(r => r != null);
+      if (!rs.length) return null;
+      lvl *= 1 + rs.reduce((a, b) => a + b, 0) / rs.length;
+      return lvl;
+    });
+  }
+  if (e.op === 'advshare') return eds.map((x, i) => {
+    // Share of members that closed higher, among those observed today and on the previous edition.
+    if (!i) return null;
+    const ch = e.keys.map(k => { const a = num(eds[i - 1].assets?.[k]), b = num(x.assets?.[k]); return a != null && b != null ? b - a : null; }).filter(c => c != null);
+    return ch.length * 2 >= e.keys.length ? (ch.filter(c => c > 0).length / ch.length) * 100 : null;
+  });
+  if (e.op === 'abovebase') return eds.map((_, i) => {
+    // Share of (earlier-built) indices above their starting level of 100.
+    const v = e.keys.map(k => series[k]?.[i]).filter(x => x != null);
+    if (v.every(x => x === 100)) return null; // base day: nothing to compare yet
+    return v.length === e.keys.length ? (v.filter(x => x > 100).length / v.length) * 100 : null;
+  });
   throw new Error(`unknown raw op ${e.op}`);
 }
 // Derived rows may build on other derived rows listed earlier (e.g. TSX in USD feeds the TSX pairs).
@@ -136,13 +162,14 @@ for (const [k, from] of Object.entries(coverage)) if (from > 0) console.log(`bui
 
 // ---------- formatting ----------
 const fmtNum = (v, dp) => v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
-const DP = { yield: 2, prob: 0, bp: 0, fx: 4, level: 1, pctlvl: 2, index: 2 };
+const DP = { yield: 2, prob: 0, bp: 0, fx: 4, level: 1, pctlvl: 2, index: 2, pp: 2 };
 function fmtValue(v, row) {
   const dp = row.dp ?? DP[row.fmt] ?? 2;
   const out = (() => {
     switch (row.fmt) {
       case 'yield': return v.toFixed(dp) + '%';
-      case 'prob': return Math.round(v) + '%';
+      case 'prob': return v.toFixed(dp) + '%';
+      case 'pp': return v.toFixed(dp) + 'pp';
       case 'bp': return Math.round(v) + 'bp';
       case 'pctlvl': return (v > 0 ? '+' : '') + v.toFixed(dp) + '%';
       case 'fx': case 'level': return v.toFixed(dp);
@@ -158,7 +185,7 @@ function moveOf(r) {
   switch (r.fmt) {
     case 'yield': return step ? { mode: 'diff', scale: 1, unit: 'pp' } : { mode: 'diff', scale: 100, unit: 'bp' };
     case 'bp': return { mode: 'diff', scale: 1, unit: 'bp' };
-    case 'prob': case 'pctlvl': return { mode: 'diff', scale: 1, unit: 'pp' };
+    case 'prob': case 'pctlvl': case 'pp': return { mode: 'diff', scale: 1, unit: 'pp' };
     case 'level': return { mode: 'diff', scale: 1, unit: 'pt' };
     default: return { mode: 'pct', scale: 1, unit: '%' };
   }

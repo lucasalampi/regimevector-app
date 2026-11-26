@@ -6,7 +6,7 @@ import { ChevronRight, Star } from '@/components/icons';
 import { InstrumentChart, Sparkline } from '@/components/InstrumentChart';
 import { Kicker, Seg, Tap } from '@/components/ui';
 import { DATES, DIM_LINKS, ED, GROUPS, REGIMES, TRANSMISSION, type Group, type Row } from '@/data';
-import { byRegime, coMovement, flowStats, fmtChange, fmtValue, indexBoard, isFlow, isStep, shortDate, stats, windowFor, type Unit } from '@/lib/analytics';
+import { byRegime, coMovement, flowStats, fmtChange, fmtValue, isFlow, BOARD, MEMBER_BOARD, relBoard, SLEEVE_BOARD, type BoardSpec, isStep, shortDate, stats, windowFor, type Unit } from '@/lib/analytics';
 import { useApp, type ChartStyle } from '@/store';
 import { alpha, C, changeColor, font, MUTED, tabular } from '@/theme';
 
@@ -72,11 +72,14 @@ export default function Asset() {
   const w = useMemo(() => windowFor(row, SPAN[range]), [row, range]);
   const st = useMemo(() => stats(row, w), [row, w]);
   const fs = useMemo(() => (flow ? flowStats(row, w) : null), [flow, row, w]);
-  const showBoard = g.id === 'equities' && (row.sub === 'Relative performance' || row.sub === 'Market structure');
-  const board = useMemo(() => (showBoard ? indexBoard({ start: DATES.length - Math.min(DATES.length, SPAN[range]), end: DATES.length - 1 }) : null), [showBoard, range]);
-  /** Open the pair "a / S&P" when it exists, else the index itself. */
-  const openPair = (key: string) => {
-    const pair = g.rows.find(r => r.k === (key === 'russell2k' ? 'x_rtyspx' : `x_rel_${key.replace('x_', '')}_spx`)) ?? g.rows.find(r => r.k === key);
+  // Relative-performance boards: indexes under Equities, sleeves and members under Commodities.
+  const specs: BoardSpec[] = g.id === 'equities' && (row.sub === 'Relative performance' || row.sub === 'Market structure') ? [BOARD]
+    : g.id === 'commodities' && ['Sleeves', 'Breadth', 'Relative performance', 'ETF closes'].includes(row.sub ?? '') ? [SLEEVE_BOARD, MEMBER_BOARD] : [];
+  const boards = useMemo(() => specs.map(spec => ({ spec, b: relBoard(spec, { start: DATES.length - Math.min(DATES.length, SPAN[range]), end: DATES.length - 1 }) }))
+    .filter((x): x is { spec: BoardSpec; b: NonNullable<ReturnType<typeof relBoard>> } => !!x.b), [specs.map(s => s.id).join(), range]);
+  /** Open the pair "a / benchmark" when it exists, else the instrument itself. */
+  const openPair = (spec: BoardSpec, key: string) => {
+    const pair = g.rows.find(r => r.k === spec.pairs?.[key]) ?? g.rows.find(r => r.k === key);
     if (pair) select(pair);
   };
   const regimes = useMemo(() => byRegime(row, w), [row, w]);
@@ -92,7 +95,7 @@ export default function Asset() {
 
   return (
     <ScrollView ref={scroll} style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingTop: 14, paddingHorizontal: 18, paddingBottom: 32, gap: 22 }}>
-      <Seg options={GROUPS.map(x => x.name)} value={g.name} onChange={name => { setGroupId(GROUPS.find(x => x.name === name)!.id); setSym(undefined); }} />
+      <Seg fit options={GROUPS.map(x => x.name)} value={g.name} onChange={name => { setGroupId(GROUPS.find(x => x.name === name)!.id); setSym(undefined); }} />
 
       {/* Instrument header */}
       <View style={{ gap: 10 }}>
@@ -184,36 +187,41 @@ export default function Asset() {
         </Section>
       ) : null}
 
-      {/* Relative-performance board */}
-      {board ? (
-        <Section title="Index relative performance" meta={`${shortDate(DATES[board.from])} – ${shortDate(DATES[DATES.length - 1])}`}>
-          <View style={{ borderTopWidth: 1, borderTopColor: C.text }}>
-            <View style={[styles.tr, { borderTopWidth: 0, minHeight: 28 }]}>
-              <Text style={[styles.th, { width: 92 }]}>Index</Text>
-              <Text style={[styles.th, styles.num, { width: 62 }]}>Return</Text>
-              <Text style={[styles.th, { flex: 1, textAlign: 'center' }]}>Excess vs S&P</Text>
-              <Text style={[styles.th, styles.num, { width: 58 }]}>Excess</Text>
-            </View>
-            {(() => {
-              const m = Math.max(...board.rows.map(r => Math.abs(r.excess)), 0.01);
-              return board.rows.map(r => (
-                <Tap key={r.key} onPress={() => openPair(r.key)} accessibilityLabel={`${r.name}: ${fmtChange(r.ret, '%')}, ${r.key === 'spx' ? 'benchmark' : `${fmtChange(r.excess, '%')} versus S&P 500`}`}
+      {/* Relative-performance boards */}
+      {boards.map(({ spec, b: board }) => {
+        const m = Math.max(...board.rows.map(r => Math.abs(r.excess)), 0.01);
+        const isBench = (k: string) => k === spec.bench;
+        const tagged = board.rows.some(r => r.tag);
+        return (
+          <Section key={spec.id} title={spec.title} meta={`${shortDate(DATES[board.from])} – ${shortDate(DATES[DATES.length - 1])}`}>
+            <View style={{ borderTopWidth: 1, borderTopColor: C.text }}>
+              <View style={[styles.tr, { borderTopWidth: 0, minHeight: 28 }]}>
+                <Text style={[styles.th, { width: 96 }]}>{tagged ? 'ETF' : spec.id === 'index' ? 'Index' : 'Sleeve'}</Text>
+                <Text style={[styles.th, styles.num, { width: 62 }]}>Return</Text>
+                <Text style={[styles.th, { flex: 1, textAlign: 'center' }]}>Excess vs {spec.benchName}</Text>
+                <Text style={[styles.th, styles.num, { width: 58 }]}>Excess</Text>
+              </View>
+              {board.rows.map(r => (
+                <Tap key={r.key} onPress={() => openPair(spec, r.key)} accessibilityLabel={`${r.name}${r.tag ? `, ${r.tag}` : ''}: ${fmtChange(r.ret, '%')}, ${isBench(r.key) ? 'benchmark' : `${fmtChange(r.excess, '%')} versus ${spec.benchName}`}`}
                   style={[styles.tr, { minHeight: 34 }]}>
-                  <Text style={[font(r.key === 'spx' ? 600 : 500, 12), { width: 92, color: C.text }]} numberOfLines={1}>{r.name}</Text>
+                  <View style={{ width: 96, flexDirection: 'row', alignItems: 'baseline', gap: 5 }}>
+                    <Text style={[font(isBench(r.key) ? 600 : 500, 12), { color: C.text, flexShrink: 1 }]} numberOfLines={1}>{r.name}</Text>
+                    {r.tag ? <Text style={[font(400, 10), { color: C.n500 }]} numberOfLines={1}>{r.tag}</Text> : null}
+                  </View>
                   <Text style={[styles.td, styles.num, { width: 62, color: signColor(r.ret) }]}>{fmtChange(r.ret, '%')}</Text>
                   <View style={{ flex: 1, height: 10, justifyContent: 'center' }}>
                     <View style={{ position: 'absolute', left: '50%', top: -4, bottom: -4, width: 1, backgroundColor: C.a300 }} />
-                    {r.key !== 'spx' ? <View style={{ position: 'absolute', height: 8, top: 1, backgroundColor: r.excess >= 0 ? C.a700 : C.down,
+                    {!isBench(r.key) ? <View style={{ position: 'absolute', height: 8, top: 1, backgroundColor: r.excess >= 0 ? C.a700 : C.down,
                       left: r.excess >= 0 ? '50%' : `${50 - (Math.abs(r.excess) / m) * 50}%`, width: `${(Math.abs(r.excess) / m) * 50}%` }} /> : null}
                   </View>
-                  <Text style={[styles.td, styles.num, { width: 58, color: r.key === 'spx' ? C.n500 : signColor(r.excess) }]}>{r.key === 'spx' ? 'bench.' : fmtChange(r.excess, 'pp')}</Text>
+                  <Text style={[styles.td, styles.num, { width: 58, color: isBench(r.key) ? C.n500 : signColor(r.excess) }]}>{isBench(r.key) ? 'bench.' : fmtChange(r.excess, 'pp')}</Text>
                 </Tap>
-              ));
-            })()}
-          </View>
-          <Text style={styles.note}>Price returns over the selected range from the latest common start; TSX converted to USD. Tap an index to open its relative line against the S&P 500.</Text>
-        </Section>
-      ) : null}
+              ))}
+            </View>
+            <Text style={styles.note}>{tagged ? `${Math.round(board.up * (board.rows.length - 1))} of ${board.rows.length - 1} members up over the range. ` : ''}{spec.note}</Text>
+          </Section>
+        );
+      })}
 
       {/* Range statistics */}
       <Section title={`Over the ${RANGE_LABEL[range]}`} meta={fs ? `${fs.n} readings` : undefined}>

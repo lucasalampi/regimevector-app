@@ -46,7 +46,7 @@ function fmtValue(v, r) {
   if (v == null) return '—';
   const s = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: r.dp, maximumFractionDigits: r.dp });
   const sign = v < 0 && +s.replace(/,/g, '') !== 0 ? MINUS : r.fmt === 'pctlvl' && v > 0 ? '+' : '';
-  return sign + s + (['yield', 'prob', 'pctlvl'].includes(r.fmt) ? '%' : r.fmt === 'bp' ? 'bp' : '');
+  return sign + s + (['yield', 'prob', 'pctlvl'].includes(r.fmt) ? '%' : r.fmt === 'bp' ? 'bp' : r.fmt === 'pp' ? 'pp' : '');
 }
 function fmtChange(v, unit, dp) {
   if (v == null || !isFinite(v)) return '—';
@@ -164,7 +164,8 @@ function regimeBehaviour() {
 function instrumentTables() {
   return D.groups.map(g => {
     const subs = [...new Set(g.rows.map(r => r.sub ?? g.name))];
-    const body = subs.map(sub => `<tr class="sub"><td colspan="10">${esc(sub)}</td></tr>` + g.rows.filter(r => (r.sub ?? g.name) === sub).map(r => {
+    // Each section heading is kept with its first two instruments (no orphaned headings at a page foot).
+    const body = subs.map(sub => g.rows.filter(r => (r.sub ?? g.name) === sub).map(r => {
       const m1 = windowStats(r, 21), m3 = windowStats(r, 63), all = windowStats(r, Infinity);
       const dd = isFlow(r) ? 'daily' : isStep(r) ? (r.freq === 'policy' ? 'policy' : 'monthly') : r.asof ? `as of ${short(r.asof)}` : r.chg ?? '—';
       const cls = v => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
@@ -173,9 +174,9 @@ function instrumentTables() {
         <td class="num ${cls(m1.chg)}">${fmtChange(m1.chg, r.unit)}</td><td class="num ${cls(m3.chg)}">${fmtChange(m3.chg, r.unit)}</td>
         <td class="num">${esc(fmtValue(all.hi, r))}</td><td class="num">${esc(fmtValue(all.lo, r))}</td><td class="num">${Math.round(all.pos * 100)}%</td>
         <td class="num">${all.vol == null ? '—' : r.unit === '%' ? all.vol.toFixed(1) + '%' : fmtChange(all.vol, r.unit, r.unit === 'bp' ? 1 : 2).replace(/^\+/, '')}</td><td>${spark(r)}</td></tr>`;
-    }).join('')).join('');
+    })).map((trs, k) => `<tbody class="keep"><tr class="sub"><td colspan="10">${esc(subs[k])}</td></tr>${trs.slice(0, 2).join('')}</tbody><tbody>${trs.slice(2).join('')}</tbody>`).join('');
     return `<h2>${esc(g.name)} <span class="h-meta">${g.rows.length}</span></h2>
-      <table class="t small"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th><th class="num">1M</th><th class="num">3M</th><th class="num">High</th><th class="num">Low</th><th class="num">Pos.</th><th class="num">Vol</th><th>21 sess.</th></tr></thead><tbody>${body}</tbody></table>`;
+      <table class="t small"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th><th class="num">1M</th><th class="num">3M</th><th class="num">High</th><th class="num">Low</th><th class="num">Pos.</th><th class="num">Vol</th><th>21 sess.</th></tr></thead>${body}</table>`;
   }).join('');
 }
 
@@ -274,6 +275,7 @@ table.t{width:100%;border-collapse:collapse;margin:0;font-variant-numeric:tabula
 .t td{padding:.75mm 1.2mm;border-bottom:.4pt solid #e1e7ed;vertical-align:middle}
 .t tr{break-inside:avoid}.t thead{display:table-header-group}
 .t .num{text-align:right;white-space:nowrap}
+.t tbody.keep{break-inside:avoid}
 .t tr.sub td{font-size:6.4pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#15304e;background:#eef2f6;padding:.9mm 1.2mm .6mm}
 .t tr.foot td{border-top:.8pt solid #0b0f1a;border-bottom:0}
 .t.small td,.t.small th{font-size:7.2pt}

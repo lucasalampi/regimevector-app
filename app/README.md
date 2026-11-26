@@ -45,16 +45,17 @@ content/events.json, positioning.json   ─┘                           assets/
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
-**Instruments (75)** live in `content/instruments.json`, grouped into sections:
+**Instruments (118)** live in `content/instruments.json`, grouped into sections:
 
 | Group | Sections |
 |---|---|
 | Rates | Treasury curve (3M, 2Y, 5Y, 10Y, 30Y; 2s10s, 10s30s, 2s10s30s fly, 3M–10Y, 5s30s) · Policy (Fed funds, Dec hike odds, 2Y − Fed funds) · Real rates (real policy rate = Fed funds − core PCE; real 10Y proxy = US 10Y − core PCE) · Credit (HY/IG/CCC OAS, HY − IG, HYG) · Canada (2Y, 10Y, 2s10s) |
 | FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) · G10 rate differentials (ECB, BoE, SNB, RBA, Norges Bank, Riksbank policy minus Fed; euro area, UK, Japan, Australia, Norway, Sweden 10Y minus US 10Y; G10 layer from 9 Nov) |
 | Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, RSP / SPY relative, RSP − S&P daily spread, S&P 500 % advancing and A/D ratio, SPY) · Relative performance (TSX in USD; all 10 pairs across S&P 500, Nasdaq, Dow, Russell 2000 and TSX in USD) |
-| Inflation | Prints · Commodities |
+| Inflation | Prints (CPI, core CPI, core PCE, PPI, ISM prices) |
+| Commodities | Energy (WTI, Brent Jan, Henry Hub, TTF, Hormuz disruption, deal probability) · Metals (gold, silver, copper) · Sleeves (broad PDBC; equal-weight energy, precious, base-metals, agriculture) · Breadth (ETFs % advancing, sleeves above 9 Nov level, leader − laggard sleeve) · Relative performance (each sleeve vs broad, base vs precious, oil vs gold, XLE vs USO, XME vs DBB, commodities vs S&P 500) · Ratios (gold/silver, copper/gold, Brent − WTI, 3-2-1 crack) · ETF closes (16) |
 
-**Derived instruments** are built edition by edition from archive fields. An `expr` sets the formula: spread, fly, pctvs (percent versus) or rel (relative, rebased to 100). They are marked "RV" in the app.
+**Derived instruments** are built edition by edition from archive fields. An `expr` sets the formula: spread, fly, pctvs (percent versus), rel (relative, rebased to 100), basket (equal-weight daily returns, compounded, 100 = first full close), advshare (% of members up on the day) or abovebase (% of indices above 100). They are marked "RV" in the app.
 
 Each row also states how it moves:
 - yields in **bp**;
@@ -67,7 +68,9 @@ Each row also states how it moves:
 - **RSP:** the RSP − S&P spread merges the archive's two spread fields, giving full coverage from 2 Nov. RSP / SPY compounds RSP's daily returns against the S&P 500, with 100 = 30 Oct close.
 - **Flow series** (`freq: flow`) are daily returns or spreads. They chart as bars, show sum / average / positive-session / best / worst statistics, and are never carried forward over a missing day.
 
-**Index relative-performance board.** In Drill-down, Market structure and Relative performance instruments add a ranked table of the five indexes' returns over the selected range, with each one's excess over the S&P 500.
+**Relative-performance boards.** In Drill-down, Market structure and Relative performance instruments add a ranked table of the five indexes' returns over the selected range, with each one's excess over the S&P 500. Commodity Sleeves, Breadth, Relative performance and ETF closes add two boards: the sleeves (and carbon) against broad commodities, and all 13 sleeve ETFs ranked with a members-up count.
+
+**Commodity layer (CM-1.1, from 9 Nov).** Sleeve membership is the archive's own `cmd_sleeve_members_used` (energy USO/BNO/UNG; precious GLD/SLV/PPLT/PALL; base CPER/DBB; ags DBA/WEAT/CORN/SOYB). Henry Hub, TTF, copper, Brent − WTI and the crack spread are OilPriceAPI evening snapshots. Left out on purpose: the EIA spot fields (`cmd_wti_spot`, `cmd_brent_spot`, `cmd_hh_spot`, unchanged since 3 Nov), the 20-observation change helpers, and futures-construction fields (`wti_f2_*`, `wti_fv_*`), which are engine internals. Also available but not yet shown: the remaining snapshot fields (Dubai, Murban, WCS, OPEC basket, JKM, RBOB, ULSD, gasoil, Newcastle coal, aluminium, nickel, iron ore, EUA, Baltic Dry, EU gas storage).
 
 **Not yet shown:** the EQ-1.0 factor fields (`eq_ar1`, `eq_ar2`, `eq_z1`–`eq_z3`, `eq_s1`; 5 editions, PROPOSED). They have no definitions in the archive.
 
@@ -106,7 +109,7 @@ This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, t
 8. Interface screenshots
 9. Methodology and data provenance
 
-**Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF runs to 6–7 pages and about 0.7 MB. The report reads the same generated data as the app, so its figures match the interface.
+**Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF runs to 9 pages and about 0.7 MB. The report reads the same generated data as the app, so its figures match the interface.
 
 **Client edition:** excludes the strategist view, boundary distances, internal research, internal events and the Desk ops theme. Positioning is omitted from both editions while its data is illustrative.
 

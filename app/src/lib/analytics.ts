@@ -37,7 +37,7 @@ export function fmtChange(v: number, unit: Unit, dpOverride?: number): string {
 export function fmtValue(v: number, row: Pick<Row, 'fmt' | 'dp'>): string {
   const s = Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: row.dp, maximumFractionDigits: row.dp });
   const sign = v < 0 && +s.replace(/,/g, '') !== 0 ? MINUS : row.fmt === 'pctlvl' && v > 0 ? '+' : '';
-  return sign + s + (row.fmt === 'yield' || row.fmt === 'prob' || row.fmt === 'pctlvl' ? '%' : row.fmt === 'bp' ? 'bp' : '');
+  return sign + s + (row.fmt === 'yield' || row.fmt === 'prob' || row.fmt === 'pctlvl' ? '%' : row.fmt === 'bp' ? 'bp' : row.fmt === 'pp' ? 'pp' : '');
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -139,20 +139,42 @@ export function coMovement(row: Row, n = TRANSMISSION.window) {
   return out[0]?.n >= 15 ? out : null;
 }
 
-/** Main indexes for the relative-performance board (TSX in USD so all legs share a currency). */
-export const BOARD = [
-  { key: 'spx', name: 'S&P 500' }, { key: 'nasdaq', name: 'Nasdaq' }, { key: 'dow', name: 'Dow' },
-  { key: 'russell2k', name: 'Russell 2000' }, { key: 'x_tsxusd', name: 'TSX (USD)' },
-] as const;
+export interface BoardItem { key: string; name: string; tag?: string }
+export interface BoardSpec { id: string; title: string; bench: string; benchName: string; items: readonly BoardItem[]; note: string; pairs?: Record<string, string> }
 
-export interface BoardRow { key: string; name: string; ret: number; excess: number }
-/** Index returns over a common window (latest common start inside it) and excess over the S&P 500, best first. */
-export function indexBoard(w: Pick<Window, 'start' | 'end'>): { rows: BoardRow[]; from: number } {
-  const keys = BOARD.map(b => b.key).filter(k => SERIES[k]);
+/** Main indexes for the relative-performance board (TSX in USD so all legs share a currency). */
+export const BOARD: BoardSpec = {
+  id: 'index', title: 'Index relative performance', bench: 'spx', benchName: 'S&P',
+  items: [{ key: 'spx', name: 'S&P 500' }, { key: 'nasdaq', name: 'Nasdaq' }, { key: 'dow', name: 'Dow' }, { key: 'russell2k', name: 'Russell 2000' }, { key: 'x_tsxusd', name: 'TSX (USD)' }],
+  note: 'Price returns over the selected range from the latest common start; TSX converted to USD. Tap an index to open its relative line against the S&P 500.',
+  pairs: { russell2k: 'x_rtyspx', nasdaq: 'x_rel_nasdaq_spx', dow: 'x_rel_dow_spx', x_tsxusd: 'x_rel_tsxusd_spx' },
+};
+/** Commodity sleeves against broad commodities (PDBC), and every sleeve member. */
+export const SLEEVE_BOARD: BoardSpec = {
+  id: 'sleeves', title: 'Commodity sleeves', bench: 'x_cbroad', benchName: 'broad',
+  items: [{ key: 'x_cbroad', name: 'Broad (PDBC)' }, { key: 'x_cenergy', name: 'Energy' }, { key: 'x_cprecious', name: 'Precious' }, { key: 'x_cbase', name: 'Base metals' }, { key: 'x_cags', name: 'Agriculture' }, { key: 'cmd_px_krbn', name: 'Carbon (KRBN)' }],
+  note: 'Equal-weight sleeve returns over the selected range (commodity layer from 9 Nov). Tap a sleeve to open its line against broad commodities.',
+  pairs: { x_cenergy: 'x_crel_energy', x_cprecious: 'x_crel_precious', x_cbase: 'x_crel_base', x_cags: 'x_crel_ags' },
+};
+const tk = (t: string, tag: string) => ({ key: `cmd_px_${t}`, name: t.toUpperCase(), tag });
+export const MEMBER_BOARD: BoardSpec = {
+  id: 'members', title: 'Commodity breadth · members', bench: 'x_cbroad', benchName: 'broad',
+  items: [{ key: 'x_cbroad', name: 'PDBC', tag: 'Broad' }, tk('uso', 'Energy'), tk('bno', 'Energy'), tk('ung', 'Energy'), tk('gld', 'Precious'), tk('slv', 'Precious'), tk('pplt', 'Precious'), tk('pall', 'Precious'),
+    tk('cper', 'Base'), tk('dbb', 'Base'), tk('dba', 'Ags'), tk('weat', 'Ags'), tk('corn', 'Ags'), tk('soyb', 'Ags')],
+  note: 'Every sleeve ETF ranked by return over the selected range, with its excess over broad commodities. Tap a row to open the ETF.',
+};
+
+export interface BoardRow { key: string; name: string; tag?: string; ret: number; excess: number }
+/** Returns over a common window (latest common start inside it) and excess over the benchmark, best first. */
+export function relBoard(spec: BoardSpec, w: Pick<Window, 'start' | 'end'>): { rows: BoardRow[]; from: number; up: number } | null {
+  const items = spec.items.filter(b => SERIES[b.key]);
+  if (!SERIES[spec.bench] || items.length < 2) return null;
   let from = w.start;
-  for (const k of keys) { const s = SERIES[k]; let i = from; while (i < w.end && s[i] == null) i++; from = Math.max(from, i); }
+  for (const b of items) { const s = SERIES[b.key]; let i = from; while (i < w.end && s[i] == null) i++; from = Math.max(from, i); }
+  if (from >= w.end) return null;
   const ret = (k: string) => (SERIES[k][w.end]! / SERIES[k][from]! - 1) * 100;
-  const spx = ret('spx');
-  const rows = BOARD.filter(b => SERIES[b.key]).map(b => ({ key: b.key, name: b.name, ret: ret(b.key), excess: ret(b.key) - spx }));
-  return { rows: rows.sort((a, b) => b.ret - a.ret), from };
+  const bench = ret(spec.bench);
+  const rows = items.map(b => ({ ...b, ret: ret(b.key), excess: ret(b.key) - bench }));
+  const others = rows.filter(r => r.key !== spec.bench);
+  return { rows: rows.sort((a, b) => b.ret - a.ret), from, up: others.filter(r => r.ret > 0).length / others.length };
 }

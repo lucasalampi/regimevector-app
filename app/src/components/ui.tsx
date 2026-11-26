@@ -31,8 +31,10 @@ export const Kicker = ({ children, color, style }: { children: ReactNode; color?
 /** `.blueprint` from the DS as overridden in v2: white plate, hairline border, corners hidden. */
 export const blueprint: ViewStyle = { backgroundColor: C.paper, borderWidth: 1, borderColor: C.divider };
 
-export function Seg<T extends string>({ options, value, onChange, height = 44, size = 13, itemWidth }: {
+export function Seg<T extends string>({ options, value, onChange, height = 44, size = 13, itemWidth, fit }: {
   options: readonly T[]; value: T; onChange: (v: T) => void; height?: number; size?: number; itemWidth?: number;
+  /** Size each item to its label and share the spare width (long and short labels side by side). */
+  fit?: boolean;
 }) {
   return (
     <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: C.divider }} accessibilityRole="tablist">
@@ -41,7 +43,7 @@ export function Seg<T extends string>({ options, value, onChange, height = 44, s
         return (
           <Tap key={o} onPress={() => onChange(o)} accessibilityRole="tab" accessibilityState={{ selected: on }}
             hoverBg={on ? ON : C.a100}
-            style={[{ height, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? ON : 'transparent' }, itemWidth ? { width: itemWidth } : { flex: 1 }]}>
+            style={[{ height, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? ON : 'transparent' }, itemWidth ? { width: itemWidth } : fit ? { flexGrow: 1, flexBasis: 'auto', paddingHorizontal: 6 } : { flex: 1 }]}>
             <Text style={[font(500, size), { color: on ? '#fff' : C.text }]} numberOfLines={1}>{o}</Text>
           </Tap>
         );
