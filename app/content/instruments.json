@@ -1,13 +1,25 @@
 {
-  "$comment": "Cross-asset instrument catalogue. `key` is an archive asset field, or a derived id with `expr` (spread: (a−b)×scale · fly: (2×body−w1−w2)×scale · pctvs: (a/b−1)×100 · rel: a/b rebased to 100). `fmt`: yield | prob | bp | index | fx | level | pctlvl. `sub` groups rows inside a tab. `freq`: monthly (prints) or policy (decided rates), drawn as steps without per-session statistics. `note` explains a derived series in the drill-down. `label` may use {asof:<field>}. `dimensionLinks` maps each regime dimension to the instrument it reads, for navigation. Ops without carry-forward (gaps stay empty): coalesce (first present of `keys`), breadth (S&P 500 member counts: pct = adv/(adv+dec), ratio = adv/dec), relret (compound daily % of `a` against the archive series `b`, 100 at the close before the first observation). `freq: flow` marks a daily return or spread: drawn as bars with sum / mean / hit-rate statistics instead of level changes. ratio: a / b (unscaled).",
+  "$comment": "Cross-asset instrument catalogue. `key` is an archive asset field, or a derived id with `expr` (spread: (a−b)×scale · fly: (2×body−w1−w2)×scale · pctvs: (a/b−1)×100 · rel: a/b rebased to 100). `fmt`: yield | prob | bp | index | fx | level | pctlvl. `sub` groups rows inside a tab. `freq`: monthly (prints) or policy (decided rates), drawn as steps without per-session statistics. `note` explains a derived series in the drill-down. `label` may use {asof:<field>}. `dimensionLinks` maps each regime dimension to the instrument it reads, for navigation. Ops without carry-forward (gaps stay empty): coalesce (first present of `keys`), breadth (S&P 500 member counts: pct = adv/(adv+dec), ratio = adv/dec), relret (compound daily % of `a` against the archive series `b`, 100 at the close before the first observation). `freq: flow` marks a daily return or spread: drawn as bars with sum / mean / hit-rate statistics instead of level changes. ratio: a / b (unscaled). geo: geo_state[j][f] minus the archive series `minus`, × scale (G10 layer; no carry-forward).",
   "groups": [
     {
       "id": "rates",
       "name": "Rates",
       "rows": [
         {
+          "label": "US 3M",
+          "key": "usy3m",
+          "fmt": "yield",
+          "sub": "Treasury curve"
+        },
+        {
           "label": "US 2Y",
           "key": "usy2",
+          "fmt": "yield",
+          "sub": "Treasury curve"
+        },
+        {
+          "label": "US 5Y",
+          "key": "usy5",
           "fmt": "yield",
           "sub": "Treasury curve"
         },
@@ -64,6 +76,32 @@
           "note": "2 × 10Y − 2Y − 30Y. Positive = belly cheap to the wings."
         },
         {
+          "label": "3M–10Y",
+          "key": "x_us3m10y",
+          "fmt": "bp",
+          "sub": "Treasury curve",
+          "expr": {
+            "op": "spread",
+            "a": "usy10",
+            "b": "usy3m",
+            "scale": 100
+          },
+          "note": "US 10Y minus the 3-month bill: the classic recession-watch curve. Negative = inverted."
+        },
+        {
+          "label": "5s30s",
+          "key": "x_us5s30s",
+          "fmt": "bp",
+          "sub": "Treasury curve",
+          "expr": {
+            "op": "spread",
+            "a": "usy30",
+            "b": "usy5",
+            "scale": 100
+          },
+          "note": "US 30Y minus US 5Y: the long end against the belly."
+        },
+        {
           "label": "Fed funds",
           "key": "fed_funds",
           "fmt": "yield",
@@ -88,6 +126,33 @@
             "scale": 100
           },
           "note": "Front end over the policy rate: roughly what the market prices beyond the current setting."
+        },
+        {
+          "label": "Real policy rate",
+          "key": "x_realff",
+          "fmt": "yield",
+          "sub": "Real rates",
+          "freq": "policy",
+          "expr": {
+            "op": "spread",
+            "a": "fed_funds",
+            "b": "core_pce_yoy",
+            "scale": 1
+          },
+          "note": "Fed funds minus core PCE inflation (YoY). Positive = policy is restrictive in real terms. Moves only when the policy rate or the monthly core PCE print changes."
+        },
+        {
+          "label": "Real 10Y proxy",
+          "key": "x_real10y",
+          "fmt": "yield",
+          "sub": "Real rates",
+          "expr": {
+            "op": "spread",
+            "a": "usy10",
+            "b": "core_pce_yoy",
+            "scale": 1
+          },
+          "note": "US 10Y minus core PCE inflation (YoY): a backward-looking real-yield proxy, not a TIPS yield."
         },
         {
           "label": "HY OAS ({asof:credit_hy_oas_asof})",
@@ -208,6 +273,180 @@
           },
           "freq": "policy",
           "note": "Fed funds minus the Bank of Canada rate."
+        },
+        {
+          "label": "ECB − Fed",
+          "key": "x_pol_ea",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "EA",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "ECB policy rate minus Fed funds. Positive = Euro area pays more at the front end. G10 layer from 9 Nov."
+        },
+        {
+          "label": "BoE − Fed",
+          "key": "x_pol_gb",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "GB",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "BoE policy rate minus Fed funds. Positive = UK pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead."
+        },
+        {
+          "label": "SNB − Fed",
+          "key": "x_pol_ch",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "CH",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "SNB policy rate minus Fed funds. Positive = Switzerland pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead."
+        },
+        {
+          "label": "RBA − Fed",
+          "key": "x_pol_au",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "AU",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "RBA policy rate minus Fed funds. Positive = Australia pays more at the front end. G10 layer from 9 Nov."
+        },
+        {
+          "label": "Norges Bank − Fed",
+          "key": "x_pol_no",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "NO",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "Norges Bank policy rate minus Fed funds. Positive = Norway pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead."
+        },
+        {
+          "label": "Riksbank − Fed",
+          "key": "x_pol_se",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "freq": "policy",
+          "expr": {
+            "op": "geo",
+            "j": "SE",
+            "f": "policy_rate",
+            "minus": "fed_funds",
+            "scale": 100
+          },
+          "note": "Riksbank policy rate minus Fed funds. Positive = Sweden pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead."
+        },
+        {
+          "label": "Euro area − US 10Y",
+          "key": "x_y10_ea",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "EA",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "Euro area 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+        },
+        {
+          "label": "UK − US 10Y",
+          "key": "x_y10_gb",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "GB",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "UK 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+        },
+        {
+          "label": "Japan − US 10Y",
+          "key": "x_y10_jp",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "JP",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "Japan 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+        },
+        {
+          "label": "Australia − US 10Y",
+          "key": "x_y10_au",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "AU",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "Australia 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+        },
+        {
+          "label": "Norway − US 10Y",
+          "key": "x_y10_no",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "NO",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "Norway 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+        },
+        {
+          "label": "Sweden − US 10Y",
+          "key": "x_y10_se",
+          "fmt": "bp",
+          "sub": "G10 rate differentials",
+          "expr": {
+            "op": "geo",
+            "j": "SE",
+            "f": "y10",
+            "minus": "usy10",
+            "scale": 100
+          },
+          "note": "Sweden 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
         }
       ]
     },

@@ -14,7 +14,7 @@ const RANGES = ['1M', '3M', 'All'] as const;
 type Range = (typeof RANGES)[number];
 const SPAN: Record<Range, number> = { '1M': 21, '3M': 63, All: Infinity };
 const RANGE_LABEL: Record<Range, string> = { '1M': 'last 21 sessions', '3M': 'last 63 sessions', All: 'full archive' };
-const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy rate', flow: 'Daily spread', daily: '' } as const;
+const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy setting', flow: 'Daily spread', daily: '' } as const;
 /** Instruments with less history than this open on the 1M view. */
 const SHORT_HISTORY = 30;
 
@@ -150,7 +150,7 @@ export default function Asset() {
         <Text style={[font(400, 11, 1.4), { color: C.n500 }]}>
           {shortDate(DATES[w.from])} – {shortDate(DATES[w.end])} · {st.n} editions
           {row.from > 0 ? ` · archive coverage from ${shortDate(DATES[row.from])}` : ''}
-          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy rate, held between decisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
+          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy setting, held between decisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
           {` · ${Platform.OS === 'web' ? 'hover' : 'drag sideways or press and hold'} to read any session`}
         </Text>
       </View>

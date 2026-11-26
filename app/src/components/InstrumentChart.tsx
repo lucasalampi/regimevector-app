@@ -17,11 +17,12 @@ const AXIS_FONT = Platform.select({ web: 'Inter_400Regular, Inter, sans-serif', 
 const isWeb = Platform.OS === 'web';
 const tick = () => { if (!isWeb) Haptics.selectionAsync().catch(() => {}); };
 
-/** 3–5 round ticks covering [lo, hi]. */
-function ticks(lo: number, hi: number) {
+/** 3–5 round ticks covering [lo, hi], never finer than the instrument's display precision (no 2.5bp steps shown as whole bp). */
+function ticks(lo: number, hi: number, dp: number) {
   const span = hi - lo || Math.abs(hi) || 1;
-  const raw = span / 4, mag = 10 ** Math.floor(Math.log10(raw));
-  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw) ?? 10 * mag;
+  const raw = span / 4, mag = 10 ** Math.floor(Math.log10(raw)), unit = 10 ** -dp;
+  const ok = (st: number) => st >= unit - 1e-12 && Math.abs(st / unit - Math.round(st / unit)) < 1e-9;
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(st => st >= raw && ok(st)) ?? Math.max(unit, 10 * mag);
   const out: number[] = [];
   for (let v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) out.push(+v.toFixed(10));
   return { out, step };
@@ -51,8 +52,11 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
     const vals = s.slice(w.from, w.end + 1).filter((v): v is number => v != null);
     const flow = isFlow(row);
     let lo = Math.min(...vals, ...(flow ? [0] : [])), hi = Math.max(...vals, ...(flow ? [0] : []));
-    const pad = (hi - lo || Math.abs(hi) * 0.01 || 1) * 0.08; lo -= pad; hi += pad;
-    const t = ticks(lo, hi);
+    // Flat or near-flat series (policy settings that have not moved) still get a readable axis.
+    const minSpan = 12 * 10 ** -Math.min(row.dp, 2);
+    if (hi - lo < minSpan) { const mid = (hi + lo) / 2; lo = mid - minSpan / 2; hi = mid + minSpan / 2; }
+    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const t = ticks(lo, hi, Math.min(row.dp, 2));
     lo = Math.min(lo, t.out[0]); hi = Math.max(hi, t.out[t.out.length - 1]);
     const y = (v: number) => TOP + (1 - (v - lo) / (hi - lo)) * plotH;
     // Step series (monthly prints, policy rates) hold between decisions: draw steps, not a trend.

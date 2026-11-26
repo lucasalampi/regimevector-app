@@ -1,13 +1,19 @@
 group,section,instrument,key,derived,level,unit_of_change,dd_change,as_of,chg_1m,chg_3m,archive_high,archive_low,position_in_range,realised_vol,vol_basis,coverage_from,frequency,note
+Rates,Treasury curve,US 3M,usy3m,no,4.34,bp,-2bp,,4.0000,4.0000,4.37,4.3,0.5714,2.0627,per-session bp,2026-11-10,daily,
 Rates,Treasury curve,US 2Y,usy2,no,4.61,bp,-2bp,,-6.0000,28.5000,4.92,3.98,0.6702,5.6291,per-session bp,2026-05-21,daily,
+Rates,Treasury curve,US 5Y,usy5,no,4.65,bp,-4bp,,-16.0000,-16.0000,4.98,4.65,0.0000,7.0762,per-session bp,2026-11-10,daily,
 Rates,Treasury curve,US 10Y,usy10,no,4.85,bp,-6bp,,-20.0000,13.0000,5.31,4.38,0.5054,4.8474,per-session bp,2026-05-21,daily,
 Rates,Treasury curve,US 30Y,usy30,no,5.24,bp,-6bp,,-13.0000,3.0000,5.67,4.86,0.4691,4.2585,per-session bp,2026-05-21,daily,
 Rates,Treasury curve,2s10s,x_us2s10s,yes,24,bp,-4bp,,-14.0000,-15.5000,53,20.6,0.1049,3.3801,per-session bp,2026-05-21,daily,US 10Y minus US 2Y.
 Rates,Treasury curve,10s30s,x_us10s30s,yes,39,bp,0bp,,7.0000,-10.0000,59,28.8,0.3377,1.8459,per-session bp,2026-05-21,daily,US 30Y minus US 10Y.
 Rates,Treasury curve,2s10s30s fly,x_usfly,yes,-15,bp,-4bp,,-21.0000,-5.5000,12,-20,0.1563,2.9816,per-session bp,2026-05-21,daily,2 × 10Y − 2Y − 30Y. Positive = belly cheap to the wings.
+Rates,Treasury curve,3M–10Y,x_us3m10y,yes,51,bp,-4bp,,-17.0000,-17.0000,83,51,0.0000,5.3919,per-session bp,2026-11-10,daily,US 10Y minus the 3-month bill: the classic recession-watch curve. Negative = inverted.
+Rates,Treasury curve,5s30s,x_us5s30s,yes,59,bp,-2bp,,5.0000,5.0000,61,48,0.8462,4.2512,per-session bp,2026-11-10,daily,US 30Y minus US 5Y: the long end against the belly.
 Rates,Policy,Fed funds,fed_funds,no,4,bp,,,0.0000,25.0000,4,3.75,1.0000,,per-session bp,2026-05-21,policy,
 Rates,Policy,Dec 25bp hike,fed_hike_prob_dec,no,98,pp,+3.0pp,,13.0000,41.0000,100,20,0.9750,8.6742,per-session pp,2026-05-21,daily,
 Rates,Policy,2Y − Fed funds,x_us2yff,yes,61,bp,-2bp,,-6.0000,3.5000,93,23,0.5429,5.8589,per-session bp,2026-05-21,daily,Front end over the policy rate: roughly what the market prices beyond the current setting.
+Rates,Real rates,Real policy rate,x_realff,yes,0.7,bp,,,-30.0000,25.0000,1,0.35,0.5385,,per-session bp,2026-05-21,policy,Fed funds minus core PCE inflation (YoY). Positive = policy is restrictive in real terms. Moves only when the policy rate or the monthly core PCE print changes.
+Rates,Real rates,Real 10Y proxy,x_real10y,yes,1.55,bp,-26bp,,-50.0000,13.0000,2.31,0.98,0.4286,6.4416,per-session bp,2026-05-21,daily,"US 10Y minus core PCE inflation (YoY): a backward-looking real-yield proxy, not a TIPS yield."
 Rates,Credit,HY OAS (24 Nov),credit_hy_oas,no,372,bp,,2026-11-24,58.0000,112.0000,376,260,0.9655,5.7033,per-session bp,2026-05-21,daily,
 Rates,Credit,IG OAS,credit_ig_oas,no,98,bp,,2026-11-24,12.0000,19.0000,98,73,1.0000,1.0817,per-session bp,2026-05-21,daily,
 Rates,Credit,CCC OAS,credit_ccc_oas,no,1405,bp,,2026-11-24,98.0000,379.0000,1405,935,1.0000,10.4768,per-session bp,2026-05-21,daily,
@@ -24,6 +30,18 @@ FX,Majors,USDCAD,usdcad,no,1.42054,%,-0.46%,,1.5165,2.1604,1.43712,1.376,0.7287,
 FX,Differentials,Canada − US 2Y,ca_us_2y,no,-139,bp,,2026-11-24,-13.0000,-1.0000,-124,-162,0.6053,4.5442,per-session bp,2026-09-01,daily,Canada 2Y minus US 2Y: the front-end rate gap behind USDCAD.
 FX,Differentials,Canada − US 10Y,ca_us_10y,no,-124,bp,,2026-11-24,-6.0000,-20.0000,-98,-138,0.3500,3.0538,per-session bp,2026-09-01,daily,Canada 10Y minus US 10Y.
 FX,Differentials,Fed − BoC policy,x_fedboc,yes,150,bp,,,0.0000,0.0000,175,150,0.0000,,per-session bp,2026-05-21,policy,Fed funds minus the Bank of Canada rate.
+FX,G10 rate differentials,ECB − Fed,x_pol_ea,yes,-150,bp,,,0.0000,0.0000,-150,-150,0.5000,,per-session bp,2026-11-09,policy,ECB policy rate minus Fed funds. Positive = Euro area pays more at the front end. G10 layer from 9 Nov.
+FX,G10 rate differentials,BoE − Fed,x_pol_gb,yes,0,bp,,,0.0000,0.0000,0,0,0.5000,,per-session bp,2026-11-09,policy,BoE policy rate minus Fed funds. Positive = UK pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead.
+FX,G10 rate differentials,SNB − Fed,x_pol_ch,yes,-400,bp,,,0.0000,0.0000,-400,-400,0.5000,,per-session bp,2026-11-09,policy,SNB policy rate minus Fed funds. Positive = Switzerland pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead.
+FX,G10 rate differentials,RBA − Fed,x_pol_au,yes,85,bp,,,0.0000,0.0000,85,85,0.5000,,per-session bp,2026-11-09,policy,RBA policy rate minus Fed funds. Positive = Australia pays more at the front end. G10 layer from 9 Nov.
+FX,G10 rate differentials,Norges Bank − Fed,x_pol_no,yes,50,bp,,,0.0000,0.0000,50,50,0.5000,,per-session bp,2026-11-09,policy,Norges Bank policy rate minus Fed funds. Positive = Norway pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead.
+FX,G10 rate differentials,Riksbank − Fed,x_pol_se,yes,-200,bp,,,25.0000,25.0000,-200,-225,1.0000,,per-session bp,2026-11-09,policy,Riksbank policy rate minus Fed funds. Positive = Sweden pays more at the front end. G10 layer from 9 Nov. The archive's own divergence field measures this bank against the ECB instead.
+FX,G10 rate differentials,Euro area − US 10Y,x_y10_ea,yes,-151.911347,bp,+6bp,,7.5298,7.5298,-151.911347,-181.911347,1.0000,7.0073,per-session bp,2026-11-09,daily,"Euro area 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+FX,G10 rate differentials,UK − US 10Y,x_y10_gb,yes,27.68,bp,+6bp,,2.5100,2.5100,27.68,-2.32,1.0000,6.4905,per-session bp,2026-11-09,daily,"UK 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+FX,G10 rate differentials,Japan − US 10Y,x_y10_jp,yes,-210.2,bp,+6bp,,8.2000,8.2000,-210.2,-240.2,1.0000,6.2740,per-session bp,2026-11-09,daily,"Japan 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+FX,G10 rate differentials,Australia − US 10Y,x_y10_au,yes,23.2,bp,+6bp,,3.0000,3.0000,23.2,-6.8,1.0000,6.6075,per-session bp,2026-11-09,daily,"Australia 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+FX,G10 rate differentials,Norway − US 10Y,x_y10_no,yes,-53.2,bp,+6bp,,5.3000,5.3000,-53.2,-83.2,1.0000,6.9310,per-session bp,2026-11-09,daily,"Norway 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
+FX,G10 rate differentials,Sweden − US 10Y,x_y10_se,yes,-183.9,bp,+6bp,,6.7000,6.7000,-183.9,-213.9,1.0000,7.0951,per-session bp,2026-11-09,daily,"Sweden 10-year yield minus US 10Y. G10 layer from 9 Nov; the foreign leg is often carried between updates, so daily moves mostly reflect the US 10Y."
 Equities,Indices,S&P 500,spx,no,7182.78,%,-0.25%,,-7.2469,-6.8282,7819.33,6910.39,0.2997,16.6445,annualised %,2026-05-21,daily,
 Equities,Indices,Nasdaq,nasdaq,no,23585.8,%,-0.62%,,-11.1641,-10.6680,27599.79,22617.73,0.1943,24.1307,annualised %,2026-05-21,daily,
 Equities,Indices,Dow,dow,no,50182.95,%,+0.33%,,-4.3681,-6.3040,54320.7,48147.33,0.3297,14.7516,annualised %,2026-05-21,daily,

@@ -50,12 +50,13 @@ if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json ent
 // archive fields and exist only where every input does.
 const allRows = instruments.groups.flatMap(g => g.rows);
 // Ops on raw edition values (no carry-forward: a missing day stays empty).
-const RAW_OPS = new Set(['coalesce', 'breadth', 'relret']);
+const RAW_OPS = new Set(['coalesce', 'breadth', 'relret', 'geo']);
 const operands = e => {
   if (e.op === 'fly') return [e.w1, e.body, e.w2];
   if (e.op === 'coalesce') return e.keys;
   if (e.op === 'breadth') return ['br_adv', 'br_dec'];
   if (e.op === 'relret') return [...e.a, e.b];
+  if (e.op === 'geo') return [e.minus];
   return [e.a, e.b];
 };
 const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
@@ -78,6 +79,11 @@ function rawOp(e) {
       return lvl;
     });
   }
+  if (e.op === 'geo') {
+    // G10 layer: geo_state[j][f] (as published on each edition) minus a US series.
+    const m = series[e.minus];
+    return eds.map((x, i) => { const v = num(x.assets?.geo_state?.[e.j]?.[e.f]); return v == null || m?.[i] == null ? null : (v - m[i]) * (e.scale ?? 1); });
+  }
   throw new Error(`unknown raw op ${e.op}`);
 }
 // Derived rows may build on other derived rows listed earlier (e.g. TSX in USD feeds the TSX pairs).
@@ -86,6 +92,7 @@ const rawKeys = new Set([
   ...allRows.filter(r => !r.expr).map(r => r.key),
   ...allRows.filter(r => r.expr && !RAW_OPS.has(r.expr.op)).flatMap(r => operands(r.expr)),
   ...allRows.filter(r => r.expr?.op === 'relret').map(r => r.expr.b),
+  ...allRows.filter(r => r.expr?.op === 'geo').map(r => r.expr.minus),
   ...instruments.transmission.nodes.map(n => n.key),
 ]);
 const series = {}, coverage = {}, lastObs = {};

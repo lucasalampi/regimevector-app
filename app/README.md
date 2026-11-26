@@ -45,12 +45,12 @@ content/events.json, positioning.json   ─┘                           assets/
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
-**Instruments (57)** live in `content/instruments.json`, grouped into sections:
+**Instruments (75)** live in `content/instruments.json`, grouped into sections:
 
 | Group | Sections |
 |---|---|
-| Rates | Treasury curve (2Y/10Y/30Y, 2s10s, 10s30s, 2s10s30s fly) · Policy (Fed funds, Dec hike odds, 2Y − Fed funds) · Credit (HY/IG/CCC OAS, HY − IG, HYG) · Canada (2Y, 10Y, 2s10s) |
-| FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) |
+| Rates | Treasury curve (3M, 2Y, 5Y, 10Y, 30Y; 2s10s, 10s30s, 2s10s30s fly, 3M–10Y, 5s30s) · Policy (Fed funds, Dec hike odds, 2Y − Fed funds) · Real rates (real policy rate = Fed funds − core PCE; real 10Y proxy = US 10Y − core PCE) · Credit (HY/IG/CCC OAS, HY − IG, HYG) · Canada (2Y, 10Y, 2s10s) |
+| FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) · G10 rate differentials (ECB, BoE, SNB, RBA, Norges Bank, Riksbank policy minus Fed; euro area, UK, Japan, Australia, Norway, Sweden 10Y minus US 10Y; G10 layer from 9 Nov) |
 | Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, RSP / SPY relative, RSP − S&P daily spread, S&P 500 % advancing and A/D ratio, SPY) · Relative performance (TSX in USD; all 10 pairs across S&P 500, Nasdaq, Dow, Russell 2000 and TSX in USD) |
 | Inflation | Prints · Commodities |
 

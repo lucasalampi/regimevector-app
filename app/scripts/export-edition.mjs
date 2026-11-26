@@ -98,7 +98,9 @@ function spark(r, n = 21, w = 52, h = 12) {
 function chart(r, w = 220, h = 104) {
   const s = D.series[r.k], from = r.from, end = N - 1;
   const vals = s.slice(from).filter(v => v != null);
-  let lo = Math.min(...vals, ...(isFlow(r) ? [0] : [])), hi = Math.max(...vals, ...(isFlow(r) ? [0] : [])); const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
+  let lo = Math.min(...vals, ...(isFlow(r) ? [0] : [])), hi = Math.max(...vals, ...(isFlow(r) ? [0] : []));
+  const minSpan = 12 * 10 ** -Math.min(r.dp, 2); if (hi - lo < minSpan) { const m = (hi + lo) / 2; lo = m - minSpan / 2; hi = m + minSpan / 2; }
+  const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
   const L = 4, R = 36, T = 6, B = 24, pw = w - L - R, ph = h - T - B;
   const x = i => L + (i / end) * pw, y = v => T + (1 - (v - lo) / (hi - lo)) * ph;
   let d = '', pen = false, bars = '';
