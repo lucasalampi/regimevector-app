@@ -55,7 +55,8 @@ function fmtChange(v, unit, dp) {
   return signed(x, Math.abs(x).toFixed(dp) + (unit === 'pt' ? ' pt' : unit));
 }
 const change = (a, b, r) => (r.mode === 'pct' ? (b / a - 1) * 100 : (b - a) * r.scale);
-const isStep = r => r.freq !== 'daily';
+const isStep = r => r.freq === 'monthly' || r.freq === 'policy';
+const isFlow = r => r.freq === 'flow';
 const mean = x => x.reduce((a, b) => a + b, 0) / (x.length || 1);
 const sd = x => { const m = mean(x); return Math.sqrt(x.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, x.length - 1)); };
 const RUNS = D.runs.map(([from, name], i, a) => ({ from, to: (a[i + 1] ?? [N])[0], name, tint: (D.regimeTints[name] ?? ['#eef2f6', '#7a8fa3'])[0], solid: (D.regimeTints[name] ?? ['#eef2f6', '#7a8fa3'])[1] }));
@@ -63,7 +64,15 @@ const regimeAt = i => RUNS.find(r => i >= r.from && i < r.to) ?? RUNS[RUNS.lengt
 
 function windowStats(r, span) {
   const s = D.series[r.k], end = N - 1, start = Math.max(0, end - span + 1), from = Math.max(start, r.from);
-  const first = s[from], last = s[end];
+  if (isFlow(r)) {
+    // Flow (daily spread): cumulative sum over the window; vol = s.d. of the daily values.
+    const xs = s.slice(from, end + 1).filter(v => v != null);
+    const hi = Math.max(...xs), lo = Math.min(...xs);
+    return { chg: xs.reduce((a, b) => a + b, 0), hi, lo, pos: hi > lo ? (s[end] - lo) / (hi - lo) : 0.5, vol: xs.length >= 10 ? sd(xs) : null, n: xs.length };
+  }
+  let fi = from; while (fi < end && s[fi] == null) fi++;
+  let li = end; while (li > from && s[li] == null) li--;
+  const first = s[fi], last = s[li];
   let hi = -Infinity, lo = Infinity, hiI = from, loI = from;
   const daily = [];
   for (let i = from; i <= end; i++) {
@@ -89,11 +98,15 @@ function spark(r, n = 21, w = 52, h = 12) {
 function chart(r, w = 220, h = 104) {
   const s = D.series[r.k], from = r.from, end = N - 1;
   const vals = s.slice(from).filter(v => v != null);
-  let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
+  let lo = Math.min(...vals, ...(isFlow(r) ? [0] : [])), hi = Math.max(...vals, ...(isFlow(r) ? [0] : [])); const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
   const L = 4, R = 36, T = 6, B = 24, pw = w - L - R, ph = h - T - B;
   const x = i => L + (i / end) * pw, y = v => T + (1 - (v - lo) / (hi - lo)) * ph;
-  let d = '';
-  for (let i = from; i <= end; i++) { const v = s[i]; if (v == null) continue; d += !d ? `M${x(i).toFixed(1)},${y(v).toFixed(1)}` : isStep(r) ? `H${x(i).toFixed(1)}V${y(v).toFixed(1)}` : `L${x(i).toFixed(1)},${y(v).toFixed(1)}`; }
+  let d = '', pen = false, bars = '';
+  for (let i = from; i <= end; i++) {
+    const v = s[i]; if (v == null) { pen = false; continue; }
+    if (isFlow(r)) { const y0 = y(0), y1 = y(v); bars += `<rect x="${(x(i) - 1).toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="2" height="${Math.max(0.5, Math.abs(y1 - y0)).toFixed(1)}" fill="${v >= 0 ? '#15304e' : '#8b2020'}"/>`; continue; }
+    d += !pen ? `M${x(i).toFixed(1)},${y(v).toFixed(1)}` : isStep(r) ? `H${x(i).toFixed(1)}V${y(v).toFixed(1)}` : `L${x(i).toFixed(1)},${y(v).toFixed(1)}`; pen = true;
+  }
   const grid = [hi - pad, (hi + lo) / 2, lo + pad].map(v => `<line x1="${L}" x2="${L + pw}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="#d9e0e7" stroke-width="0.6"/><text x="${w - 2}" y="${(y(v) + 3).toFixed(1)}" text-anchor="end" class="ax">${esc(fmtValue(v, r).replace(/%|bp/, ''))}</text>`).join('');
   const ribbon = RUNS.map(ru => `<rect x="${x(ru.from).toFixed(1)}" y="${T + ph + 4}" width="${Math.max(0.4, x(ru.to) - x(ru.from) - 0.3).toFixed(1)}" height="6" fill="${ru.solid}"/>`).join('');
   const months = []; for (let i = 1; i <= end; i++) if (DATES[i].slice(5, 7) !== DATES[i - 1].slice(5, 7)) months.push(`<text x="${x(i).toFixed(1)}" y="${h - 4}" text-anchor="middle" class="ax">${MONTHS[+DATES[i].slice(5, 7) - 1]}</text>`);
@@ -101,7 +114,7 @@ function chart(r, w = 220, h = 104) {
   const last = s[end];
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(r.s)} archive chart">
     ${gap}${grid}<line x1="${L}" x2="${L + pw}" y1="${T + ph}" y2="${T + ph}" stroke="#c4cdd6" stroke-width="0.6"/>${ribbon}${months.join('')}
-    <path d="${d}" fill="none" stroke="#0c1829" stroke-width="1.2" stroke-linejoin="round"/>
+    ${bars}${d ? `<path d="${d}" fill="none" stroke="#0c1829" stroke-width="1.2" stroke-linejoin="round"/>` : ''}
     <circle cx="${x(end).toFixed(1)}" cy="${y(last).toFixed(1)}" r="2.4" fill="#bc9330" stroke="#fff" stroke-width="0.8"/>
     <rect x="${L + pw + 2}" y="${(y(last) - 6).toFixed(1)}" width="${R - 4}" height="12" fill="#0c1829"/>
     <text x="${w - 3}" y="${(y(last) + 3).toFixed(1)}" text-anchor="end" class="ax" fill="#fff" style="fill:#fff">${esc(fmtValue(last, { ...r, dp: r.fmt === 'fx' ? r.dp : Math.abs(last) >= 10000 ? 0 : Math.min(r.dp, 2) }).replace(/%|bp/, ''))}</text>
@@ -151,7 +164,7 @@ function instrumentTables() {
     const subs = [...new Set(g.rows.map(r => r.sub ?? g.name))];
     const body = subs.map(sub => `<tr class="sub"><td colspan="10">${esc(sub)}</td></tr>` + g.rows.filter(r => (r.sub ?? g.name) === sub).map(r => {
       const m1 = windowStats(r, 21), m3 = windowStats(r, 63), all = windowStats(r, Infinity);
-      const dd = isStep(r) ? (r.freq === 'policy' ? 'policy' : 'monthly') : r.asof ? `as of ${short(r.asof)}` : r.chg ?? '—';
+      const dd = isFlow(r) ? 'daily' : isStep(r) ? (r.freq === 'policy' ? 'policy' : 'monthly') : r.asof ? `as of ${short(r.asof)}` : r.chg ?? '—';
       const cls = v => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
       return `<tr><td>${esc(r.s)}${r.derived ? ' <span class="rv">RV</span>' : ''}</td><td class="num b">${esc(r.val)}</td>
         <td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(dd)}</td>

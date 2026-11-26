@@ -12,13 +12,15 @@ export interface Row {
   fmt: string; dp: number;
   /** How the instrument moves: differences scaled into bp / pp / pt, or percent changes. */
   mode: 'diff' | 'pct'; scale: number; unit: 'bp' | 'pp' | 'pt' | '%';
-  /** daily sessions, monthly prints or policy decisions (the last two draw as steps). */
-  freq: 'daily' | 'monthly' | 'policy';
+  /** daily sessions, monthly prints / policy decisions (steps), or flow: the value is itself a daily return or spread. */
+  freq: 'daily' | 'monthly' | 'policy' | 'flow';
   /** First archive index with an observation. */
   from: number;
   sub: string | null; note: string | null; derived: boolean;
   /** ISO date of the last real observation when the latest edition carried it forward. */
   asof: string | null;
+  /** ISO date the latest change is measured against, when that is not the previous edition. */
+  chgRef?: string | null;
 }
 export interface Group { id: string; name: string; rows: Row[] }
 export interface Dim { name: string; tag: string; level: string; bd: number; data: string }

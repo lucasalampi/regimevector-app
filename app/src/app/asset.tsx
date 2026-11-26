@@ -6,7 +6,7 @@ import { ChevronRight, Star } from '@/components/icons';
 import { InstrumentChart, Sparkline } from '@/components/InstrumentChart';
 import { Kicker, Seg, Tap } from '@/components/ui';
 import { DATES, DIM_LINKS, ED, GROUPS, REGIMES, TRANSMISSION, type Group, type Row } from '@/data';
-import { byRegime, coMovement, fmtChange, fmtValue, isStep, shortDate, stats, windowFor, type Unit } from '@/lib/analytics';
+import { byRegime, coMovement, flowStats, fmtChange, fmtValue, indexBoard, isFlow, isStep, shortDate, stats, windowFor, type Unit } from '@/lib/analytics';
 import { useApp, type ChartStyle } from '@/store';
 import { alpha, C, changeColor, font, MUTED, tabular } from '@/theme';
 
@@ -14,7 +14,9 @@ const RANGES = ['1M', '3M', 'All'] as const;
 type Range = (typeof RANGES)[number];
 const SPAN: Record<Range, number> = { '1M': 21, '3M': 63, All: Infinity };
 const RANGE_LABEL: Record<Range, string> = { '1M': 'last 21 sessions', '3M': 'last 63 sessions', All: 'full archive' };
-const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy rate', daily: '' } as const;
+const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy rate', flow: 'Daily spread', daily: '' } as const;
+/** Instruments with less history than this open on the 1M view. */
+const SHORT_HISTORY = 30;
 
 const signColor = (v: number) => (Math.abs(v) < 1e-9 ? MUTED : v > 0 ? C.up : C.down);
 const subsOf = (g: Group) => [...new Set(g.rows.map(r => r.sub ?? g.name))];
@@ -48,6 +50,7 @@ export default function Asset() {
   const [groupId, setGroupId] = useState(GROUPS.some(g => g.id === params.group) ? params.group! : GROUPS[0].id);
   const [sym, setSym] = useState<string | undefined>(params.sym);
   const [range, setRange] = useState<Range>('All');
+  const [rangeTouched, setRangeTouched] = useState(false);
   const chartStyle = useApp(s => s.chartStyle);
   const setChartStyle = useApp(s => s.setChartStyle);
   const watch = useApp(s => s.watch);
@@ -61,8 +64,21 @@ export default function Asset() {
   const row: Row = g.rows.find(r => r.s === sym) ?? g.rows[0];
   const unit = row.unit as Unit;
   const step = isStep(row);
+  const flow = isFlow(row);
+  // Short histories open on 1M so the chart is not mostly "not in archive"; an explicit choice sticks.
+  const short = DATES.length - row.from < SHORT_HISTORY;
+  useEffect(() => { if (!rangeTouched) setRange(short ? '1M' : 'All'); }, [row.k, short, rangeTouched]);
+  const pickRange = (r: Range) => { setRangeTouched(true); setRange(r); };
   const w = useMemo(() => windowFor(row, SPAN[range]), [row, range]);
   const st = useMemo(() => stats(row, w), [row, w]);
+  const fs = useMemo(() => (flow ? flowStats(row, w) : null), [flow, row, w]);
+  const showBoard = g.id === 'equities' && (row.sub === 'Relative performance' || row.sub === 'Market structure');
+  const board = useMemo(() => (showBoard ? indexBoard({ start: DATES.length - Math.min(DATES.length, SPAN[range]), end: DATES.length - 1 }) : null), [showBoard, range]);
+  /** Open the pair "a / S&P" when it exists, else the index itself. */
+  const openPair = (key: string) => {
+    const pair = g.rows.find(r => r.k === (key === 'russell2k' ? 'x_rtyspx' : `x_rel_${key.replace('x_', '')}_spx`)) ?? g.rows.find(r => r.k === key);
+    if (pair) select(pair);
+  };
   const regimes = useMemo(() => byRegime(row, w), [row, w]);
   const co = useMemo(() => coMovement(row), [row]);
   const cur = REGIMES[REGIMES.length - 1];
@@ -91,9 +107,10 @@ export default function Asset() {
             <Text style={[font(600, 17, 1.2), { color: C.text }]} numberOfLines={1}>{row.s}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
               <Text style={[font(700, 34, 1.05), tabular, { letterSpacing: -0.5, color: C.text }]}>{row.val}</Text>
-              {step ? <Text style={[font(500, 12), { color: MUTED }]}>{STEP_LABEL[row.freq]}</Text>
+              {flow ? <Text style={[font(500, 12), { color: MUTED }]}>{row.asof ? `as of ${shortDate(row.asof)}` : `daily spread · ${ED.dateShort}`}</Text>
+                : step ? <Text style={[font(500, 12), { color: MUTED }]}>{STEP_LABEL[row.freq]}</Text>
                 : row.asof ? <Text style={[font(500, 12), { color: C.noticeInk }]}>as of {shortDate(row.asof)}</Text>
-                : row.chg ? <Text style={[font(600, 14), tabular, { color: changeColor(row.chg) }]}>{row.chg} <Text style={[font(400, 12), { color: MUTED }]}>d/d</Text></Text> : null}
+                : row.chg ? <Text style={[font(600, 14), tabular, { color: changeColor(row.chg) }]}>{row.chg} <Text style={[font(400, 12), { color: MUTED }]}>{row.chgRef ? `vs ${shortDate(row.chgRef)}` : 'd/d'}</Text></Text> : null}
             </View>
           </View>
           <Pressable onPress={() => toggleWatch(row.s)} accessibilityRole="button" accessibilityLabel={starred ? `Remove ${row.s} from watchlist` : `Add ${row.s} to watchlist`}
@@ -118,7 +135,7 @@ export default function Asset() {
       {/* Chart */}
       <View style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={{ flex: 1 }}><Seg options={RANGES} value={range} onChange={setRange} height={36} size={12} /></View>
+          <View style={{ flex: 1 }}><Seg options={RANGES} value={range} onChange={pickRange} height={36} size={12} /></View>
           <Seg options={['Timeline', 'Overlay'] as const} value={chartStyle} onChange={(v: ChartStyle) => setChartStyle(v)} height={36} size={11} itemWidth={70} />
         </View>
         <InstrumentChart row={row} w={w} style={chartStyle} />
@@ -133,7 +150,7 @@ export default function Asset() {
         <Text style={[font(400, 11, 1.4), { color: C.n500 }]}>
           {shortDate(DATES[w.from])} – {shortDate(DATES[w.end])} · {st.n} editions
           {row.from > 0 ? ` · archive coverage from ${shortDate(DATES[row.from])}` : ''}
-          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy rate, held between decisions' : ''}
+          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy rate, held between decisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
           {` · ${Platform.OS === 'web' ? 'hover' : 'drag sideways or press and hold'} to read any session`}
         </Text>
       </View>
@@ -167,8 +184,51 @@ export default function Asset() {
         </Section>
       ) : null}
 
+      {/* Relative-performance board */}
+      {board ? (
+        <Section title="Index relative performance" meta={`${shortDate(DATES[board.from])} – ${shortDate(DATES[DATES.length - 1])}`}>
+          <View style={{ borderTopWidth: 1, borderTopColor: C.text }}>
+            <View style={[styles.tr, { borderTopWidth: 0, minHeight: 28 }]}>
+              <Text style={[styles.th, { width: 92 }]}>Index</Text>
+              <Text style={[styles.th, styles.num, { width: 62 }]}>Return</Text>
+              <Text style={[styles.th, { flex: 1, textAlign: 'center' }]}>Excess vs S&P</Text>
+              <Text style={[styles.th, styles.num, { width: 58 }]}>Excess</Text>
+            </View>
+            {(() => {
+              const m = Math.max(...board.rows.map(r => Math.abs(r.excess)), 0.01);
+              return board.rows.map(r => (
+                <Tap key={r.key} onPress={() => openPair(r.key)} accessibilityLabel={`${r.name}: ${fmtChange(r.ret, '%')}, ${r.key === 'spx' ? 'benchmark' : `${fmtChange(r.excess, '%')} versus S&P 500`}`}
+                  style={[styles.tr, { minHeight: 34 }]}>
+                  <Text style={[font(r.key === 'spx' ? 600 : 500, 12), { width: 92, color: C.text }]} numberOfLines={1}>{r.name}</Text>
+                  <Text style={[styles.td, styles.num, { width: 62, color: signColor(r.ret) }]}>{fmtChange(r.ret, '%')}</Text>
+                  <View style={{ flex: 1, height: 10, justifyContent: 'center' }}>
+                    <View style={{ position: 'absolute', left: '50%', top: -4, bottom: -4, width: 1, backgroundColor: C.a300 }} />
+                    {r.key !== 'spx' ? <View style={{ position: 'absolute', height: 8, top: 1, backgroundColor: r.excess >= 0 ? C.a700 : C.down,
+                      left: r.excess >= 0 ? '50%' : `${50 - (Math.abs(r.excess) / m) * 50}%`, width: `${(Math.abs(r.excess) / m) * 50}%` }} /> : null}
+                  </View>
+                  <Text style={[styles.td, styles.num, { width: 58, color: r.key === 'spx' ? C.n500 : signColor(r.excess) }]}>{r.key === 'spx' ? 'bench.' : fmtChange(r.excess, 'pp')}</Text>
+                </Tap>
+              ));
+            })()}
+          </View>
+          <Text style={styles.note}>Price returns over the selected range from the latest common start; TSX converted to USD. Tap an index to open its relative line against the S&P 500.</Text>
+        </Section>
+      ) : null}
+
       {/* Range statistics */}
-      <Section title={`Over the ${RANGE_LABEL[range]}`}>
+      <Section title={`Over the ${RANGE_LABEL[range]}`} meta={fs ? `${fs.n} readings` : undefined}>
+        {fs ? (
+          <View style={styles.grid}>
+            <Stat i={0} label="Cumulative" value={fmtChange(fs.sum, unit)} color={signColor(fs.sum)} sub="sum of daily values" />
+            <Stat i={1} label="Average / session" value={fmtChange(fs.mean, unit, unit === 'bp' ? 1 : undefined)} color={signColor(fs.mean)} sub={`latest ${fs.last != null ? fmtValue(fs.last, row) : '—'}`} />
+            <Stat i={2} label="Positive sessions" value={`${Math.round(fs.up * 100)}%`} sub={`${Math.round(fs.up * fs.n)} of ${fs.n}`}>
+              <View style={{ height: 4, backgroundColor: alpha(C.down, 0.35), marginVertical: 3 }}><View style={{ height: 4, width: `${fs.up * 100}%`, backgroundColor: C.a700 }} /></View>
+            </Stat>
+            <Stat i={3} label="Range" value={`${fmtValue(fs.worst.v, row)} to ${fmtValue(fs.best.v, row)}`} sub="worst to best session" />
+            <Stat i={4} label="Best" value={fmtChange(fs.best.v, unit)} color={signColor(fs.best.v)} sub={shortDate(DATES[fs.best.i])} />
+            <Stat i={5} label="Worst" value={fmtChange(fs.worst.v, unit)} color={signColor(fs.worst.v)} sub={shortDate(DATES[fs.worst.i])} />
+          </View>
+        ) : (
         <View style={styles.grid}>
           <Stat i={0} label="Change" value={fmtChange(st.chg, unit)} color={signColor(st.chg)} sub={`${fmtValue(st.first, row)} → ${fmtValue(st.last, row)}`} />
           <Stat i={1} label="High" value={fmtValue(st.hi.v, row)} sub={shortDate(DATES[st.hi.i])} />
@@ -183,6 +243,7 @@ export default function Asset() {
           <Stat i={5} label="Largest move" value={st.big ? fmtChange(st.big.c, unit) : '—'} color={st.big ? signColor(st.big.c) : undefined}
             sub={st.big ? `${shortDate(DATES[st.big.i])} · one session` : step ? 'step series' : ''} />
         </View>
+        )}
       </Section>
 
       {/* Behaviour by regime */}
@@ -255,7 +316,7 @@ export default function Asset() {
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={[font(on ? 600 : 500, 14), { color: C.text }]} numberOfLines={1}>{r.s}</Text>
                     <Text style={[font(400, 11), tabular, { color: isStep(r) || r.asof ? C.n500 : changeColor(r.chg) }]}>
-                      {isStep(r) ? STEP_LABEL[r.freq] : r.asof ? `as of ${shortDate(r.asof)}` : r.chg ?? '—'}{r.derived ? '  ·  RV' : ''}
+                      {isStep(r) || isFlow(r) ? STEP_LABEL[r.freq] : r.asof ? `as of ${shortDate(r.asof)}` : r.chg ?? '—'}{r.derived ? '  ·  RV' : ''}
                     </Text>
                   </View>
                   <Sparkline row={r} />

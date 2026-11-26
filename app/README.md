@@ -45,13 +45,13 @@ content/events.json, positioning.json   ─┘                           assets/
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
-**Instruments (43)** live in `content/instruments.json`, grouped into sections:
+**Instruments (57)** live in `content/instruments.json`, grouped into sections:
 
 | Group | Sections |
 |---|---|
 | Rates | Treasury curve (2Y/10Y/30Y, 2s10s, 10s30s, 2s10s30s fly) · Policy (Fed funds, Dec hike odds, 2Y − Fed funds) · Credit (HY/IG/CCC OAS, HY − IG, HYG) · Canada (2Y, 10Y, 2s10s) |
 | FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) |
-| Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, Russell 2000/S&P, Nasdaq/Dow) |
+| Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, RSP / SPY relative, RSP − S&P daily spread, S&P 500 % advancing and A/D ratio, SPY) · Relative performance (TSX in USD; all 10 pairs across S&P 500, Nasdaq, Dow, Russell 2000 and TSX in USD) |
 | Inflation | Prints · Commodities |
 
 **Derived instruments** are built edition by edition from archive fields. An `expr` sets the formula: spread, fly, pctvs (percent versus) or rel (relative, rebased to 100). They are marked "RV" in the app.
@@ -61,6 +61,15 @@ Each row also states how it moves:
 - probabilities and percent levels in **pp**;
 - spreads already quoted in bp in **bp**;
 - prices in **%**.
+
+**Breadth and flows.**
+- **Breadth** (BR-1.0 layer): S&P 500 member counts only, from 5 Nov. The 2–4 Nov counts covered four indices and are excluded.
+- **RSP:** the RSP − S&P spread merges the archive's two spread fields, giving full coverage from 2 Nov. RSP / SPY compounds RSP's daily returns against the S&P 500, with 100 = 30 Oct close.
+- **Flow series** (`freq: flow`) are daily returns or spreads. They chart as bars, show sum / average / positive-session / best / worst statistics, and are never carried forward over a missing day.
+
+**Index relative-performance board.** In Drill-down, Market structure and Relative performance instruments add a ranked table of the five indexes' returns over the selected range, with each one's excess over the S&P 500.
+
+**Not yet shown:** the EQ-1.0 factor fields (`eq_ar1`, `eq_ar2`, `eq_z1`–`eq_z3`, `eq_s1`; 5 editions, PROPOSED). They have no definitions in the archive.
 
 A value the latest edition did not re-observe shows **"as of <date>"** instead of a change. Canada fields last arrived on 23 Nov.
 

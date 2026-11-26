@@ -49,14 +49,47 @@ if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json ent
 // them "not in archive". Derived instruments (spreads, flies, relatives) are computed edition by edition from
 // archive fields and exist only where every input does.
 const allRows = instruments.groups.flatMap(g => g.rows);
-const operands = e => (e.op === 'fly' ? [e.w1, e.body, e.w2] : [e.a, e.b]);
+// Ops on raw edition values (no carry-forward: a missing day stays empty).
+const RAW_OPS = new Set(['coalesce', 'breadth', 'relret']);
+const operands = e => {
+  if (e.op === 'fly') return [e.w1, e.body, e.w2];
+  if (e.op === 'coalesce') return e.keys;
+  if (e.op === 'breadth') return ['br_adv', 'br_dec'];
+  if (e.op === 'relret') return [...e.a, e.b];
+  return [e.a, e.b];
+};
+const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
+/** Raw-value derived series: values only on editions that observed them. */
+function rawOp(e) {
+  if (e.op === 'coalesce') return eds.map(x => { for (const k of e.keys) { const v = num(x.assets?.[k]); if (v != null) return v; } return null; });
+  if (e.op === 'breadth') return eds.map(x => {
+    const adv = num(x.assets?.br_adv), dec = num(x.assets?.br_dec);
+    // S&P 500 member counts only (about 500 names); the early four-index counts (about 1,500) are not comparable.
+    if (adv == null || dec == null || adv + dec === 0 || adv + dec > 700) return null;
+    return e.mode === 'ratio' ? (dec ? adv / dec : null) : (adv / (adv + dec)) * 100;
+  });
+  if (e.op === 'relret') {
+    const b = series[e.b]; let lvl = null;
+    return eds.map((x, i) => {
+      let ra = null; for (const k of e.a) { const v = num(x.assets?.[k]); if (v != null) { ra = v; break; } }
+      const rb = i > 0 && b?.[i] != null && b?.[i - 1] != null ? b[i] / b[i - 1] - 1 : null;
+      if (ra == null || rb == null) return null;
+      lvl = (lvl ?? 100) * (1 + ra / 100) / (1 + rb);
+      return lvl;
+    });
+  }
+  throw new Error(`unknown raw op ${e.op}`);
+}
+// Derived rows may build on other derived rows listed earlier (e.g. TSX in USD feeds the TSX pairs).
+const derivedKeys = new Set(allRows.filter(r => r.expr).map(r => r.key));
 const rawKeys = new Set([
   ...allRows.filter(r => !r.expr).map(r => r.key),
-  ...allRows.filter(r => r.expr).flatMap(r => operands(r.expr)),
+  ...allRows.filter(r => r.expr && !RAW_OPS.has(r.expr.op)).flatMap(r => operands(r.expr)),
+  ...allRows.filter(r => r.expr?.op === 'relret').map(r => r.expr.b),
   ...instruments.transmission.nodes.map(n => n.key),
 ]);
 const series = {}, coverage = {}, lastObs = {};
-for (const k of rawKeys) {
+for (const k of [...rawKeys].filter(k => !derivedKeys.has(k))) {
   let lastV = null, seen = -1;
   const s = eds.map((e, i) => { const v = e.assets?.[k]; if (typeof v === 'number') { lastV = v; seen = i; } return lastV; });
   const from = s.findIndex(v => v != null);
@@ -64,7 +97,16 @@ for (const k of rawKeys) {
   series[k] = s.map(v => (v == null ? null : +v.toFixed(6)));
   coverage[k] = from; lastObs[k] = seen;
 }
-for (const r of allRows.filter(r => r.expr)) {
+for (const r of allRows.filter(r => r.expr && RAW_OPS.has(r.expr.op))) {
+  const s = rawOp(r.expr).map(v => (v == null ? null : +v.toFixed(6)));
+  const from = s.findIndex(v => v != null);
+  if (from < 0) { console.warn(`build-data: ${r.key} has no observations; skipped`); continue; }
+  series[r.key] = s; coverage[r.key] = from;
+  lastObs[r.key] = s.reduce((m, v, i) => (v != null ? i : m), -1);
+  const gaps = s.slice(from).filter(v => v == null).length;
+  console.log(`build-data: ${r.key} ${s.length - from - gaps} observations from ${eds[from].date}${gaps ? `, ${gaps} empty editions` : ''}`);
+}
+for (const r of allRows.filter(r => r.expr && !RAW_OPS.has(r.expr.op))) {
   const e = r.expr, ins = operands(e);
   if (ins.some(k => !series[k])) { console.warn(`build-data: ${r.key} needs ${ins.join(', ')}; skipped`); continue; }
   const at = i => ins.map(k => series[k][i]);
@@ -75,6 +117,7 @@ for (const r of allRows.filter(r => r.expr)) {
     if (e.op === 'spread') out = (v[0] - v[1]) * (e.scale ?? 1);
     else if (e.op === 'fly') out = (2 * v[1] - v[0] - v[2]) * (e.scale ?? 1);
     else if (e.op === 'pctvs') out = (v[0] / v[1] - 1) * 100;
+    else if (e.op === 'ratio') out = v[0] / v[1];
     else if (e.op === 'rel') { const q = v[0] / v[1]; base ??= q; out = (q / base) * 100; }
     else throw new Error(`unknown expr op ${e.op}`);
     return +out.toFixed(6);
@@ -123,6 +166,7 @@ const longDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-GB',
 
 /** ISO date of the last real observation when the latest edition only carries a value forward, else null. */
 function staleAsof(r) {
+  if (r.expr && RAW_OPS.has(r.expr.op)) return lastObs[r.key] < N - 1 ? eds[lastObs[r.key]].date : null;
   const keys = r.expr ? operands(r.expr) : [r.key];
   let asof = null;
   for (const k of keys) {
@@ -139,10 +183,13 @@ const groups = instruments.groups.map(g => ({
   rows: g.rows.filter(r => series[r.key]).map(r => {
     const s = series[r.key];
     const v = s[N - 1];
-    const freq = r.freq === 'monthly' ? 'monthly' : r.freq === 'policy' ? 'policy' : 'daily';
+    const freq = ['monthly', 'policy', 'flow'].includes(r.freq) ? r.freq : 'daily';
     const mv = moveOf(r);
     // Latest session move; archive *_prev fields win where they exist (they are the attested prior close).
-    const prev = (!r.expr && typeof A[r.key + '_prev'] === 'number') ? A[r.key + '_prev'] : s[N - 2];
+    // Gappy raw-op series (breadth) compare with their last reading, and say which day that was.
+    let prevI = N - 2;
+    if (r.expr && RAW_OPS.has(r.expr.op)) while (prevI > 0 && s[prevI] == null) prevI--;
+    const prev = (!r.expr && typeof A[r.key + '_prev'] === 'number') ? A[r.key + '_prev'] : s[prevI];
     // Carried, not re-observed: missing from the latest edition, or the archive's own *_asof date is older than the edition.
     const stale = staleAsof(r) != null;
     const chg = freq === 'daily' && !stale && prev != null && v != null
@@ -152,6 +199,7 @@ const groups = instruments.groups.map(g => ({
       s: label, k: r.key, v, val: fmtValue(v, r), chg, fmt: r.fmt, dp: r.dp ?? DP[r.fmt] ?? 2, ...mv, freq,
       from: coverage[r.key], sub: r.sub ?? null, note: r.note ?? null, derived: !!r.expr,
       asof: staleAsof(r),
+      chgRef: chg && prevI < N - 2 ? eds[prevI].date : null,
     };
   }),
 }));
@@ -191,7 +239,7 @@ const matrix = changes.map(a => changes.map(b => +corr(a, b).toFixed(2)));
 const briefDir = rel('assets', 'briefs');
 for (const d of research.docs) if (!fs.existsSync(path.join(briefDir, d.file))) fail(`research doc ${d.id} points at missing assets/briefs/${d.file}`);
 const docIds = new Set(research.docs.map(d => d.id));
-for (const ref of [...research.latest, ...research.issuers.map(i => i.doc).filter(Boolean), events.middayDoc, positioning.briefDoc])
+for (const ref of [...research.latest, ...research.issuers.map(i => i.doc).filter(Boolean), positioning.briefDoc])
   if (!docIds.has(ref)) fail(`content references unknown research doc id "${ref}"`);
 
 // Page count and page shapes (height / width) per PDF, so the reader can lay pages out before they render.
@@ -212,6 +260,14 @@ const pdfMeta = {};
   }
 }
 
+{
+  const themeIds = new Set((events.themes ?? []).map(t => t.id));
+  const keys = new Set(instruments.groups.flatMap(g => g.rows.map(r => r.key)));
+  for (const a of events.alerts) {
+    if (!themeIds.has(a.theme)) fail(`event ${a.id} has unknown theme "${a.theme}"`);
+    for (const k of a.links ?? []) if (!keys.has(k)) fail(`event ${a.id} links unknown instrument "${k}"`);
+  }
+}
 const assetLines = research.docs.map(d => `  ${JSON.stringify(d.file)}: require('../../assets/briefs/${d.file}'),`);
 fs.writeFileSync(rel('src', 'data', 'briefAssets.generated.ts'),
   `// GENERATED by scripts/build-data.mjs — do not edit.\n// Static requires so Metro bundles every brief listed in content/research.json.\nexport const BRIEF_ASSETS: Record<string, number> = {\n${assetLines.join('\n')}\n};\n`);

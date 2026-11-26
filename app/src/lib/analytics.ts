@@ -10,7 +10,22 @@ export function change(a: number, b: number, row: Pick<Row, 'mode' | 'scale'>): 
   return row.mode === 'pct' ? (b / a - 1) * 100 : (b - a) * row.scale;
 }
 /** Step series (monthly prints, policy rates) hold between decisions; per-session statistics do not apply. */
-export const isStep = (row: Pick<Row, 'freq'>) => row.freq !== 'daily';
+export const isStep = (row: Pick<Row, 'freq'>) => row.freq === 'monthly' || row.freq === 'policy';
+/** Flow series: each value is a daily return or spread (bars; sum / mean / hit-rate statistics). */
+export const isFlow = (row: Pick<Row, 'freq'>) => row.freq === 'flow';
+
+export interface FlowStats { n: number; sum: number; mean: number; up: number; best: { v: number; i: number }; worst: { v: number; i: number }; last: number | null }
+/** Statistics for a flow series over the window: observed sessions only. */
+export function flowStats(row: Row, w: Window): FlowStats | null {
+  const s = SERIES[row.k], xs: { v: number; i: number }[] = [];
+  for (let i = w.from; i <= w.end; i++) if (s[i] != null) xs.push({ v: s[i]!, i });
+  if (!xs.length) return null;
+  const sum = xs.reduce((a, x) => a + x.v, 0);
+  return {
+    n: xs.length, sum, mean: sum / xs.length, up: xs.filter(x => x.v > 0).length / xs.length,
+    best: xs.reduce((m, x) => (x.v > m.v ? x : m)), worst: xs.reduce((m, x) => (x.v < m.v ? x : m)), last: s[w.end] ?? null,
+  };
+}
 
 export function fmtChange(v: number, unit: Unit, dpOverride?: number): string {
   const dp = dpOverride ?? (unit === 'bp' ? 0 : unit === '%' ? 2 : 1);
@@ -74,7 +89,10 @@ export function stats(row: Row, w: Window): Stats {
   const s = SERIES[row.k];
   let hi = { v: -Infinity, i: w.from }, lo = { v: Infinity, i: w.from };
   for (let i = w.from; i <= w.end; i++) { const v = s[i]; if (v == null) continue; if (v > hi.v) hi = { v, i }; if (v < lo.v) lo = { v, i }; }
-  const first = s[w.from]!, last = s[w.end]!;
+  // First / last actual readings in the window (gappy series can start or end on an empty edition).
+  let fi = w.from; while (fi < w.end && s[fi] == null) fi++;
+  let li = w.end; while (li > w.from && s[li] == null) li--;
+  const first = s[fi]!, last = s[li]!;
   const daily = !isStep(row) ? dailyChanges(row, w) : [];
   const vol = daily.length >= 10
     ? row.unit === '%' ? { v: sd(daily.map(d => d.c)) * Math.sqrt(252), label: 'annualised' } : { v: sd(daily.map(d => d.c)), label: 'per session' }
@@ -95,7 +113,8 @@ export function byRegime(row: Row, w: Window): RegimeRow[] {
     const e = acc.get(r.name) ?? { name: r.name, tint: r.tint, solid: r.solid, sessions: 0, avg: 0, cum: 0, level: 0, levels: [], chgs: [] };
     e.sessions++; e.levels.push(v);
     const p = s[i - 1];
-    if (i > w.from && p != null) e.chgs.push(change(p, v, row));
+    if (isFlow(row)) e.chgs.push(v);
+    else if (i > w.from && p != null) e.chgs.push(change(p, v, row));
     acc.set(r.name, e);
   }
   return [...acc.values()].map(e => ({ ...e, avg: mean(e.chgs), cum: e.chgs.reduce((a, b) => a + b, 0), level: mean(e.levels) }))
@@ -112,10 +131,28 @@ export function coMovement(row: Row, n = TRANSMISSION.window) {
     const x: number[] = [], y: number[] = [];
     for (let i = start; i <= end; i++) {
       const a = mine[i - 1], b = mine[i], c = s[i - 1], d = s[i];
-      if (a == null || b == null || c == null || d == null) continue;
-      x.push(change(a, b, row)); y.push(diff ? d - c : d / c - 1);
+      if (b == null || c == null || d == null || (!isFlow(row) && a == null)) continue;
+      x.push(isFlow(row) ? b : change(a!, b, row)); y.push(diff ? d - c : d / c - 1);
     }
     return { name, key, v: corr(x, y), n: x.length, self: key === row.k };
   });
-  return out[0]?.n >= 20 ? out : null;
+  return out[0]?.n >= 15 ? out : null;
+}
+
+/** Main indexes for the relative-performance board (TSX in USD so all legs share a currency). */
+export const BOARD = [
+  { key: 'spx', name: 'S&P 500' }, { key: 'nasdaq', name: 'Nasdaq' }, { key: 'dow', name: 'Dow' },
+  { key: 'russell2k', name: 'Russell 2000' }, { key: 'x_tsxusd', name: 'TSX (USD)' },
+] as const;
+
+export interface BoardRow { key: string; name: string; ret: number; excess: number }
+/** Index returns over a common window (latest common start inside it) and excess over the S&P 500, best first. */
+export function indexBoard(w: Pick<Window, 'start' | 'end'>): { rows: BoardRow[]; from: number } {
+  const keys = BOARD.map(b => b.key).filter(k => SERIES[k]);
+  let from = w.start;
+  for (const k of keys) { const s = SERIES[k]; let i = from; while (i < w.end && s[i] == null) i++; from = Math.max(from, i); }
+  const ret = (k: string) => (SERIES[k][w.end]! / SERIES[k][from]! - 1) * 100;
+  const spx = ret('spx');
+  const rows = BOARD.filter(b => SERIES[b.key]).map(b => ({ key: b.key, name: b.name, ret: ret(b.key), excess: ret(b.key) - spx }));
+  return { rows: rows.sort((a, b) => b.ret - a.ret), from };
 }

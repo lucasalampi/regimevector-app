@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from 'react';
 import { PanResponder, Platform, Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { DATES, REGIMES, SERIES, type Row } from '@/data';
-import { fmtValue, isStep, monthOf, regimeAt, shortDate, type Window } from '@/lib/analytics';
+import { fmtValue, isFlow, isStep, monthOf, regimeAt, shortDate, type Window } from '@/lib/analytics';
 import type { ChartStyle } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
@@ -49,27 +49,38 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
 
   const geo = useMemo(() => {
     const vals = s.slice(w.from, w.end + 1).filter((v): v is number => v != null);
-    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const flow = isFlow(row);
+    let lo = Math.min(...vals, ...(flow ? [0] : [])), hi = Math.max(...vals, ...(flow ? [0] : []));
     const pad = (hi - lo || Math.abs(hi) * 0.01 || 1) * 0.08; lo -= pad; hi += pad;
     const t = ticks(lo, hi);
     lo = Math.min(lo, t.out[0]); hi = Math.max(hi, t.out[t.out.length - 1]);
     const y = (v: number) => TOP + (1 - (v - lo) / (hi - lo)) * plotH;
     // Step series (monthly prints, policy rates) hold between decisions: draw steps, not a trend.
-    let d = '';
+    // Gappy series break the line at a missing edition instead of bridging it.
+    let d = '', pen = false, gappy = false;
+    const pts: { i: number; v: number }[] = [];
     for (let i = w.from; i <= w.end; i++) {
-      const v = s[i]; if (v == null) continue;
+      const v = s[i];
+      if (v == null) { if (pen) gappy = true; pen = false; continue; }
+      pts.push({ i, v });
+      if (flow) continue;
       const X = x(i).toFixed(1), Y = y(v).toFixed(1);
-      d += !d ? `M${X},${Y}` : isStep(row) ? `H${X}V${Y}` : `L${X},${Y}`;
+      d += !pen ? `M${X},${Y}` : isStep(row) ? `H${X}V${Y}` : `L${X},${Y}`;
+      pen = true;
     }
+    // Flow series (daily returns / spreads): bars from zero.
+    const bw = Math.max(1.5, Math.min(10, (plotW / Math.max(1, span)) * 0.7));
+    const bars = flow ? pts.map(p => ({ i: p.i, x: x(p.i) - bw / 2, y: Math.min(y(p.v), y(0)), h: Math.max(0.75, Math.abs(y(p.v) - y(0))), up: p.v >= 0 })) : [];
     const xt: { i: number; label: string }[] = [];
     if (span <= 30) for (let i = w.start; i <= w.end; i += 5) xt.push({ i, label: shortDate(DATES[i]) });
     else for (let i = w.start + 1; i <= w.end; i++) if (DATES[i].slice(5, 7) !== DATES[i - 1].slice(5, 7)) xt.push({ i, label: monthOf(DATES[i]) });
-    return { y, d, yt: t.out, ydp: tickDp(t.step, row.dp), xt, zero: lo < 0 && hi > 0 ? y(0) : null };
+    return { y, d, yt: t.out, ydp: tickDp(t.step, row.dp), xt, zero: lo < 0 && hi > 0 ? y(0) : null, bars, dots: gappy ? pts : [], bw };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.k, w.start, w.end, w.from, width, plotH]);
 
   const bands = REGIMES.filter(r => r.to > w.start && r.from <= w.end).map(r => ({ r, a: Math.max(r.from, w.start), b: Math.min(r.to, w.end + 1) }));
-  const last = s[w.end]!;
+  let lastI = w.end; while (lastI > w.from && s[lastI] == null) lastI--;
+  const last = s[lastI]!;
   const tagDp = row.fmt === 'fx' ? row.dp : Math.abs(last) >= 10000 ? 0 : Math.min(row.dp, 2);
   const covered = w.from > w.start;
 
@@ -78,7 +89,9 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
   const active = useRef(false), hold = useRef<ReturnType<typeof setTimeout> | null>(null), lastRegime = useRef('');
   const pick = (px: number) => {
     const g = geoRef.current;
-    const i = Math.max(g.w.from, Math.min(g.w.end, Math.round(g.w.start + ((px - PAD_L) / g.plotW) * g.span)));
+    let i = Math.max(g.w.from, Math.min(g.w.end, Math.round(g.w.start + ((px - PAD_L) / g.plotW) * g.span)));
+    // Snap to the nearest edition with a reading.
+    if (SERIES[row.k][i] == null) { for (let d = 1; d < 6; d++) { if (SERIES[row.k][i - d] != null && i - d >= g.w.from) { i -= d; break; } if (SERIES[row.k][i + d] != null && i + d <= g.w.end) { i += d; break; } } }
     const name = regimeAt(i).name;
     if (active.current && lastRegime.current && name !== lastRegime.current) tick();
     lastRegime.current = name;
@@ -145,13 +158,15 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
               opacity={scrub != null ? 0.25 : 1}>{t.label}</SvgText>
           ))}
 
-          <Path d={geo.d} fill="none" stroke={C.navy} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
+          {geo.bars.map(b => <Rect key={b.i} x={b.x} y={b.y} width={geo.bw} height={b.h} fill={b.i === lastI ? C.gold : b.up ? C.a700 : C.down} opacity={scrub == null || scrub === b.i ? 1 : 0.55} />)}
+          {geo.d ? <Path d={geo.d} fill="none" stroke={C.navy} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" /> : null}
+          {geo.dots.map(p => <Circle key={p.i} cx={x(p.i)} cy={geo.y(p.v)} r={2} fill={C.navy} />)}
 
           {/* last value */}
-          <Line x1={x(w.end)} x2={PAD_L + plotW} y1={geo.y(last)} y2={geo.y(last)} stroke={C.gold} strokeDasharray="2 2" />
+          <Line x1={x(lastI)} x2={PAD_L + plotW} y1={geo.y(last)} y2={geo.y(last)} stroke={C.gold} strokeDasharray="2 2" />
           <Rect x={PAD_L + plotW + 2} y={geo.y(last) - 9} width={GUTTER - 4} height={18} fill={C.navy} />
           <SvgText x={width - 6} y={geo.y(last) + 3.5} fontSize={10} fontFamily={AXIS_FONT} fill="#fff" textAnchor="end">{num(last, tagDp)}</SvgText>
-          <Circle cx={x(w.end)} cy={geo.y(last)} r={3.5} fill={C.gold} stroke="#fff" strokeWidth={1.5} />
+          {isFlow(row) ? null : <Circle cx={x(lastI)} cy={geo.y(last)} r={3.5} fill={C.gold} stroke="#fff" strokeWidth={1.5} />}
 
           {/* crosshair */}
           {scrub != null && sy != null ? (
@@ -175,7 +190,7 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
         <View style={{ width: 8, height: 8, backgroundColor: sr.solid, flexShrink: 0 }} />
         <Text numberOfLines={1} style={[font(400, 11), { color: MUTED, flexShrink: 1 }]}>{sr.name}</Text>
       </View>
-      {covered ? (
+      {covered && x(w.from) - PAD_L >= 72 ? (
         <Text pointerEvents="none" style={[font(500, 10, 1.3), { position: 'absolute', left: PAD_L + 6, top: TOP + 8, width: Math.max(60, x(w.from) - PAD_L - 12), color: C.n500 }]}>
           Not in archive before {shortDate(DATES[row.from])}
         </Text>
@@ -192,6 +207,14 @@ export function Sparkline({ row, n = 21, width = 60, height = 22 }: { row: Row; 
   const s = SERIES[row.k];
   const vals = s.slice(Math.max(row.from, s.length - n)).filter((v): v is number => v != null);
   if (vals.length < 2) return <View style={{ width, height }} />;
+  if (isFlow(row)) {
+    const m = Math.max(...vals.map(Math.abs)) || 1, bw = Math.max(1, (width - 2) / vals.length - 1), mid = height / 2;
+    return (
+      <Svg width={width} height={height} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {vals.map((v, i) => { const h = Math.max(0.75, (Math.abs(v) / m) * (mid - 1)); return <Rect key={i} x={1 + i * (bw + 1)} y={v >= 0 ? mid - h : mid} width={bw} height={h} fill={v >= 0 ? C.a700 : C.down} />; })}
+      </Svg>
+    );
+  }
   const lo = Math.min(...vals), hi = Math.max(...vals), k = hi - lo || 1;
   const pts = vals.map((v, i) => [((i / (vals.length - 1)) * (width - 2) + 1), (height - 2 - ((v - lo) / k) * (height - 4))]);
   const d = pts.map(([px, py], i) => (i ? (isStep(row) ? `H${px.toFixed(1)}V${py.toFixed(1)}` : `L${px.toFixed(1)},${py.toFixed(1)}`) : `M${px.toFixed(1)},${py.toFixed(1)}`)).join('');

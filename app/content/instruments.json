@@ -1,5 +1,5 @@
 {
-  "$comment": "Cross-asset instrument catalogue. `key` is an archive asset field, or a derived id with `expr` (spread: (a−b)×scale · fly: (2×body−w1−w2)×scale · pctvs: (a/b−1)×100 · rel: a/b rebased to 100). `fmt`: yield | prob | bp | index | fx | level | pctlvl. `sub` groups rows inside a tab. `freq`: monthly (prints) or policy (decided rates), drawn as steps without per-session statistics. `note` explains a derived series in the drill-down. `label` may use {asof:<field>}. `dimensionLinks` maps each regime dimension to the instrument it reads, for navigation.",
+  "$comment": "Cross-asset instrument catalogue. `key` is an archive asset field, or a derived id with `expr` (spread: (a−b)×scale · fly: (2×body−w1−w2)×scale · pctvs: (a/b−1)×100 · rel: a/b rebased to 100). `fmt`: yield | prob | bp | index | fx | level | pctlvl. `sub` groups rows inside a tab. `freq`: monthly (prints) or policy (decided rates), drawn as steps without per-session statistics. `note` explains a derived series in the drill-down. `label` may use {asof:<field>}. `dimensionLinks` maps each regime dimension to the instrument it reads, for navigation. Ops without carry-forward (gaps stay empty): coalesce (first present of `keys`), breadth (S&P 500 member counts: pct = adv/(adv+dec), ratio = adv/dec), relret (compound daily % of `a` against the archive series `b`, 100 at the close before the first observation). `freq: flow` marks a daily return or spread: drawn as bars with sum / mean / hit-rate statistics instead of level changes. ratio: a / b (unscaled).",
   "groups": [
     {
       "id": "rates",
@@ -276,28 +276,196 @@
           "note": "Drawdown from the 52-week high."
         },
         {
+          "label": "RSP / SPY relative",
+          "key": "x_rsprel",
+          "fmt": "index",
+          "sub": "Market structure",
+          "expr": {
+            "op": "relret",
+            "a": [
+              "br_rsp_pct",
+              "rsp_pct_chg",
+              "rsp_pct"
+            ],
+            "b": "spx"
+          },
+          "note": "Equal-weight (RSP) against cap-weight (the S&P 500 that SPY tracks), compounded from archive daily returns; 100 = 30 Oct close. Rising: participation broadening."
+        },
+        {
+          "label": "RSP − S&P (daily)",
+          "key": "x_rspspx",
+          "fmt": "bp",
+          "sub": "Market structure",
+          "freq": "flow",
+          "expr": {
+            "op": "coalesce",
+            "keys": [
+              "br_rsp_minus_spx_bp",
+              "rsp_minus_spx_bp"
+            ]
+          },
+          "note": "Equal-weight S&P 500 (RSP) daily return minus the cap-weighted index, in bp. Positive: the average stock beat the index."
+        },
+        {
+          "label": "S&P 500 % advancing",
+          "key": "x_pctadv",
+          "fmt": "prob",
+          "sub": "Market structure",
+          "expr": {
+            "op": "breadth",
+            "mode": "pct"
+          },
+          "note": "Share of S&P 500 members that rose on the day. Counts from 5 Nov; the 2–4 Nov four-index counts are excluded."
+        },
+        {
+          "label": "S&P 500 A/D ratio",
+          "key": "x_adratio",
+          "fmt": "level",
+          "dp": 2,
+          "sub": "Market structure",
+          "expr": {
+            "op": "breadth",
+            "mode": "ratio"
+          },
+          "note": "Advancers ÷ decliners among S&P 500 members. Above 1: more stocks rose than fell."
+        },
+        {
+          "label": "SPY",
+          "key": "spy_close",
+          "fmt": "index",
+          "sub": "Market structure"
+        },
+        {
+          "label": "TSX in USD",
+          "key": "x_tsxusd",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "ratio",
+            "a": "tsx",
+            "b": "usdcad"
+          },
+          "note": "TSX composite converted to US dollars (TSX ÷ USDCAD), so it can be compared with the US indexes without the currency move."
+        },
+        {
+          "label": "Nasdaq / S&P",
+          "key": "x_rel_nasdaq_spx",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "nasdaq",
+            "b": "spx"
+          },
+          "note": "Growth-heavy Nasdaq against the S&P 500. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
+          "label": "Dow / S&P",
+          "key": "x_rel_dow_spx",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "dow",
+            "b": "spx"
+          },
+          "note": "Price-weighted Dow against the S&P 500. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
           "label": "Russell 2000 / S&P",
           "key": "x_rtyspx",
           "fmt": "index",
-          "sub": "Market structure",
+          "sub": "Relative performance",
           "expr": {
             "op": "rel",
             "a": "russell2k",
             "b": "spx"
           },
-          "note": "Small caps relative to the S&P 500, rebased to 100 at the start of the archive."
+          "note": "Small caps against the S&P 500. Ratio of the two index levels, rebased to 100 at the first common edition; rising = small caps outperform."
+        },
+        {
+          "label": "TSX (USD) / S&P",
+          "key": "x_rel_tsxusd_spx",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "x_tsxusd",
+            "b": "spx"
+          },
+          "note": "Canada (TSX, in USD) against the S&P 500. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
         },
         {
           "label": "Nasdaq / Dow",
           "key": "x_ndxdow",
           "fmt": "index",
-          "sub": "Market structure",
+          "sub": "Relative performance",
           "expr": {
             "op": "rel",
             "a": "nasdaq",
             "b": "dow"
           },
-          "note": "Growth-heavy Nasdaq relative to the Dow, rebased to 100."
+          "note": "Growth-heavy Nasdaq against the Dow. Ratio rebased to 100 at the first common edition; rising = the Nasdaq outperforms."
+        },
+        {
+          "label": "Russell 2000 / Nasdaq",
+          "key": "x_rel_russell2k_nasdaq",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "russell2k",
+            "b": "nasdaq"
+          },
+          "note": "Small caps against the Nasdaq. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
+          "label": "Russell 2000 / Dow",
+          "key": "x_rel_russell2k_dow",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "russell2k",
+            "b": "dow"
+          },
+          "note": "Small caps against the Dow. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
+          "label": "Dow / TSX (USD)",
+          "key": "x_rel_dow_tsxusd",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "dow",
+            "b": "x_tsxusd"
+          },
+          "note": "Dow against the TSX in USD. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
+          "label": "Nasdaq / TSX (USD)",
+          "key": "x_rel_nasdaq_tsxusd",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "nasdaq",
+            "b": "x_tsxusd"
+          },
+          "note": "Nasdaq against the TSX in USD. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
+        },
+        {
+          "label": "Russell 2000 / TSX (USD)",
+          "key": "x_rel_russell2k_tsxusd",
+          "fmt": "index",
+          "sub": "Relative performance",
+          "expr": {
+            "op": "rel",
+            "a": "russell2k",
+            "b": "x_tsxusd"
+          },
+          "note": "Small caps against the TSX in USD. Ratio of the two index levels, rebased to 100 at the first common edition; rising = the first outperforms."
         }
       ]
     },
