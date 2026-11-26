@@ -50,7 +50,7 @@ if (!notesAll[last.date]) console.warn(`build-data: no content/editions.json ent
 // archive fields and exist only where every input does.
 const allRows = instruments.groups.flatMap(g => g.rows);
 // Ops on raw edition values (no carry-forward: a missing day stays empty).
-const RAW_OPS = new Set(['coalesce', 'breadth', 'relret', 'geo', 'basket', 'advshare', 'abovebase']);
+const RAW_OPS = new Set(['coalesce', 'breadth', 'relret', 'geo', 'basket', 'advshare', 'abovebase', 'scenario']);
 const operands = e => {
   if (e.op === 'fly') return [e.w1, e.body, e.w2];
   if (e.op === 'coalesce') return e.keys;
@@ -58,6 +58,7 @@ const operands = e => {
   if (e.op === 'relret') return [...e.a, e.b];
   if (e.op === 'geo') return [e.minus];
   if (e.op === 'basket' || e.op === 'advshare' || e.op === 'abovebase') return e.keys;
+  if (e.op === 'scenario') return [];
   return [e.a, e.b];
 };
 const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
@@ -85,6 +86,7 @@ function rawOp(e) {
     const m = series[e.minus];
     return eds.map((x, i) => { const v = num(x.assets?.geo_state?.[e.j]?.[e.f]); return v == null || m?.[i] == null ? null : (v - m[i]) * (e.scale ?? 1); });
   }
+  if (e.op === 'scenario') return eds.map(x => { const v = num(x.scenario_weights?.[e.slot]); return v == null ? null : v * 100; });
   if (e.op === 'basket') {
     // Equal-weight basket: mean of member daily returns (members observed on both days), compounded; 100 = first full close.
     let lvl = null;
@@ -212,12 +214,33 @@ function staleAsof(r) {
   return asof;
 }
 
+// ---------- scenario matrix in force (names + SN-1.0 order come from the registry, not the cell keys) ----------
+const w = last.scenario_weights || {};
+const registry = archive.metadata?.governance?.scenario_matrix || {};
+const effectiveDate = m => (m.effective?.match(/\d{4}-\d{2}-\d{2}/)?.[0]) || m.registered || '';
+const matrixKey = Object.keys(registry)
+  .filter(k => registry[k].cells && effectiveDate(registry[k]) <= last.date && !(registry[k].closed && registry[k].closed < last.date))
+  .sort((a, b) => effectiveDate(registry[a]).localeCompare(effectiveDate(registry[b])))
+  .pop();
+const scen = matrixKey ? registry[matrixKey] : null;
+if (!scen) console.warn('build-data: no scenario matrix in force; falling back to cell keys');
+/** Matrix cell names over time, for the scenario-weight instruments: same slot, names change with each matrix. */
+const scenarioLabel = slot => scen?.cells?.[slot]?.name ?? slot;
+function scenarioNote(slot) {
+  const cur = scen?.cells?.[slot];
+  const pos = (scen?.resolution_order ?? []).indexOf(slot);
+  const earlier = Object.entries(registry).filter(([k, m]) => k !== matrixKey && m.cells?.[slot])
+    .map(([k, m]) => `${k} (${m.registered ?? '?'} – ${m.closed ?? '?'}): ${m.cells[slot].name}`);
+  return [cur?.definition ?? cur?.resolution_criteria, `Matrix ${matrixKey} weight${pos >= 0 ? `, SN-1.0 position ${pos + 1} of ${scen.resolution_order.length}` : ''}, in force from ${effectiveDate(scen)}; steps at each weight revision.`,
+    earlier.length ? `Earlier history is the same slot under previous matrices, defined differently: ${earlier.join('; ')}; v1 (to 4 Jul) cell names are not registered.` : null].filter(Boolean).join(' ');
+}
+
 const groups = instruments.groups.map(g => ({
   id: g.id, name: g.name,
   rows: g.rows.filter(r => series[r.key]).map(r => {
     const s = series[r.key];
     const v = s[N - 1];
-    const freq = ['monthly', 'policy', 'flow'].includes(r.freq) ? r.freq : 'daily';
+    const freq = ['monthly', 'policy', 'revised', 'flow'].includes(r.freq) ? r.freq : 'daily';
     const mv = moveOf(r);
     // Latest session move; archive *_prev fields win where they exist (they are the attested prior close).
     // Gappy raw-op series (breadth) compare with their last reading, and say which day that was.
@@ -228,10 +251,12 @@ const groups = instruments.groups.map(g => ({
     const stale = staleAsof(r) != null;
     const chg = freq === 'daily' && !stale && prev != null && v != null
       ? fmtMove(mv.mode === 'pct' ? (v / prev - 1) * 100 : (v - prev) * mv.scale, mv.unit) : null;
-    const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'));
+    const label = r.label.replace(/\{asof:([a-z0-9_]+)\}/g, (_, f) => (A[f] ? shortDate(A[f]) : 'n/a'))
+      .replace(/\{scenario:([a-z]+)\}/g, (_, k) => scenarioLabel(k));
+    const note = r.expr?.op === 'scenario' ? scenarioNote(r.expr.slot) : r.note ?? null;
     return {
       s: label, k: r.key, v, val: fmtValue(v, r), chg, fmt: r.fmt, dp: r.dp ?? DP[r.fmt] ?? 2, ...mv, freq,
-      from: coverage[r.key], sub: r.sub ?? null, note: r.note ?? null, derived: !!r.expr,
+      from: coverage[r.key], sub: r.sub ?? null, note, derived: !!r.expr,
       asof: staleAsof(r),
       chgRef: chg && prevI < N - 2 ? eds[prevI].date : null,
     };
@@ -316,16 +341,6 @@ if (fs.existsSync(pdfjsSrc)) {
   fail('pdfjs-dist is not installed and assets/pdfjs is empty; run npm install');
 }
 
-// ---------- scenario matrix in force (names + SN-1.0 order come from the registry, not the cell keys) ----------
-const w = last.scenario_weights || {};
-const registry = archive.metadata?.governance?.scenario_matrix || {};
-const effectiveDate = m => (m.effective?.match(/\d{4}-\d{2}-\d{2}/)?.[0]) || m.registered || '';
-const matrixKey = Object.keys(registry)
-  .filter(k => registry[k].cells && effectiveDate(registry[k]) <= last.date && !(registry[k].closed && registry[k].closed < last.date))
-  .sort((a, b) => effectiveDate(registry[a]).localeCompare(effectiveDate(registry[b])))
-  .pop();
-const scen = matrixKey ? registry[matrixKey] : null;
-if (!scen) console.warn('build-data: no scenario matrix in force; falling back to cell keys');
 const order = scen?.resolution_order ?? Object.keys(scen?.cells ?? w);
 // The last revision that moved weights: compare with the most recent edition carrying different weights.
 const same = (a, b) => order.every(k => (a?.[k] ?? 0) === (b?.[k] ?? 0));

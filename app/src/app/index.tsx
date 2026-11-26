@@ -1,7 +1,8 @@
 import { Text, View } from 'react-native';
 import { DriverList, openDoc, RegimeCard, viewTitle, ViewText } from '@/components/edition';
-import { DocRow, Kicker, Screen } from '@/components/ui';
-import { ED, latestDocs } from '@/data';
+import { router } from 'expo-router';
+import { DocRow, Kicker, Screen, Tap } from '@/components/ui';
+import { ED, latestDocs, rowByKey } from '@/data';
 import { useApp } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
@@ -38,16 +39,17 @@ export default function Today() {
         </View>
         <View style={{ flexDirection: 'row', gap: 6 }}>
           {SC.cells.map((w, i) => (
-            <View key={w.key} style={{ flex: 1, justifyContent: 'space-between' }}>
+            <Tap key={w.key} onPress={() => { const r = rowByKey(`x_scn_${w.key}`); if (r) router.push({ pathname: '/asset', params: { group: r.gk, sym: r.s } }); }}
+              accessibilityLabel={`${w.name} ${pct(w.v)}. Open weight history`} style={{ flex: 1, justifyContent: 'space-between' }}>
               <Text style={[font(400, 12, 1.25), { color: MUTED }]}>{w.name}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 2 }}>
                 <Text style={[font(700, 16), { color: i === top ? C.a700 : C.text }]}>{pct(w.v)}</Text>
                 {w.chg ? <Text style={[font(500, 11), tabular, { color: MUTED }]}>{w.chg > 0 ? '+' : '\u2212'}{Math.abs(w.chg)}</Text> : null}
               </View>
-            </View>
+            </Tap>
           ))}
         </View>
-        {SC.caption ? <Text style={[font(400, 11), { color: MUTED }]}>{SC.caption}{SC.since ? '; change in points vs prior revision.' : '.'}</Text> : null}
+        {SC.caption ? <Text style={[font(400, 11), { color: MUTED }]}>{SC.caption}{SC.since ? '; change in points vs prior revision.' : '.'} Tap a scenario for its weight history.</Text> : null}
       </View>
 
       <DriverList />

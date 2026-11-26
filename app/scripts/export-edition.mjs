@@ -55,7 +55,7 @@ function fmtChange(v, unit, dp) {
   return signed(x, Math.abs(x).toFixed(dp) + (unit === 'pt' ? ' pt' : unit));
 }
 const change = (a, b, r) => (r.mode === 'pct' ? (b / a - 1) * 100 : (b - a) * r.scale);
-const isStep = r => r.freq === 'monthly' || r.freq === 'policy';
+const isStep = r => r.freq === 'monthly' || r.freq === 'policy' || r.freq === 'revised';
 const isFlow = r => r.freq === 'flow';
 const mean = x => x.reduce((a, b) => a + b, 0) / (x.length || 1);
 const sd = x => { const m = mean(x); return Math.sqrt(x.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, x.length - 1)); };
@@ -167,7 +167,7 @@ function instrumentTables() {
     // Each section heading is kept with its first two instruments (no orphaned headings at a page foot).
     const body = subs.map(sub => g.rows.filter(r => (r.sub ?? g.name) === sub).map(r => {
       const m1 = windowStats(r, 21), m3 = windowStats(r, 63), all = windowStats(r, Infinity);
-      const dd = isFlow(r) ? 'daily' : isStep(r) ? (r.freq === 'policy' ? 'policy' : 'monthly') : r.asof ? `as of ${short(r.asof)}` : r.chg ?? '—';
+      const dd = isFlow(r) ? 'daily' : isStep(r) ? (r.freq === 'monthly' ? 'monthly' : r.freq === 'revised' ? 'revised' : 'policy') : r.asof ? `as of ${short(r.asof)}` : r.chg ?? '—';
       const cls = v => (v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : '');
       return `<tr><td>${esc(r.s)}${r.derived ? ' <span class="rv">RV</span>' : ''}</td><td class="num b">${esc(r.val)}</td>
         <td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(dd)}</td>
@@ -239,7 +239,7 @@ function html(screens) {
   const half = Math.ceil(runs.length / 2);
   const runTable = list => `<table class="t tight"><thead><tr><th>Published label</th><th class="num">From</th><th class="num">To</th><th class="num">Sess.</th></tr></thead><tbody>${list.map(r => `<tr><td><span class="sw" style="background:${r.solid}"></span>${esc(r.name)}${r.to === N ? ' <b>· now</b>' : ''}</td><td class="num">${short(DATES[r.from])}</td><td class="num">${short(DATES[r.to - 1])}</td><td class="num">${r.to - r.from}</td></tr>`).join('')}</tbody></table>`;
   const sha = (() => { try { return fs.readFileSync(rel('..', 'project', 'uploads', D.generatedFrom + '.sha256'), 'utf8').split(/\s/)[0]; } catch { return null; } })();
-  const ddCell = r => `<td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(r.asof ? 'as of ' + short(r.asof) : isStep(r) ? (r.freq === 'monthly' ? 'monthly' : 'policy') : r.chg ?? '—')}</td>`;
+  const ddCell = r => `<td class="num ${r.chg && !r.asof ? (r.chg[0] === '+' ? 'up' : r.chg[0] === MINUS ? 'down' : '') : 'muted'}">${esc(r.asof ? 'as of ' + short(r.asof) : isStep(r) ? (r.freq === 'monthly' ? 'monthly' : r.freq === 'revised' ? 'revised' : 'policy') : r.chg ?? '—')}</td>`;
   const headline = ['usy2', 'usy10', 'usy30', 'x_us2s10s', 'fed_hike_prob_dec', 'credit_hy_oas', 'spx', 'x_spx200', 'vix', 'dxy', 'usdcad', 'eurusd', 'wti', 'brent', 'gold', 'core_pce_yoy'].map(byKey).filter(Boolean);
   const hl = list => `<table class="t tight"><thead><tr><th>Instrument</th><th class="num">Level</th><th class="num">D/D</th></tr></thead><tbody>${list.map(r => `<tr><td>${esc(r.s)}</td><td class="num b">${esc(r.val)}</td>${ddCell(r)}</tr>`).join('')}</tbody></table>`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">

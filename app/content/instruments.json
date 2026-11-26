@@ -789,17 +789,53 @@
           "key": "hormuz_disruption_pct",
           "fmt": "prob",
           "dp": 1,
-          "freq": "policy",
-          "note": "Archive estimate of Strait of Hormuz flow disruption, % of normal; revised as evidence arrives, so it draws as steps. Full archive history.",
+          "freq": "revised",
+          "note": "Archive estimate of Strait of Hormuz flow disruption, % of normal; revised as evidence arrives, so it draws as steps. Full archive history. A disruption above 40% is one of the escalation-cell triggers in the scenario matrix.",
           "sub": "Energy"
         },
         {
-          "label": "Deal probability",
-          "key": "deal_probability_pct",
+          "label": "{scenario:resolution}",
+          "key": "x_scn_resolution",
           "fmt": "prob",
-          "freq": "policy",
-          "note": "Archive probability of a negotiated settlement. Revised irregularly; drawn as steps. Full archive history.",
-          "sub": "Energy"
+          "freq": "revised",
+          "sub": "Scenario weights",
+          "expr": {
+            "op": "scenario",
+            "slot": "resolution"
+          }
+        },
+        {
+          "label": "{scenario:base}",
+          "key": "x_scn_base",
+          "fmt": "prob",
+          "freq": "revised",
+          "sub": "Scenario weights",
+          "expr": {
+            "op": "scenario",
+            "slot": "base"
+          }
+        },
+        {
+          "label": "{scenario:stalemate}",
+          "key": "x_scn_stalemate",
+          "fmt": "prob",
+          "freq": "revised",
+          "sub": "Scenario weights",
+          "expr": {
+            "op": "scenario",
+            "slot": "stalemate"
+          }
+        },
+        {
+          "label": "{scenario:escalation}",
+          "key": "x_scn_escalation",
+          "fmt": "prob",
+          "freq": "revised",
+          "sub": "Scenario weights",
+          "expr": {
+            "op": "scenario",
+            "slot": "escalation"
+          }
         },
         {
           "label": "Gold",

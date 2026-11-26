@@ -12,8 +12,8 @@ export interface Row {
   fmt: string; dp: number;
   /** How the instrument moves: differences scaled into bp / pp / pt, or percent changes. */
   mode: 'diff' | 'pct'; scale: number; unit: 'bp' | 'pp' | 'pt' | '%';
-  /** daily sessions, monthly prints / policy decisions (steps), or flow: the value is itself a daily return or spread. */
-  freq: 'daily' | 'monthly' | 'policy' | 'flow';
+  /** daily sessions, monthly prints / policy decisions / irregular revisions (steps), or flow: the value is itself a daily return or spread. */
+  freq: 'daily' | 'monthly' | 'policy' | 'revised' | 'flow';
   /** First archive index with an observation. */
   from: number;
   sub: string | null; note: string | null; derived: boolean;

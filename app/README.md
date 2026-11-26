@@ -45,7 +45,7 @@ content/events.json, positioning.json   ─┘                           assets/
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
-**Instruments (118)** live in `content/instruments.json`, grouped into sections:
+**Instruments (121)** live in `content/instruments.json`, grouped into sections:
 
 | Group | Sections |
 |---|---|
@@ -53,7 +53,7 @@ content/events.json, positioning.json   ─┘                           assets/
 | FX | Dollar · Majors · Differentials (Canada − US 2Y/10Y, Fed − BoC policy) · G10 rate differentials (ECB, BoE, SNB, RBA, Norges Bank, Riksbank policy minus Fed; euro area, UK, Japan, Australia, Norway, Sweden 10Y minus US 10Y; G10 layer from 9 Nov) |
 | Equities | Indices · Volatility · Market structure (S&P vs 200-day, S&P from 52-week high, RSP / SPY relative, RSP − S&P daily spread, S&P 500 % advancing and A/D ratio, SPY) · Relative performance (TSX in USD; all 10 pairs across S&P 500, Nasdaq, Dow, Russell 2000 and TSX in USD) |
 | Inflation | Prints (CPI, core CPI, core PCE, PPI, ISM prices) |
-| Commodities | Energy (WTI, Brent Jan, Henry Hub, TTF, Hormuz disruption, deal probability) · Metals (gold, silver, copper) · Sleeves (broad PDBC; equal-weight energy, precious, base-metals, agriculture) · Breadth (ETFs % advancing, sleeves above 9 Nov level, leader − laggard sleeve) · Relative performance (each sleeve vs broad, base vs precious, oil vs gold, XLE vs USO, XME vs DBB, commodities vs S&P 500) · Ratios (gold/silver, copper/gold, Brent − WTI, 3-2-1 crack) · ETF closes (16) |
+| Commodities | Energy (WTI, Brent Jan, Henry Hub, TTF, Hormuz disruption) · Scenario weights (the four cells of the matrix in force, in SN-1.0 order, full history) · Metals (gold, silver, copper) · Sleeves (broad PDBC; equal-weight energy, precious, base-metals, agriculture) · Breadth (ETFs % advancing, sleeves above 9 Nov level, leader − laggard sleeve) · Relative performance (each sleeve vs broad, base vs precious, oil vs gold, XLE vs USO, XME vs DBB, commodities vs S&P 500) · Ratios (gold/silver, copper/gold, Brent − WTI, 3-2-1 crack) · ETF closes (16) |
 
 **Derived instruments** are built edition by edition from archive fields. An `expr` sets the formula: spread, fly, pctvs (percent versus), rel (relative, rebased to 100), basket (equal-weight daily returns, compounded, 100 = first full close), advshare (% of members up on the day) or abovebase (% of indices above 100). They are marked "RV" in the app.
 
@@ -70,7 +70,9 @@ Each row also states how it moves:
 
 **Relative-performance boards.** In Drill-down, Market structure and Relative performance instruments add a ranked table of the five indexes' returns over the selected range, with each one's excess over the S&P 500. Commodity Sleeves, Breadth, Relative performance and ETF closes add two boards: the sleeves (and carbon) against broad commodities, and all 13 sleeve ETFs ranked with a members-up count.
 
-**Commodity layer (CM-1.1, from 9 Nov).** Sleeve membership is the archive's own `cmd_sleeve_members_used` (energy USO/BNO/UNG; precious GLD/SLV/PPLT/PALL; base CPER/DBB; ags DBA/WEAT/CORN/SOYB). Henry Hub, TTF, copper, Brent − WTI and the crack spread are OilPriceAPI evening snapshots. Left out on purpose: the EIA spot fields (`cmd_wti_spot`, `cmd_brent_spot`, `cmd_hh_spot`, unchanged since 3 Nov), the 20-observation change helpers, and futures-construction fields (`wti_f2_*`, `wti_fv_*`), which are engine internals. Also available but not yet shown: the remaining snapshot fields (Dubai, Murban, WCS, OPEC basket, JKM, RBOB, ULSD, gasoil, Newcastle coal, aluminium, nickel, iron ore, EUA, Baltic Dry, EU gas storage).
+**Commodity layer (CM-1.1, from 9 Nov).** Sleeve membership is the archive's own `cmd_sleeve_members_used` (energy USO/BNO/UNG; precious GLD/SLV/PPLT/PALL; base CPER/DBB; ags DBA/WEAT/CORN/SOYB). Henry Hub, TTF, copper, Brent − WTI and the crack spread are OilPriceAPI evening snapshots. **Scenario weights** come straight from each edition's `scenario_weights`, and their names come from the matrix registry (`metadata.governance.scenario_matrix`), so they always match Today's scenario bar. Each note gives the cell's resolution criteria and its earlier names: the same slot sat under v2 (4 Jul – 16 Nov) with different definitions. Tapping a scenario on Today opens its history. `deal_probability_pct` is not shown: the archive has held it at 74 since 1 Jul ("Held at 74"), so it no longer tracks the matrix. Hormuz disruption and the weights use `freq: revised`: they draw as steps held between revisions.
+
+Left out on purpose: the EIA spot fields (`cmd_wti_spot`, `cmd_brent_spot`, `cmd_hh_spot`, unchanged since 3 Nov), the 20-observation change helpers, and futures-construction fields (`wti_f2_*`, `wti_fv_*`), which are engine internals. Also available but not yet shown: the remaining snapshot fields (Dubai, Murban, WCS, OPEC basket, JKM, RBOB, ULSD, gasoil, Newcastle coal, aluminium, nickel, iron ore, EUA, Baltic Dry, EU gas storage).
 
 **Not yet shown:** the EQ-1.0 factor fields (`eq_ar1`, `eq_ar2`, `eq_z1`–`eq_z3`, `eq_s1`; 5 editions, PROPOSED). They have no definitions in the archive.
 

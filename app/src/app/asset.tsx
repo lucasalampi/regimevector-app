@@ -14,7 +14,7 @@ const RANGES = ['1M', '3M', 'All'] as const;
 type Range = (typeof RANGES)[number];
 const SPAN: Record<Range, number> = { '1M': 21, '3M': 63, All: Infinity };
 const RANGE_LABEL: Record<Range, string> = { '1M': 'last 21 sessions', '3M': 'last 63 sessions', All: 'full archive' };
-const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy setting', flow: 'Daily spread', daily: '' } as const;
+const STEP_LABEL = { monthly: 'Monthly print', policy: 'Policy setting', revised: 'Revised estimate', flow: 'Daily spread', daily: '' } as const;
 /** Instruments with less history than this open on the 1M view. */
 const SHORT_HISTORY = 30;
 
@@ -153,7 +153,7 @@ export default function Asset() {
         <Text style={[font(400, 11, 1.4), { color: C.n500 }]}>
           {shortDate(DATES[w.from])} – {shortDate(DATES[w.end])} · {st.n} editions
           {row.from > 0 ? ` · archive coverage from ${shortDate(DATES[row.from])}` : ''}
-          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy setting, held between decisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
+          {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy setting, held between decisions' : row.freq === 'revised' ? ' · held between revisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
           {` · ${Platform.OS === 'web' ? 'hover' : 'drag sideways or press and hold'} to read any session`}
         </Text>
       </View>
@@ -247,7 +247,7 @@ export default function Asset() {
             </View>
           </Stat>
           <Stat i={4} label="Realised vol" value={st.vol ? (unit === '%' ? `${st.vol.v.toFixed(1)}%` : fmtChange(st.vol.v, unit).replace(/^\+/, '')) : '—'}
-            sub={st.vol ? st.vol.label : step ? `n/a for ${row.freq === 'policy' ? 'policy rates' : 'monthly prints'}` : 'too few sessions'} />
+            sub={st.vol ? st.vol.label : step ? `n/a for ${row.freq === 'policy' ? 'policy rates' : row.freq === 'revised' ? 'revised estimates' : 'monthly prints'}` : 'too few sessions'} />
           <Stat i={5} label="Largest move" value={st.big ? fmtChange(st.big.c, unit) : '—'} color={st.big ? signColor(st.big.c) : undefined}
             sub={st.big ? `${shortDate(DATES[st.big.i])} · one session` : step ? 'step series' : ''} />
         </View>
@@ -305,7 +305,7 @@ export default function Asset() {
         ) : (
           <View style={styles.empty}>
             <Text style={[font(400, 12, 1.4), { color: MUTED }]}>
-              {step ? `${row.freq === 'policy' ? 'Policy rates' : 'Monthly prints'} do not move session to session, so daily co-movement is not computed.` : 'Too few overlapping sessions in the archive to compute co-movement.'}
+              {step ? `${row.freq === 'policy' ? 'Policy rates' : row.freq === 'revised' ? 'Revised estimates' : 'Monthly prints'} do not move session to session, so daily co-movement is not computed.` : 'Too few overlapping sessions in the archive to compute co-movement.'}
             </Text>
           </View>
         )}

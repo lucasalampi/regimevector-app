@@ -10,7 +10,7 @@ export function change(a: number, b: number, row: Pick<Row, 'mode' | 'scale'>): 
   return row.mode === 'pct' ? (b / a - 1) * 100 : (b - a) * row.scale;
 }
 /** Step series (monthly prints, policy rates) hold between decisions; per-session statistics do not apply. */
-export const isStep = (row: Pick<Row, 'freq'>) => row.freq === 'monthly' || row.freq === 'policy';
+export const isStep = (row: Pick<Row, 'freq'>) => row.freq === 'monthly' || row.freq === 'policy' || row.freq === 'revised';
 /** Flow series: each value is a daily return or spread (bars; sum / mean / hit-rate statistics). */
 export const isFlow = (row: Pick<Row, 'freq'>) => row.freq === 'flow';
 
