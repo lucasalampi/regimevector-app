@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { openDoc } from '@/components/edition';
 import { ChevronRight } from '@/components/icons';
 import { Kicker, PrimaryButton, Screen } from '@/components/ui';
-import { ED, rowByKey, todaysBrief, todaysMidday, visibleAlerts, visibleThemes, type Alert, type Theme } from '@/data';
+import { ED, rowByKey, todaysBrief, todaysMidday, todaysResearch, visibleAlerts, visibleThemes, type Alert, type Theme } from '@/data';
 import { useApp } from '@/store';
 import { C, changeColor, font, MUTED, tabular } from '@/theme';
 
@@ -94,6 +94,7 @@ export default function Events() {
   const days = useMemo(() => [...new Set(shown.map(a => a.date))].sort().reverse(), [shown]);
   const midday = todaysMidday(role);
   const brief = todaysBrief(role);
+  const research = todaysResearch(role)[0];
 
   return (
     <Screen pad={[14, 0, 28]} gap={18}>
@@ -151,8 +152,12 @@ export default function Events() {
           </>
         ) : (
           <>
-            <Text style={[font(400, 13, 1.45), { color: MUTED }]}>No mid-day orientation note was issued for {ED.dateShort}. The daily brief carries the session read.</Text>
-            {brief ? <PrimaryButton label={brief.internal ? 'Open operating-state brief' : "Open today's brief"} onPress={() => openDoc(brief)} /> : null}
+            <Text style={[font(400, 13, 1.45), { color: MUTED }]}>
+              No mid-day orientation note was issued for {ED.dateShort}.{' '}
+              {brief ? 'The daily brief carries the session read.' : `The ${ED.dateShort} daily briefs are not in the library yet${research ? `; ${research.code} was published on the close` : ''}.`}
+            </Text>
+            {brief ? <PrimaryButton label={brief.internal ? 'Open operating-state brief' : "Open today's brief"} onPress={() => openDoc(brief)} />
+              : research ? <PrimaryButton label={`Open ${research.code} · ${research.title}`} onPress={() => openDoc(research)} /> : null}
           </>
         )}
         <Pressable onPress={() => router.push({ pathname: '/research', params: { filter: 'Events' } })} accessibilityRole="link"

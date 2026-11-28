@@ -347,14 +347,14 @@ ${regimeBehaviour()}</div>
 <div class="keep"><h2>Transmission map <span class="h-meta">correlation of daily changes, last ${D.transmission.window} editions</span></h2>
 ${transmission()}</div>
 
-<h1>5 · Events by theme <span class="h-meta">${alerts.length} items · ${themes.map(t => esc(t.short)).join(' · ')}</span></h1>
+<h1 style="break-before:page;margin-top:0">5 · Events by theme <span class="h-meta">${alerts.length} items · ${themes.map(t => esc(t.short)).join(' · ')}</span></h1>
 <p class="note">Mid-day orientation notes are offered only on their publication day; none was issued for ${esc(ED.dateShort)}.</p>
 <div class="cols2">${eventsSection()}</div>
 
-<h1>6 · Research library <span class="h-meta">${docs.length} editions</span></h1>
+<div class="keep"><h1>6 · Research library <span class="h-meta">${docs.length} editions</span></h1>
 <table class="t tight"><thead><tr><th>Programme</th><th>Title</th><th>Code</th><th class="num">Date</th><th class="num">Pp.</th><th>Surface</th></tr></thead><tbody>
 ${docs.map(d => `<tr><td class="muted">${esc(research.programmes[d.kind])}</td><td>${esc(d.title)}</td><td>${esc(d.code)}</td><td class="num">${esc(d.date)}</td><td class="num">${D.pdfMeta[d.file]?.pages ?? (/\.html$/.test(d.file) ? 'int.' : '—')}</td><td class="muted">${esc(d.pages)}${d.internal ? ' · Internal' : ''}</td></tr>`).join('')}
-</tbody></table>
+</tbody></table></div>
 
 <div class="meth"><h1>7 · Methodology and data</h1>
 <div class="row r2 keep">

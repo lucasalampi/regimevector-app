@@ -2,6 +2,113 @@
   "$comment": "Event feed, organised by client theme. Each alert: `theme` (id from `themes`), `date` (ISO), optional `links` (instrument keys shown as live chips), `type` (Event | Policy | Geo, a secondary label), `internal: true` hides it from Client. Themes with `internal: true` are hidden from Client. Mid-day notes come from research docs flagged `midday` and are only offered on the day they were published.",
   "alerts": [
     {
+      "id": "c1",
+      "type": "Event",
+      "t": "Market Structure → Technical neutral",
+      "b": "S&P +1.60% to 7,297.49, 0.69% under its 200-day average: back inside the −2% line after one session. All eleven sectors rose; equal-weight 38bp behind.",
+      "theme": "equity",
+      "date": "2026-11-27",
+      "links": [
+        "x_spx200",
+        "spx"
+      ]
+    },
+    {
+      "id": "c2",
+      "type": "Event",
+      "t": "Risk Sentiment → Risk transitional",
+      "b": "VIX fell to 23.81, below 25. The S&P gained 5.6% on the week, its best since April 2025.",
+      "theme": "equity",
+      "date": "2026-11-27",
+      "links": [
+        "vix"
+      ]
+    },
+    {
+      "id": "c3",
+      "type": "Policy",
+      "t": "Yields up with stocks",
+      "b": "2Y 4.69 (+8bp), 10Y 4.94 (+9bp, first rise after eight declines), 30Y 5.33. December 25bp hike 98.9% priced; two hikes by January about 66%.",
+      "theme": "policy",
+      "date": "2026-11-27",
+      "links": [
+        "usy10",
+        "fed_hike_prob_dec"
+      ]
+    },
+    {
+      "id": "c4",
+      "type": "Event",
+      "t": "Dollar Regime → USD strong",
+      "b": "Dollar index +0.36% to 104.04, just over the 104 line.",
+      "theme": "fx",
+      "date": "2026-11-27",
+      "links": [
+        "dxy"
+      ]
+    },
+    {
+      "id": "c5",
+      "type": "Geo",
+      "t": "Jazan refinery struck; tanker targeted off Dubai",
+      "b": "A projectile hit Saudi Aramco's Jazan refinery, killing a worker; another exploded near a tanker 50nm west of Dubai. Repeat-class entries; weights held 10/8/72/10.",
+      "theme": "energy",
+      "date": "2026-11-27",
+      "links": [
+        "brent"
+      ]
+    },
+    {
+      "id": "c6",
+      "type": "Geo",
+      "t": "Drone attack on Kuwaiti military site",
+      "b": "Two Italian technicians killed. Kuwait and Italy blame Iran, which denies it and proposes a joint investigation.",
+      "theme": "energy",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "c7",
+      "type": "Event",
+      "t": "Oil steady, Brent above 5",
+      "b": "Jan WTI 83.08 (−0.60); reference 83.98, .02 below 0. Brent Jan 95.44. OPEC+ meets Sunday.",
+      "theme": "energy",
+      "date": "2026-11-27",
+      "links": [
+        "wti",
+        "brent"
+      ]
+    },
+    {
+      "id": "c8",
+      "type": "Event",
+      "t": "High-yield spreads 377bp",
+      "b": "+5bp as of 25 Nov, +51bp over the month. XA-E3: credit carried the month's largest calibrated moves (HY +2.00σ, IG +2.07σ).",
+      "theme": "credit",
+      "date": "2026-11-27",
+      "links": [
+        "credit_hy_oas",
+        "credit_ig_oas"
+      ]
+    },
+    {
+      "id": "c9",
+      "type": "Geo",
+      "t": "Class review: Kuwait attack",
+      "b": "Logged as an executed act; whether it opens a new class is flagged for review. Weights do not move without it. Quiet clock 0/10; Iranian mine claims score zero.",
+      "internal": true,
+      "theme": "energy",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "c10",
+      "type": "Event",
+      "t": "Gate 25/25 · reference revised",
+      "b": "Wednesday's reference revised 84.88 → 84.83 on the implied February settle; label unaffected. Strait series 12bd old, rule-6 guard active.",
+      "internal": true,
+      "theme": "ops",
+      "date": "2026-11-27"
+    },
+    {
       "id": "b1",
       "type": "Event",
       "t": "Market Structure → Technical breakdown",

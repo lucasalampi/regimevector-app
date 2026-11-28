@@ -106,5 +106,7 @@ export const todaysBrief = (role: Role) => {
   const today = visibleDocs(role).filter(d => d.kind === 'Daily' && docIso(d) === ED.date);
   return (role === 'Internal' ? today.find(d => d.internal) : undefined) ?? today.find(d => !d.internal) ?? today[0];
 };
+/** Research published on the current edition's day (not daily briefs, not mid-day notes). */
+export const todaysResearch = (role: Role) => visibleDocs(role).filter(d => !d.midday && d.kind !== 'Daily' && docIso(d) === ED.date);
 /** Today's "Latest research": content order, same-day rule for mid-day notes, first three. */
 export const latestDocs = (role: Role) => LATEST_IDS.map(id => visibleDocs(role).find(d => d.id === id)).filter((d): d is Doc => !!d && isCurrent(d)).slice(0, 3);

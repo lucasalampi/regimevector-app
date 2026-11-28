@@ -11,6 +11,7 @@ export const BRIEF_ASSETS: Record<string, number> = {
   "midday-2026-11-23.pdf": require('../../assets/briefs/midday-2026-11-23.pdf'),
   "midday-2026-11-20.pdf": require('../../assets/briefs/midday-2026-11-20.pdf'),
   "intraday-2026-11-20.pdf": require('../../assets/briefs/intraday-2026-11-20.pdf'),
+  "xa-e3.pdf": require('../../assets/briefs/xa-e3.pdf'),
   "fx-e1.pdf": require('../../assets/briefs/fx-e1.pdf'),
   "positioning-2026-11-20.pdf": require('../../assets/briefs/positioning-2026-11-20.pdf'),
   "semi-e2.pdf": require('../../assets/briefs/semi-e2.pdf'),

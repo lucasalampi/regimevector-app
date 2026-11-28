@@ -40,7 +40,7 @@ content/research.json      (library)    ─┤                           src/dat
 content/events.json, positioning.json   ─┘                           assets/pdfjs/*.txt
 ```
 
-- **From the archive:** levels and daily changes, all 130 editions of history for every chart, regime runs for the shading, the seven dimensions with boundary distances, scenario weights, both view texts, tenure and the weakest boundary. The transmission matrix is computed from the last 60 editions of daily changes: yield and OAS changes are differences, the rest are percent changes.
+- **From the archive:** levels and daily changes, every archived edition (132 as of 27 Nov) as history for every chart, regime runs for the shading, the seven dimensions with boundary distances, scenario weights, both view texts, tenure and the weakest boundary. The transmission matrix is computed from the last 60 editions of daily changes: yield and OAS changes are differences, the rest are percent changes.
 - **Editorial content:** `content/` holds what the archive does not: driver lists, the event feed, the research catalogue, issuers and positioning. Positioning is still **illustrative** and is labelled so in the app.
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
@@ -76,7 +76,7 @@ Left out on purpose: the EIA spot fields (`cmd_wti_spot`, `cmd_brent_spot`, `cmd
 
 **Not yet shown:** the EQ-1.0 factor fields (`eq_ar1`, `eq_ar2`, `eq_z1`–`eq_z3`, `eq_s1`; 5 editions, PROPOSED). They have no definitions in the archive.
 
-A value the latest edition did not re-observe shows **"as of <date>"** instead of a change. Canada fields last arrived on 23 Nov.
+A value the latest edition did not re-observe shows **"as of <date>"** instead of a change. In the 27 Nov edition, credit (OAS, T+2) and Canada fields are as of 25 Nov.
 
 **Chart interaction:**
 - **Timeline** (default): the plot stays clean and a regime ribbon runs underneath. **Overlay**: the plot itself is tinted by regime. Switch on the chart, or set the default in Settings.
@@ -122,6 +122,8 @@ This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, t
 `content/events.json` holds client **themes** (id, name, colour, tracked instrument; `internal` themes are hidden from Client) and **alerts** (`theme`, ISO `date`, `type`, `links` to instruments).
 
 Research entries flagged `midday: true` are mid-day orientation notes, and they are offered **only on their own publication day**. On that day, Events shows **Open mid-day orientation note** and Today's Latest research lists the note. On any other day both leave it out. Events then says that no mid-day note was issued and opens the day's brief instead (operating-state brief for Internal, client brief otherwise), with a link to the event-contingent archive in Research (`/research?filter=Events`).
+
+If the day's daily briefs are not yet in the library, Events says so and offers research published that day instead (for 27 Nov, the XA-E3 Cross-Asset Equilibrium Brief).
 
 ## Reader
 

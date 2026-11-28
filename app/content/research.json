@@ -7,8 +7,8 @@
     "Special": "Special and single-name research"
   },
   "latest": [
+    "xa3",
     "d6",
-    "d3",
     "x1",
     "x6"
   ],
@@ -111,6 +111,15 @@
       "date": "20 Nov 2026",
       "pages": "Mockup",
       "file": "intraday-2026-11-20.pdf"
+    },
+    {
+      "id": "xa3",
+      "kind": "Executive",
+      "title": "Cross-Asset Equilibrium Brief",
+      "code": "XA-E3",
+      "date": "27 Nov 2026",
+      "pages": "Edition",
+      "file": "xa-e3.pdf"
     },
     {
       "id": "x1",

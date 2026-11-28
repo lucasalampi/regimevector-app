@@ -37,5 +37,22 @@
       "Policy Stance": "Hike prob 98% / Cut prob 6%",
       "Dollar Regime": "DXY 103.7 (−0.10% d/d)"
     }
+  },
+  "2026-11-27": {
+    "drivers": [
+      {
+        "t": "Back above the break line",
+        "b": "S&P +1.60% to 7,297.49 in the half session, 0.69% under its 200-day: Market Structure back to Technical neutral after one session. VIX 23.81, below 25; Nasdaq +2.31%, all eleven sectors up."
+      },
+      {
+        "t": "Yields up with stocks; more Gulf attacks",
+        "b": "2Y 4.69 (+8bp), 10Y 4.94 (+9bp), December hike 98.9% priced. Jazan refinery hit and a Kuwait drone attack; Brent Jan 95.44, WTI reference 83.98. Weights held 10/8/72/10."
+      }
+    ],
+    "internalStatus": "HY-1.0 LIVE · gate 25/25 PASS · revision #28 held (10/8/72/10) · quiet 0/10 · Kuwait class review flagged.",
+    "dimData": {
+      "Policy Stance": "Hike prob 99% / Cut prob 6%",
+      "Dollar Regime": "DXY 104.0 (+0.36% d/d)"
+    }
   }
 }
