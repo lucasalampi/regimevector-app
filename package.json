@@ -1,0 +1,8 @@
+{
+  "name": "regimevector",
+  "private": true,
+  "description": "Repository root: builds the web terminal from app/ for Cloudflare Workers (see wrangler.jsonc).",
+  "scripts": {
+    "build:web": "npm ci --prefix app && npm run build:web --prefix app"
+  }
+}
