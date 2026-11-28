@@ -69,9 +69,24 @@ export const LATEST_IDS = research.latest;
 export const ISSUERS = research.issuers as Issuer[];
 export const ALERTS = events.alerts as Alert[];
 export const THEMES = (events as unknown as { themes: Theme[] }).themes;
+export interface PosTest {
+  id: string; name: string; kind: 'level' | 'tag'; key: string; rule: string; hypothesis: string; counter: string;
+  /** level tests: pass while the series stays above this line */
+  above?: number;
+  /** tag tests: the dimension read, and the tags that pass / fail */
+  dim?: string; passTags?: string[]; failTags?: string[];
+  /** context for the live cushion: a level line (structure, % vs 200-day) or a price edge (supply, $) */
+  line?: number; edge?: number;
+}
 export const POSITIONING = positioning as unknown as {
-  illustrative: boolean; weekEnding: string; briefDoc: string; books: Record<string, [string, number][]>;
+  book: string; status: string; weekEnding: string; weekIso: string; days: string; briefDoc: string; sidecarDoc: string;
+  headline: string; view: string;
+  prior: { weekEnding: string; summary: string; note: string; legs: { name: string; outcome: 'Confirmed' | 'Falsified' | 'Unresolved'; b: string }[] };
+  resolves: string; tests: PosTest[]; reserve: string; notHeld: { t: string; b: string }[]; watch: string[];
+  internal: { stateRows: { dim: string; from: string; to: string; read: string }[]; commodity: string; sizing: string };
 };
+/** Published dimension tag per edition. */
+export const TAG_HISTORY = (edition as unknown as { tagHistory: Record<string, (string | null)[]> }).tagHistory ?? {};
 
 /** Regime dimension → instrument key it reads (navigation between Markets and Drill-down). */
 export const DIM_LINKS = (edition as unknown as { dimensionLinks: Record<string, string> }).dimensionLinks ?? {};

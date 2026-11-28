@@ -89,13 +89,16 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
   const covered = w.from > w.start;
 
   // ---- interaction ----
-  const geoRef = useRef({ plotW, span, w }); geoRef.current = { plotW, span, w };
+  // The pan responder is created once; everything it reads must come through refs, or it keeps the
+  // instrument that was on screen when the chart mounted (snapping to the wrong series' readings).
+  const geoRef = useRef({ plotW, span, w, k: row.k }); geoRef.current = { plotW, span, w, k: row.k };
   const active = useRef(false), hold = useRef<ReturnType<typeof setTimeout> | null>(null), lastRegime = useRef('');
   const pick = (px: number) => {
     const g = geoRef.current;
     let i = Math.max(g.w.from, Math.min(g.w.end, Math.round(g.w.start + ((px - PAD_L) / g.plotW) * g.span)));
-    // Snap to the nearest edition with a reading.
-    if (SERIES[row.k][i] == null) { for (let d = 1; d < 6; d++) { if (SERIES[row.k][i - d] != null && i - d >= g.w.from) { i -= d; break; } if (SERIES[row.k][i + d] != null && i + d <= g.w.end) { i += d; break; } } }
+    // Snap to the nearest edition with a reading (the current instrument's own series).
+    const ser = SERIES[g.k];
+    if (ser[i] == null) { for (let d = 1; d < 6; d++) { if (i - d >= g.w.from && ser[i - d] != null) { i -= d; break; } if (i + d <= g.w.end && ser[i + d] != null) { i += d; break; } } }
     const name = regimeAt(i).name;
     if (active.current && lastRegime.current && name !== lastRegime.current) tick();
     lastRegime.current = name;
@@ -120,7 +123,12 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
     onPanResponderRelease: end, onPanResponderTerminate: end,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []);
-  const hover = isWeb ? { onPointerMove: (e: { nativeEvent: { offsetX: number } }) => pick(e.nativeEvent.offsetX), onPointerLeave: end } : {};
+  // Hover reading is for a mouse only; touch on mobile web goes through the pan responder like native.
+  type PE = { nativeEvent: { offsetX: number; pointerType?: string } };
+  const hover = isWeb ? {
+    onPointerMove: (e: PE) => { if (e.nativeEvent.pointerType === 'mouse') pick(e.nativeEvent.offsetX); },
+    onPointerLeave: (e: PE) => { if (e.nativeEvent.pointerType === 'mouse') end(); },
+  } : {};
 
   const si = scrub ?? w.end, sv = s[si] ?? last, sr = regimeAt(si);
   const sy = scrub != null && s[scrub] != null ? geo.y(s[scrub]!) : null;

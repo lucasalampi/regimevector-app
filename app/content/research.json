@@ -9,8 +9,8 @@
   "latest": [
     "d8",
     "xa3",
-    "x1",
-    "x6"
+    "x7",
+    "x1"
   ],
   "docs": [
     {
@@ -155,6 +155,15 @@
       "file": "fx-e1.pdf"
     },
     {
+      "id": "x7",
+      "kind": "Executive",
+      "title": "Positioning Intelligence Executive Brief",
+      "code": "PB-XB-1.0",
+      "date": "27 Nov 2026",
+      "pages": "One page",
+      "file": "positioning-2026-11-27.pdf"
+    },
+    {
       "id": "x2",
       "kind": "Executive",
       "title": "Positioning Intelligence Executive Brief",
@@ -189,6 +198,16 @@
       "date": "3 Nov 2026",
       "pages": "One page",
       "file": "in-e1.pdf"
+    },
+    {
+      "id": "x8",
+      "kind": "Executive",
+      "title": "Weekly Positioning Research Sidecar",
+      "code": "PB-1.0",
+      "date": "27 Nov 2026",
+      "pages": "Internal draft",
+      "internal": true,
+      "file": "positioning-sidecar-2026-11-27.pdf"
     },
     {
       "id": "x5",

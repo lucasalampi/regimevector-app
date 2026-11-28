@@ -32,6 +32,7 @@ if (!chromium) {
 
 const D = readJson(rel('src', 'data', 'edition.generated.json'));
 const research = readJson(rel('content', 'research.json'));
+const POS = readJson(rel('content', 'positioning.json'));
 const events = readJson(rel('content', 'events.json'));
 const ED = D.edition, N = D.dates.length, DATES = D.dates;
 const MINUS = '−';
@@ -185,6 +186,33 @@ function transmission() {
   const cell = v => { const a = Math.abs(v); const bg = v >= 0 ? `rgba(21,48,78,${a.toFixed(2)})` : `rgba(139,32,32,${a.toFixed(2)})`; return `<td class="num mx" style="background:${bg};color:${a > 0.45 ? '#fff' : '#0b0f1a'}">${(v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v).toFixed(2)}</td>`; };
   return `<table class="t mxt"><thead><tr><th></th>${T.nodes.map(n => `<th class="num">${n}</th>`).join('')}</tr></thead><tbody>${T.nodes.map((n, i) => `<tr><th>${n}</th>${T.matrix[i].map((v, j) => (i === j ? '<td class="num muted">—</td>' : cell(v))).join('')}</tr>`).join('')}</tbody></table>
     <p class="note">Correlation of daily changes over the last ${T.window} editions. Nodes: ${T.nodes.map((n, i) => `${n} = ${esc(byKey(T.keys[i])?.s ?? T.keys[i])}`).join(' · ')}. Yield and spread nodes use differences; price nodes use percent changes.</p>`;
+}
+
+// Positioning book: the same window rule as the app (src/lib/positioning.ts).
+function positioningSection() {
+  const st = t => {
+    const ses = []; let closed = false;
+    for (let i = 0; i < N && !closed; i++) {
+      if (DATES[i] <= POS.weekIso) continue;
+      let p = null;
+      if (t.kind === 'level') { const v = D.series[t.key]?.[i]; p = v == null ? null : v > t.above; }
+      else { const tag = D.tagHistory?.[t.dim]?.[i]; p = tag == null ? null : t.passTags ? t.passTags.includes(tag) : !(t.failTags ?? []).includes(tag); }
+      if (p != null) ses.push({ d: DATES[i], p });
+      if (DATES[i] >= POS.resolves) closed = true;
+    }
+    const f = ses.find(x => !x.p);
+    const status = f ? `Falsified ${short(f.d)}` : closed ? 'Confirmed' : ses.length ? `Holding · ${ses.length}` : 'Window opens';
+    const v = D.series[t.key]?.[N - 1], r = byKey(t.key);
+    const cushion = v == null ? '—' : t.kind === 'level' ? `${Math.round((v - t.above) * 100)}bp ${v > t.above ? 'above' : 'below'} ${t.above.toFixed(2)}`
+      : t.line != null ? `${Math.abs(v - t.line).toFixed(2)}pp ${v > t.line ? 'above' : 'below'} the ${MINUS}${Math.abs(t.line)}% line`
+      : `$${Math.abs(t.edge - v).toFixed(2)} ${v < t.edge ? 'below' : 'above'} $${t.edge}`;
+    return { status, cushion, now: r ? `${r.s} ${r.val}` : '' };
+  };
+  return `<div class="keep"><h2>Positioning book · ${esc(POS.book)} <span class="h-meta">week ending ${esc(POS.weekEnding)} · ${esc(POS.status.toLowerCase())}</span></h2>
+  <p style="margin:0 0 1mm"><b>${esc(POS.headline)}</b> Last week: ${esc(POS.prior.summary)}.</p>
+  <table class="t tight"><thead><tr><th>Test (resolves ${short(POS.resolves)})</th><th>Exit rule</th><th>Now</th><th class="num">Cushion</th><th>Status</th></tr></thead><tbody>
+  ${POS.tests.map(t => { const x = st(t); return `<tr><td><b>${esc(t.name)}</b></td><td class="muted">${esc(t.rule)}</td><td>${esc(x.now)}</td><td class="num">${esc(x.cushion)}</td><td>${esc(x.status)}</td></tr>`; }).join('')}
+  </tbody></table><p class="note">Shadow book: no notional, no execution path; weights withheld. Not held: ${POS.notHeld.map(n => esc(n.t)).join(' · ')}.</p></div>`;
 }
 
 function eventsSection() {
@@ -351,6 +379,8 @@ ${transmission()}</div>
 <p class="note">Mid-day orientation notes are offered only on their publication day; none was issued for ${esc(ED.dateShort)}.</p>
 <div class="cols2">${eventsSection()}</div>
 
+${positioningSection()}
+
 <div class="keep"><h1>6 · Research library <span class="h-meta">${docs.length} editions</span></h1>
 <table class="t tight"><thead><tr><th>Programme</th><th>Title</th><th>Code</th><th class="num">Date</th><th class="num">Pp.</th><th>Surface</th></tr></thead><tbody>
 ${docs.map(d => `<tr><td class="muted">${esc(research.programmes[d.kind])}</td><td>${esc(d.title)}</td><td>${esc(d.code)}</td><td class="num">${esc(d.date)}</td><td class="num">${D.pdfMeta[d.file]?.pages ?? (/\.html$/.test(d.file) ? 'int.' : '—')}</td><td class="muted">${esc(d.pages)}${d.internal ? ' · Internal' : ''}</td></tr>`).join('')}
@@ -369,7 +399,7 @@ ${docs.map(d => `<tr><td class="muted">${esc(research.programmes[d.kind])}</td><
 </div>
 <div class="keep"><h3>Derived RV analytics</h3>
 <p style="font-size:6.8pt">${rows.filter(r => r.derived).map(r => `<b>${esc(r.s)}</b> ${esc((r.note ?? '').replace(/\.$/, ''))}`).join(' · ')}.</p>
-<div class="disc">Research content is interpretive commentary on a classified state. It is not investment advice, an offer or a solicitation. All statistics are descriptive. ${INTERNAL ? 'INTERNAL edition: includes internal views, boundary distances, internal research and internal events; not for distribution.' : 'Client edition: internal views, boundary distances, internal research and internal events are excluded. Weekly positioning is omitted while its data is illustrative.'} © ${ED.date.slice(0, 4)} RegimeVector.</div></div>
+<div class="disc">Research content is interpretive commentary on a classified state. It is not investment advice, an offer or a solicitation. All statistics are descriptive. ${INTERNAL ? 'INTERNAL edition: includes internal views, boundary distances, internal research and internal events; not for distribution.' : 'Client edition: internal views, boundary distances, internal research and internal events are excluded.'} © ${ED.date.slice(0, 4)} RegimeVector.</div></div>
 </div>
 
 ${screens.length ? `<div class="keep"><h1>Appendix · Interface <span class="h-meta">${role} view at the ${esc(ED.dateShort)} close · web build, phone width</span></h1>

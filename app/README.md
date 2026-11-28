@@ -26,7 +26,8 @@ The app needs no backend. Sign-in is mocked: any valid email and a password of 6
 | `/reader/[id]` | Reader: daily summary, fit-width edition pages, save |
 | `/viewer/[id]` | Full-screen edition: zoom, text selection, page counter |
 | `/events` | Thematic event feed: theme cards (count, unread, live tracked instrument) as filters; items grouped by day with theme colour, live instrument chips ("Now" on earlier days); Today's edition panel |
-| `/more`, `/watchlist`, `/positioning`, `/names`, `/name/[tk]`, `/search`, `/settings` | Secondary screens |
+| `/positioning` | Weekly positioning book (PB-1.0): headline and view, last week's test outcomes, the dated tests with live cushions and window status from the archive, reserve, not-held list, what to watch; Internal adds the regime-state table, commodity read, sizing note and the research sidecar |
+| `/more`, `/watchlist`, `/names`, `/name/[tk]`, `/search`, `/settings` | Secondary screens |
 
 The navy masthead and the five-tab bar stay on every screen, as in the design. Tapping a tab clears any pushed screens.
 
@@ -41,7 +42,7 @@ content/events.json, positioning.json   ─┘                           assets/
 ```
 
 - **From the archive:** levels and daily changes, every archived edition (132 as of 27 Nov) as history for every chart, regime runs for the shading, the seven dimensions with boundary distances, scenario weights, both view texts, tenure and the weakest boundary. The transmission matrix is computed from the last 60 editions of daily changes: yield and OAS changes are differences, the rest are percent changes.
-- **Editorial content:** `content/` holds what the archive does not: driver lists, the event feed, the research catalogue, issuers and positioning. Positioning is still **illustrative** and is labelled so in the app.
+- **Editorial content:** `content/` holds what the archive does not: driver lists, the event feed, the research catalogue, issuers and the weekly positioning book.
 
 **Coverage is never invented.** Values carry forward across a missing edition, but an instrument's history starts at its first observation. GBP/USD, for example, starts on 2 Sep 2026 (edition 72), and the chart marks the earlier stretch "Not in archive". Monthly releases (CPI, core CPI, core PCE, PPI, ISM prices) are tagged `freq: monthly` in `content/instruments.json`: they draw as steps and skip per-session statistics.
 
@@ -113,7 +114,7 @@ This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, t
 
 **Format:** text-based, so every number can be searched and copied. Charts are vector, the Inter fonts are embedded as subsets, and pages are Letter size with bookmarks and accessibility tags. Each PDF runs to 9 pages and about 0.7 MB. The report reads the same generated data as the app, so its figures match the interface.
 
-**Client edition:** excludes the strategist view, boundary distances, internal research, internal events and the Desk ops theme. Positioning is omitted from both editions while its data is illustrative.
+**Client edition:** excludes the strategist view, boundary distances, internal research, internal events and the Desk ops theme.
 
 **Requirement:** Playwright with Chromium (`npm i -D playwright && npx playwright install chromium`).
 
@@ -124,6 +125,10 @@ This produces `RegimeVector_Edition<N>_<date>_Client.pdf` and `_Internal.pdf`, t
 Research entries flagged `midday: true` are mid-day orientation notes, and they are offered **only on their own publication day**. On that day, Events shows **Open mid-day orientation note** and Today's Latest research lists the note. On any other day both leave it out. Events then says that no mid-day note was issued and opens the day's brief instead (operating-state brief for Internal, client brief otherwise), with a link to the event-contingent archive in Research (`/research?filter=Events`).
 
 If the day's daily briefs are not yet in the library, Events says so and offers research published that day instead (for 27 Nov, the XA-E3 Cross-Asset Equilibrium Brief).
+
+## Positioning book
+
+`content/positioning.json` holds the Saturday book (from the executive brief and the sidecar). Each test is a `level` test on a series (`above`) or a `tag` test on a dimension (`passTags` / `failTags`). A test's window runs from the first edition after `weekIso` to the first edition on or after `resolves`; it is falsified by any failing edition and confirmed when the window closes clean. `build-data` writes `tagHistory` (published tags per edition) so tag tests resolve from the archive. To publish a new week, replace the file and add the two PDFs to `research.json` (set `briefDoc` and `sidecarDoc`).
 
 ## Reader
 
@@ -152,5 +157,4 @@ Deep links to internal content redirect when the role is **Client**.
 
 - **Auth:** mocked, in `src/store.ts` `signIn`.
 - **Notifications:** the toggles are stored but nothing sends a notification yet.
-- **Positioning:** illustrative data.
 - **Updates:** data is bundled at build time; a runtime edition feed would replace `src/data/index.ts`'s imports.

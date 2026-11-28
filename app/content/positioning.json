@@ -1,10 +1,68 @@
 {
-  "$comment": "Weekly positioning book. Values are 1Y percentiles of net position. ILLUSTRATIVE until wired to the PB-1.0 pb_input feed.",
-  "illustrative": true,
-  "weekEnding": "20 Nov 2026",
-  "briefDoc": "x2",
-  "books": {
-    "Asset managers": [["UST 10Y", 71], ["S&P 500", 38], ["Nasdaq 100", 24], ["WTI", 57], ["Gold", 83], ["USD index", 66], ["JPY", 19], ["CAD", 31]],
-    "Leveraged funds": [["UST 10Y", 22], ["S&P 500", 44], ["Nasdaq 100", 61], ["WTI", 35], ["Gold", 58], ["USD index", 74], ["JPY", 12], ["CAD", 27]]
+  "$comment": "Weekly positioning book (PB-1.0, Saturday edition). Authored content from the executive brief and the internal research sidecar; live cushions and window status are computed in the app from the archive. Shadow book: no notional, no execution path; sizing weights withheld.",
+  "book": "PB-1.0",
+  "status": "Proposed · shadow book · weights withheld",
+  "weekEnding": "27 Nov 2026",
+  "weekIso": "2026-11-27",
+  "days": "Day 216–220",
+  "briefDoc": "x7",
+  "sidecarDoc": "x8",
+  "headline": "Stocks reclaimed the break; bonds sold off with them.",
+  "view": "The index broke its long average for one session and reclaimed it within two, while the ten-year rose with stocks on Friday and December hike pricing sat at 99%: the hawkish half of the label did the work, and the label held. The book tests only daily inputs: the front end above a tighter line, no re-break in structure, and the supply cushion through the producer meeting. Growth and inflation are not testable this window; the book stays de-grossed.",
+  "prior": {
+    "weekEnding": "20 Nov 2026",
+    "summary": "2 confirmed · 1 falsified · 0 unresolved",
+    "note": "Decided by the rules as pre-written; descriptive, not ledger evidence (the prior draft was never hashed).",
+    "legs": [
+      { "name": "Front end above 4.50", "outcome": "Confirmed", "b": "Two-year above 4.50 on all four window editions; low 4.61 on the core-inflation day, 4.69 at the close." },
+      { "name": "Structure: no reclaim", "outcome": "Falsified", "b": "Lost on the first session as the index rose nearly 5%; Market Structure closed the week Technical neutral." },
+      { "name": "Supply easing through the roll", "outcome": "Confirmed", "b": "Supply Shock read Easing on every edition through the January roll, though Brent's January closed above $95." }
+    ]
+  },
+  "resolves": "2026-12-04",
+  "tests": [
+    {
+      "id": "front", "name": "Front end", "kind": "level", "key": "usy2", "above": 4.6,
+      "rule": "Two-year yield above 4.60 on every edition after 27 Nov through the first edition dated on or after 4 Dec; any edition at or below 4.60 falsifies.",
+      "hypothesis": "The hawkish half of the label holds a tighter line: with a December hike all but fully priced, core inflation at a two-year high and the ten-year rising with stocks, the two-year stays above 4.60.",
+      "counter": "Nine basis points of cushion; two hikes by January are two-thirds priced, so little hawkish news is left and a renewed equity slide would pull yields down."
+    },
+    {
+      "id": "structure", "name": "Structure", "kind": "tag", "dim": "Market Structure", "failTags": ["TECHNICAL_BREAKDOWN"], "key": "x_spx200", "line": -2,
+      "rule": "Market Structure reads anything other than Technical breakdown on every edition after 27 Nov through the first edition dated on or after 4 Dec.",
+      "hypothesis": "The 200-day break was a one-session event: the index reclaimed the line within two sessions and closed the week less than 1% under its long average.",
+      "counter": "The same chip names led both ways, the equal-weight index lagged on Friday, and the break line is 1.3% below Friday's close."
+    },
+    {
+      "id": "supply", "name": "Supply", "kind": "tag", "dim": "Supply Shock", "passTags": ["EASING"], "key": "wti", "edge": 90,
+      "rule": "Supply Shock reads Easing on every edition after 27 Nov through the first edition dated on or after 4 Dec; any other tag falsifies.",
+      "hypothesis": "The supply leg holds Easing through the producer meeting and a worse strike tape, with the reference six dollars under $90.",
+      "counter": "Brent's front contract is above $95 after the Ras Tanura and Jazan attacks; OPEC+ meets on 29 Nov, and a cut or a single refinery outage closes a six-dollar cushion in two sessions."
+    }
+  ],
+  "reserve": "Held at the floor; deployed after the first resolution, along the surviving branch. All three exits rest on daily inputs (W-1).",
+  "notHeld": [
+    { "t": "Breakdown", "b": "Falsified on Monday as the index rose nearly 5%; it broke again for one session on 25 Nov and closed neutral." },
+    { "t": "Growth · CPI", "b": "No dated release inside the window; W-1 admits a monthly basis only with a declared release. Core inflation printed before it." },
+    { "t": "Dollar", "b": "The edge is named, firm against strong, but the tag crossed it three times in four sessions; a test would round-trip." },
+    { "t": "Weights · havens", "b": "Weights revised on the completed class clock, with a possible new act class under review; gold swung 3% on alternate sessions." },
+    { "t": "Long end", "b": "The ten-year rose 9bp on Friday after eight straight declines; one session is not a turn." },
+    { "t": "Equity beta", "b": "Best week since April 2025 on a chip-led rally with Risk Sentiment still short of risk-on; the book stays de-grossed (since 30 Oct)." }
+  ],
+  "watch": [
+    "OPEC+ meeting on Sunday 29 Nov (supply leg).",
+    "Whether the S&P holds above the −2% line to its 200-day (structure leg).",
+    "Two-year against 4.60 (front-end leg).",
+    "Class review of the Kuwait attack (scenario weights)."
+  ],
+  "internal": {
+    "stateRows": [
+      { "dim": "Risk Sentiment", "from": "Risk-off · 0.162", "to": "Transitional · 0.170", "read": "Stepped down twice; never risk-on, de-gross trigger still in force." },
+      { "dim": "Market Structure", "from": "Neutral · 0.138", "to": "Neutral · 0.328", "read": "Broke for one session on 25 Nov, reclaimed in two." },
+      { "dim": "Dollar Regime", "from": "USD strong · 0.053", "to": "USD strong · 0.007", "read": "Crossed to firm and back; three crossings in four sessions." },
+      { "dim": "Supply Shock", "from": "Easing · 0.413", "to": "Easing · 0.401", "read": "Cushion held through the January roll." }
+    ],
+    "commodity": "Energy ELEVATED/FALLING on a firm dollar while prices lead commodities: keeps the supply cushion and the policy leg's inflation anchor, but the copper/gold lean is defensive, so the complex does not corroborate the equity reclaim.",
+    "sizing": "Tier A for all three legs; stance Aligned, form Convexity; weights derived by R-SZ and withheld (parameter file not authored). Draft unhashed; no ledger calls open."
   }
 }

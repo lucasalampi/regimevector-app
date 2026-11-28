@@ -376,6 +376,8 @@ const out = {
   series, runs, groups,
   transmission: { window: T.window, nodes: T.nodes.map(n => n.name), keys: T.nodes.map(n => n.key), change: T.nodes.map(n => n.change), matrix },
   dates: eds.map(e => e.date),
+  // Published dimension tags per edition (positioning tests resolve on tags, not on levels).
+  tagHistory: Object.fromEntries(Object.keys(dimsRaw).map(name => [name, eds.map(e => e.regime_tags?.dimensions?.[name]?.tag ?? null)])),
   regimeTints: instruments.regimeTints,
   dimensionLinks: instruments.dimensionLinks ?? {},
   pdfMeta,
