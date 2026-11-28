@@ -69,8 +69,8 @@
     {
       "id": "c7",
       "type": "Event",
-      "t": "Oil steady, Brent above 5",
-      "b": "Jan WTI 83.08 (−0.60); reference 83.98, .02 below 0. Brent Jan 95.44. OPEC+ meets Sunday.",
+      "t": "Oil steady, Brent above $95",
+      "b": "Jan WTI 83.08 (−0.60); reference 83.98, $6.02 below $90. Brent Jan 95.44. OPEC+ meets Sunday.",
       "theme": "energy",
       "date": "2026-11-27",
       "links": [

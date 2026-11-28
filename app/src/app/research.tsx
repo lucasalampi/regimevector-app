@@ -4,6 +4,8 @@ import { View } from 'react-native';
 import { openDoc } from '@/components/edition';
 import { DocRow, ProgrammeBar, Screen, Seg } from '@/components/ui';
 import { docFormat, pdfMeta, PROGRAMMES, visibleDocs, type Doc, type DocKind } from '@/data';
+import { ResearchTerminal } from '@/components/terminal/ResearchSplit';
+import { useTerminal } from '@/lib/terminal';
 import { useApp } from '@/store';
 
 const FILTERS = ['All', 'Daily', 'Events', 'Executive', 'Special'] as const;
@@ -12,9 +14,10 @@ const extent = (d: Doc) => { const n = pdfMeta(d)?.pages; return docFormat(d) ==
 
 export default function Research() {
   const role = useApp(s => s.role);
-  const { filter: initial } = useLocalSearchParams<{ filter?: string }>();
+  const { filter: initial, id } = useLocalSearchParams<{ filter?: string; id?: string }>();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>(FILTERS.find(f => f === initial) ?? 'All');
   const docs = visibleDocs(role).filter(d => filter === 'All' || d.kind === filter);
+  if (useTerminal()) return <ResearchTerminal initialFilter={filter} initialId={id} />;
 
   return (
     <Screen pad={[14, 18, 28]} gap={14}>

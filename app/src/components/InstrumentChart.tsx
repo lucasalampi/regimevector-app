@@ -1,13 +1,14 @@
 import * as Haptics from 'expo-haptics';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PanResponder, Platform, Text, View } from 'react-native';
+import { useKeys } from '@/lib/terminal';
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { DATES, REGIMES, SERIES, type Row } from '@/data';
 import { fmtValue, isFlow, isStep, monthOf, regimeAt, shortDate, type Window } from '@/lib/analytics';
 import type { ChartStyle } from '@/store';
 import { C, font, MUTED, tabular } from '@/theme';
 
-const H = 248;          // card height
+const H_DEFAULT = 248;  // card height (phone); the terminal passes a taller one
 const TOP = 40;         // read-out row
 const RIBBON = 10;      // regime timeline height (Timeline mode)
 const AXIS = 22;        // x-axis labels
@@ -37,9 +38,13 @@ const num = (v: number, dp: number) => (v < 0 ? '−' : '') + Math.abs(v).toLoca
  *   Crosshair, value tag on the axis, date on the x-axis, haptic tick on start and at each regime change.
  * - Web: hover to read.
  */
-export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style: ChartStyle }) {
+export function InstrumentChart({ row, w, style, height, keys }: { row: Row; w: Window; style: ChartStyle; height?: number;
+  /** Terminal: ← / → step the crosshair one session, Esc clears it. */
+  keys?: boolean }) {
+  const H = height ?? H_DEFAULT;
   const [width, setWidth] = useState(0);
   const [scrub, setScrub] = useState<number | null>(null);
+  useEffect(() => setScrub(null), [row.k]);
   const s = SERIES[row.k];
   const overlay = style === 'Overlay';
   const plotW = Math.max(10, width - GUTTER - PAD_L);
@@ -130,6 +135,15 @@ export function InstrumentChart({ row, w, style }: { row: Row; w: Window; style:
     onPointerLeave: (e: PE) => { if (e.nativeEvent.pointerType === 'mouse') end(); },
   } : {};
 
+  useKeys(e => {
+    if (e.key === 'Escape') { if (scrub == null) return false; setScrub(null); return true; }
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return false;
+    const dir = e.key === 'ArrowLeft' ? -1 : 1;
+    let i = (scrub ?? w.end) + (scrub == null && dir > 0 ? 0 : dir);
+    while (i > w.from && i < w.end && s[i] == null) i += dir;
+    setScrub(Math.max(w.from, Math.min(w.end, i)));
+    return true;
+  }, !!keys);
   const si = scrub ?? w.end, sv = s[si] ?? last, sr = regimeAt(si);
   const sy = scrub != null && s[scrub] != null ? geo.y(s[scrub]!) : null;
 

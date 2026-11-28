@@ -5,6 +5,8 @@ import { TransmissionMap } from '@/components/charts';
 import { ChevronRight } from '@/components/icons';
 import { blueprint, Kicker, Tap } from '@/components/ui';
 import { DIM_LINKS, ED, GROUPS, rowByKey, TRANSMISSION } from '@/data';
+import { MarketsMonitor } from '@/components/terminal/Monitor';
+import { useTerminal } from '@/lib/terminal';
 import { useApp } from '@/store';
 import { C, changeColor, font, LEVEL_TINT, MUTED, tabular } from '@/theme';
 
@@ -14,6 +16,11 @@ const openRow = (key: string) => {
 };
 
 export default function Markets() {
+  if (useTerminal()) return <MarketsMonitor />;
+  return <MobileMarkets />;
+}
+
+function MobileMarkets() {
   const internal = useApp(s => s.role) === 'Internal';
   const mapStyle = useApp(s => s.mapStyle);
   const scroll = useRef<ScrollViewInstance>(null);

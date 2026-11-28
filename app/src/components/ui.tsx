@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import { C, font, kicker, MUTED, ON } from '@/theme';
 import { ChevronRight } from './icons';
+import { useTerminal } from '@/lib/terminal';
 
 /** Pressable with the DS hover/pressed tint (accent-100). */
 export function Tap({ style, hoverBg = C.a100, children, ...rest }: Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle>; hoverBg?: string; children?: ReactNode }) {
@@ -16,9 +17,12 @@ export function Tap({ style, hoverBg = C.a100, children, ...rest }: Omit<Pressab
 }
 
 /** Screen body: scrolls, padded like the prototype's per-screen wrappers. */
-export function Screen({ children, pad = [18, 18, 28], gap = 22, style }: { children: ReactNode; pad?: [number, number, number]; gap?: number; style?: StyleProp<ViewStyle> }) {
+export function Screen({ children, pad = [18, 18, 28], gap = 22, style, maxWidth = 880 }: { children: ReactNode; pad?: [number, number, number]; gap?: number; style?: StyleProp<ViewStyle>; maxWidth?: number }) {
+  // On a computer the single column is centred at a readable width.
+  const terminal = useTerminal();
+  const wide: ViewStyle | null = terminal ? { width: '100%', maxWidth, alignSelf: 'center', paddingHorizontal: 28, paddingTop: 22 } : null;
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={[{ paddingTop: pad[0], paddingHorizontal: pad[1], paddingBottom: pad[2], gap }, style]} keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={[{ paddingTop: pad[0], paddingHorizontal: pad[1], paddingBottom: pad[2], gap }, wide, style]} keyboardShouldPersistTaps="handled">
       {children}
     </ScrollView>
   );

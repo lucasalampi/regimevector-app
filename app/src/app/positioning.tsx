@@ -6,6 +6,7 @@ import { Kicker, OutlineButton, PrimaryButton, Screen, Tap } from '@/components/
 import { POSITIONING as P, rowByKey, type PosTest } from '@/data';
 import { shortDate } from '@/lib/analytics';
 import { sessionsToResolve, testState, type TestStatus } from '@/lib/positioning';
+import { useTerminal } from '@/lib/terminal';
 import { useApp } from '@/store';
 import { alpha, C, font, MUTED, tabular } from '@/theme';
 
@@ -62,8 +63,9 @@ function TestCard({ t }: { t: PosTest }) {
 export default function Positioning() {
   const internal = useApp(s => s.role) === 'Internal';
   const left = sessionsToResolve();
+  const terminal = useTerminal();
   return (
-    <Screen pad={[14, 18, 28]} gap={22}>
+    <Screen pad={[14, 18, 28]} gap={22} maxWidth={1240}>
       <View style={{ gap: 6 }}>
         <Text style={[font(600, 11), { letterSpacing: 0.8, color: C.a700, textTransform: 'uppercase' }]}>{P.book} · week ending {P.weekEnding} · {P.days}</Text>
         <Text style={[font(700, 22, 1.25), { color: C.text }]}>{P.headline}</Text>
@@ -98,7 +100,9 @@ export default function Positioning() {
           <Text style={[font(600, 11), { color: C.text }]}>Resolves {shortDate(P.resolves)}{left > 0 ? ` · ${left} to run` : ''}</Text>
         </View>
         <Small>Each test passes only if it holds on every edition in its window: from the first edition after {shortDate(P.weekIso)} to the first on or after {shortDate(P.resolves)}. Cushions update with every archive edition; tap a test to open its instrument.</Small>
-        {P.tests.map(t => <TestCard key={t.id} t={t} />)}
+        <View style={terminal ? { flexDirection: 'row', gap: 14, alignItems: 'stretch' } : { gap: 10 }}>
+          {P.tests.map(t => <View key={t.id} style={terminal ? { flex: 1, minWidth: 0 } : null}><TestCard t={t} /></View>)}
+        </View>
         <Small><Text style={font(600, 12.5)}>Reserve. </Text>{P.reserve}</Small>
       </View>
 

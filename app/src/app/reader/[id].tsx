@@ -6,6 +6,8 @@ import EditionFrame from '@/components/frame/EditionFrame';
 import { Bookmark } from '@/components/icons';
 import { Kicker, PrimaryButton, ProgrammeBar, Screen, Tap } from '@/components/ui';
 import { docById, docFormat, ED, pdfMeta } from '@/data';
+import { ResearchTerminal } from '@/components/terminal/ResearchSplit';
+import { useTerminal } from '@/lib/terminal';
 import { useApp } from '@/store';
 import { C, font, MUTED } from '@/theme';
 
@@ -16,10 +18,13 @@ export default function Reader() {
   const toggleSaved = useApp(s => s.toggleSaved);
   const [note, setNote] = useState('');
   const doc = docById(id ?? '');
+  const terminal = useTerminal();
   const open = useCallback((page: number) => doc && router.push({ pathname: '/viewer/[id]', params: { id: doc.id, page: String(page) } }), [doc]);
 
   // Unknown id, or an internal edition opened under the Client role (e.g. via a stale deep link).
   if (!doc || (doc.internal && role !== 'Internal')) return <Redirect href="/research" />;
+  // On a computer the reader is the Research split view with this edition open.
+  if (terminal) return <ResearchTerminal initialId={doc.id} />;
   const isSaved = saved.includes(doc.id);
   const fmt = docFormat(doc);
   const pages = pdfMeta(doc)?.pages;

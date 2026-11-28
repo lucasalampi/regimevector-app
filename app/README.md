@@ -14,6 +14,26 @@ npm run export:web      # static web build in dist/
 
 The app needs no backend. Sign-in is mocked: any valid email and a password of 6+ characters works. Pick **Client** or **Internal** at sign-in, or switch later in Settings.
 
+## Computer (terminal) layout
+
+The web build switches to a **terminal layout** when the browser window is at least 1100px wide; narrower windows, phones and the native apps keep the mobile layout. It is the same app and the same data: no separate build.
+
+- **Chrome:** navy status bar (edition, regime, scenario weights; Internal adds tenure and the weakest boundary), a ticker of key levels (click to open), a navigation rail, and a command palette.
+- **Markets:** every instrument in one table: level, D/D, 1M, 3M, range position, realised vol, 21-session sparkline; filter by group or text, click a column to sort. Regime dimensions and the transmission map alongside.
+- **Drill-down:** three panes: instrument list (with a filter across all groups), chart (taller; hover or arrow keys) with related instruments and boards, and statistics / behaviour by regime / co-movement. The URL follows the selection.
+- **Research:** the library beside the open edition (zoom, page counter, save). Reader and viewer links open here.
+- **Today** in two columns (adds dimensions and the day's events); **Positioning** shows the three tests side by side; other screens centre at a readable width.
+
+**Keyboard:** `Ctrl K` or `/` search everything (instruments, research, issuers, screens) · `g` then `t m d e r p w n s` to go to a screen · `j`/`k` or `↓`/`↑` next / previous instrument or document · `[` `]` previous / next group · `←`/`→` step the chart crosshair one session, `Esc` clears · `1` `3` `a` chart range · `o` Timeline / Overlay · `w` watchlist · `b` save (Research) · `?` shortcut list. Shortcuts pause while typing in a field.
+
+Code: `src/lib/terminal.ts` (`useTerminal`, `useKeys`), `src/components/terminal/` (shell, markets monitor, research split), `src/components/DocPane.tsx`.
+
+## Hosting the web build
+
+`npm run export:web` writes a static single-page site to `dist/` (`public/_redirects` sends every path to `index.html`, so deep links work on Cloudflare Pages and Netlify). Any static host works; to look at it locally: `npx serve dist -s`.
+
+`.github/workflows/deploy-web.yml` builds the site on every push to `main` (data build, typecheck, export) and attaches it as a downloadable artifact. With the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set, it also deploys to Cloudflare Pages (project `regimevector`, or the `CF_PAGES_PROJECT` variable). Sign-in is still mocked and every edition is bundled into the site, so keep the hosted copy private: put Cloudflare Access in front of the Pages domain.
+
 ## Screens
 
 | Route | Screen |

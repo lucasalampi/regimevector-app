@@ -1,12 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type ScrollViewInstance } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { goTab } from '@/components/Chrome';
 import { ChevronRight, Star } from '@/components/icons';
 import { InstrumentChart, Sparkline } from '@/components/InstrumentChart';
 import { Kicker, Seg, Tap } from '@/components/ui';
-import { DATES, DIM_LINKS, ED, GROUPS, REGIMES, TRANSMISSION, type Group, type Row } from '@/data';
+import { ALL_ROWS, DATES, DIM_LINKS, ED, GROUPS, REGIMES, TRANSMISSION, type Group, type Row } from '@/data';
 import { byRegime, coMovement, flowStats, fmtChange, fmtValue, isFlow, BOARD, MEMBER_BOARD, relBoard, SLEEVE_BOARD, type BoardSpec, isStep, shortDate, stats, windowFor, type Unit } from '@/lib/analytics';
+import { useKeys, useTerminal, useTerminalWide } from '@/lib/terminal';
 import { useApp, type ChartStyle } from '@/store';
 import { alpha, C, changeColor, font, MUTED, tabular } from '@/theme';
 
@@ -56,6 +57,9 @@ export default function Asset() {
   const watch = useApp(s => s.watch);
   const toggleWatch = useApp(s => s.toggleWatch);
   const scroll = useRef<ScrollViewInstance>(null);
+  const terminal = useTerminal();
+  const threePane = useTerminalWide();
+  const [query, setQuery] = useState('');
 
   // Deep links (search, watchlist, Markets) can land on any instrument.
   useEffect(() => { if (params.group && GROUPS.some(g => g.id === params.group)) setGroupId(params.group); setSym(params.sym); }, [params.group, params.sym]);
@@ -91,12 +95,35 @@ export default function Asset() {
   const related = g.rows.filter(r => (r.sub ?? g.name) === section && r.s !== row.s);
   const feeds = Object.entries(DIM_LINKS).filter(([, k]) => k === row.k).map(([name]) => ED.dims.find(d => d.name === name)).filter(Boolean);
 
-  const select = (r: Row) => { setSym(r.s); scroll.current?.scrollTo({ y: 0, animated: true }); };
+  const select = (r: Row, gid = groupId) => {
+    if (gid !== groupId) setGroupId(gid);
+    setSym(r.s); scroll.current?.scrollTo({ y: 0, animated: true });
+    if (terminal) router.setParams({ group: gid, sym: r.s });
+  };
+  const pickGroup = (gid: string) => { setGroupId(gid); setSym(undefined); if (terminal) router.setParams({ group: gid, sym: GROUPS.find(x => x.id === gid)!.rows[0].s }); };
 
-  return (
-    <ScrollView ref={scroll} style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingTop: 14, paddingHorizontal: 18, paddingBottom: 32, gap: 22 }}>
-      <Seg fit options={GROUPS.map(x => x.name)} value={g.name} onChange={name => { setGroupId(GROUPS.find(x => x.name === name)!.id); setSym(undefined); }} />
+  // Terminal keyboard: j/k or ↓/↑ instruments, [ ] groups, 1 / 3 / a ranges, o display, w watchlist.
+  const q = query.trim().toLowerCase();
+  const listed = q ? ALL_ROWS.filter(r => `${r.s} ${r.group} ${r.sub ?? ''}`.toLowerCase().includes(q)) : g.rows.map(r => ({ ...r, gk: g.id, group: g.name }));
+  useKeys(e => {
+    const k = e.key;
+    if (k === 'j' || k === 'k' || k === 'ArrowDown' || k === 'ArrowUp') {
+      const i = listed.findIndex(r => r.s === row.s && r.gk === groupId);
+      const n = listed[Math.max(0, Math.min(listed.length - 1, (i < 0 ? -1 : i) + (k === 'j' || k === 'ArrowDown' ? 1 : -1)))];
+      if (n) select(n, n.gk);
+      return true;
+    }
+    if (k === '[' || k === ']') { const i = GROUPS.findIndex(x => x.id === groupId); pickGroup(GROUPS[(i + (k === ']' ? 1 : -1) + GROUPS.length) % GROUPS.length].id); return true; }
+    if (k === '1') { pickRange('1M'); return true; }
+    if (k === '3') { pickRange('3M'); return true; }
+    if (k === 'a') { pickRange('All'); return true; }
+    if (k === 'o') { setChartStyle(chartStyle === 'Timeline' ? 'Overlay' : 'Timeline'); return true; }
+    if (k === 'w') { toggleWatch(row.s); return true; }
+    return false;
+  }, terminal);
 
+  const headerEl = (
+    <>
       {/* Instrument header */}
       <View style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
@@ -135,13 +162,17 @@ export default function Asset() {
         ) : null}
       </View>
 
+    </>
+  );
+  const chartEl = (
+    <>
       {/* Chart */}
       <View style={{ gap: 10 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <View style={{ flex: 1 }}><Seg options={RANGES} value={range} onChange={pickRange} height={36} size={12} /></View>
           <Seg options={['Timeline', 'Overlay'] as const} value={chartStyle} onChange={(v: ChartStyle) => setChartStyle(v)} height={36} size={11} itemWidth={70} />
         </View>
-        <InstrumentChart row={row} w={w} style={chartStyle} />
+        <InstrumentChart row={row} w={w} style={chartStyle} height={terminal ? 400 : undefined} keys={terminal} />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 5 }}>
           {ribbon.map(r => (
             <View key={r.name} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
@@ -154,15 +185,19 @@ export default function Asset() {
           {shortDate(DATES[w.from])} – {shortDate(DATES[w.end])} · {st.n} editions
           {row.from > 0 ? ` · archive coverage from ${shortDate(DATES[row.from])}` : ''}
           {row.freq === 'monthly' ? ' · monthly release, carried between prints' : row.freq === 'policy' ? ' · policy setting, held between decisions' : row.freq === 'revised' ? ' · held between revisions' : flow ? ' · daily values as bars, gold = latest; days without a reading stay empty' : ''}
-          {` · ${Platform.OS === 'web' ? 'hover' : 'drag sideways or press and hold'} to read any session`}
+          {` · ${terminal ? 'hover, or ← / → to step sessions' : Platform.OS === 'web' ? 'hover' : 'drag sideways or press and hold'} to read any session`}
         </Text>
       </View>
 
+    </>
+  );
+  const relatedEl = (
+    <>
       {/* Related */}
       {related.length || feeds.length ? (
         <Section title="Related" meta={section}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }} style={{ marginHorizontal: -18 }}>
-            <View style={{ width: 10 }} />
+          <ScrollView horizontal={!terminal} showsHorizontalScrollIndicator={false} contentContainerStyle={terminal ? { gap: 8, flexDirection: 'row', flexWrap: 'wrap' } : { gap: 8 }} style={terminal ? undefined : { marginHorizontal: -18 }}>
+            {!terminal ? <View style={{ width: 10 }} /> : null}
             {feeds.map(d => (
               <Pressable key={d!.name} onPress={() => goTab('/markets')} accessibilityRole="link"
                 style={({ pressed }) => [styles.chip, { borderLeftWidth: 3, borderLeftColor: C.gold }, pressed && { backgroundColor: C.a100 }]}>
@@ -182,11 +217,15 @@ export default function Asset() {
                 <Sparkline row={r} width={96} height={18} />
               </Pressable>
             ))}
-            <View style={{ width: 10 }} />
+            {!terminal ? <View style={{ width: 10 }} /> : null}
           </ScrollView>
         </Section>
       ) : null}
 
+    </>
+  );
+  const boardsEl = (
+    <>
       {/* Relative-performance boards */}
       {boards.map(({ spec, b: board }) => {
         const m = Math.max(...board.rows.map(r => Math.abs(r.excess)), 0.01);
@@ -223,6 +262,10 @@ export default function Asset() {
         );
       })}
 
+    </>
+  );
+  const statsEl = (
+    <>
       {/* Range statistics */}
       <Section title={`Over the ${RANGE_LABEL[range]}`} meta={fs ? `${fs.n} readings` : undefined}>
         {fs ? (
@@ -254,6 +297,10 @@ export default function Asset() {
         )}
       </Section>
 
+    </>
+  );
+  const regimeEl = (
+    <>
       {/* Behaviour by regime */}
       <Section title="Behaviour by regime" meta={RANGE_LABEL[range]}>
         <View style={{ borderTopWidth: 1, borderTopColor: C.text }}>
@@ -282,6 +329,10 @@ export default function Asset() {
         <Text style={styles.note}>Descriptive: each session is grouped by the regime label published on that edition. Not a forecast.</Text>
       </Section>
 
+    </>
+  );
+  const coEl = (
+    <>
       {/* Co-movement */}
       <Section title="Co-movement" meta={co ? `${co[0].n} sessions · daily changes` : undefined}>
         {co ? (
@@ -311,6 +362,81 @@ export default function Asset() {
         )}
       </Section>
 
+    </>
+  );
+
+  if (terminal) {
+    return (
+      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: C.bg }}>
+        {/* Instrument list */}
+        <View style={{ width: 300, flexShrink: 0, borderRightWidth: 1, borderRightColor: C.divider, backgroundColor: '#fff' }}>
+          <View style={{ padding: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: C.divider }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }} accessibilityRole="tablist">
+              {GROUPS.map(x => {
+                const on = x.id === groupId && !q;
+                return (
+                  <Tap key={x.id} onPress={() => { setQuery(''); pickGroup(x.id); }} accessibilityRole="tab" accessibilityState={{ selected: on }}
+                    style={[styles.gchip, on && { backgroundColor: C.a700, borderColor: C.a700 }]} hoverBg={on ? C.a700 : C.a100}>
+                    <Text style={[font(500, 12), { color: on ? '#fff' : C.text }]}>{x.name} <Text style={{ color: on ? C.a300 : C.n500 }}>{x.rows.length}</Text></Text>
+                  </Tap>
+                );
+              })}
+            </View>
+            <TextInput value={query} onChangeText={setQuery} placeholder="Filter all instruments…" placeholderTextColor={C.n500}
+              style={[font(400, 13), styles.filter, { outlineStyle: 'none' } as object]} />
+          </View>
+          <ScrollView style={{ flex: 1 }}>
+            {(q ? [{ sub: `${listed.length} matches`, rows: listed }] : subsOf(g).map(sub => ({ sub, rows: listed.filter(r => (r.sub ?? g.name) === sub) }))).map(sec => (
+              <View key={sec.sub}>
+                <Text style={[styles.subhead, { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4 }]}>{sec.sub}</Text>
+                {sec.rows.map(r => {
+                  const on = r.s === row.s && r.gk === groupId;
+                  return (
+                    <Tap key={r.gk + r.s} onPress={() => select(r, r.gk)} accessibilityState={{ selected: on }} style={[styles.trow, on && { backgroundColor: C.a100, borderLeftColor: C.gold }]}>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={[font(on ? 600 : 500, 12.5), { color: C.text }]} numberOfLines={1}>{r.s}</Text>
+                        <Text style={[font(400, 10.5), tabular, { color: isStep(r) || r.asof ? C.n500 : changeColor(r.chg) }]} numberOfLines={1}>
+                          {q ? `${r.group} · ` : ''}{isStep(r) || isFlow(r) ? STEP_LABEL[r.freq] : r.asof ? `as of ${shortDate(r.asof)}` : r.chg ?? '—'}
+                        </Text>
+                      </View>
+                      <Sparkline row={r} width={56} height={18} />
+                      <Text style={[font(500, 12.5), tabular, { width: 74, textAlign: 'right', color: C.text }]} numberOfLines={1}>{r.val}</Text>
+                    </Tap>
+                  );
+                })}
+              </View>
+            ))}
+          </ScrollView>
+          <Text style={[font(400, 10.5), { color: C.n500, padding: 10, borderTopWidth: 1, borderTopColor: C.divider }]}>j / k instrument · [ ] group · ← → crosshair · 1 3 a range · o display · w watch</Text>
+        </View>
+        {/* Chart and context */}
+        <ScrollView ref={scroll} style={{ flex: 1, minWidth: 0 }} contentContainerStyle={{ padding: 22, gap: 22 }}>
+          {headerEl}
+          {chartEl}
+          {relatedEl}
+          {boardsEl}
+          {!threePane ? <>{statsEl}{regimeEl}{coEl}</> : null}
+        </ScrollView>
+        {/* Statistics */}
+        {threePane ? <ScrollView style={{ width: 380, flexGrow: 0, flexShrink: 0, borderLeftWidth: 1, borderLeftColor: C.divider, backgroundColor: '#fff' }} contentContainerStyle={{ padding: 18, gap: 22 }}>
+          {statsEl}
+          {regimeEl}
+          {coEl}
+        </ScrollView> : null}
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView ref={scroll} style={{ flex: 1, backgroundColor: C.bg }} contentContainerStyle={{ paddingTop: 14, paddingHorizontal: 18, paddingBottom: 32, gap: 22 }}>
+      <Seg fit options={GROUPS.map(x => x.name)} value={g.name} onChange={name => { setGroupId(GROUPS.find(x => x.name === name)!.id); setSym(undefined); }} />
+      {headerEl}
+      {chartEl}
+      {relatedEl}
+      {boardsEl}
+      {statsEl}
+      {regimeEl}
+      {coEl}
       {/* Group list, by section */}
       <Section title={`${g.name} · ${g.rows.length} instruments`} meta="21-session trend" gap={4}>
         {subsOf(g).map(sub => (
@@ -366,5 +492,8 @@ const styles = StyleSheet.create({
   note: { ...font(400, 11, 1.45), color: C.n500 },
   empty: { padding: 14, backgroundColor: alpha(C.a700, 0.04), borderWidth: 1, borderColor: C.divider },
   subhead: { ...font(700, 10), letterSpacing: 0.9, textTransform: 'uppercase', color: C.a700, paddingTop: 14, paddingBottom: 6 },
+  gchip: { paddingHorizontal: 9, height: 28, justifyContent: 'center', borderWidth: 1, borderColor: C.divider },
+  filter: { height: 34, paddingHorizontal: 10, borderWidth: 1, borderColor: C.divider, color: C.text, backgroundColor: C.bg },
+  trow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingHorizontal: 10, borderLeftWidth: 3, borderLeftColor: 'transparent', borderTopWidth: 1, borderTopColor: C.a100 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 56, borderTopWidth: 1, borderTopColor: C.divider, marginHorizontal: -4, paddingLeft: 4 },
 });
