@@ -7,20 +7,41 @@
     "Special": "Special and single-name research"
   },
   "latest": [
+    "d8",
     "xa3",
-    "d6",
     "x1",
     "x6"
   ],
   "docs": [
     {
-      "id": "d6",
+      "id": "d8",
       "kind": "Daily",
       "title": "Client Brief: Disinflation / Hawkish Pivot",
-      "code": "Day 218 · Ed 131",
-      "date": "25 Nov 2026",
+      "code": "Day 220 · Ed 132",
+      "date": "27 Nov 2026",
       "pages": "Client surface · prototype",
       "daily": true,
+      "file": "client-brief-2026-11-27.pdf"
+    },
+    {
+      "id": "d9",
+      "kind": "Daily",
+      "title": "Operating-State Brief",
+      "code": "Day 220 · Ed 132",
+      "date": "27 Nov 2026",
+      "pages": "Internal surface",
+      "daily": true,
+      "internal": true,
+      "file": "brief-2026-11-27.pdf"
+    },
+    {
+      "id": "d6",
+      "kind": "Daily",
+      "title": "Client Brief",
+      "code": "Day 218 · Ed 131",
+      "date": "25 Nov 2026",
+      "pages": "Client surface",
+      "daily": false,
       "file": "client-brief-2026-11-25.pdf"
     },
     {
@@ -30,7 +51,7 @@
       "code": "Day 218 · Ed 131",
       "date": "25 Nov 2026",
       "pages": "Internal surface",
-      "daily": true,
+      "daily": false,
       "internal": true,
       "file": "brief-2026-11-25.pdf"
     },
@@ -52,7 +73,8 @@
       "date": "24 Nov 2026",
       "pages": "Internal surface",
       "internal": true,
-      "file": "brief-2026-11-24.pdf"
+      "file": "brief-2026-11-24.pdf",
+      "daily": false
     },
     {
       "id": "d4",
@@ -61,7 +83,8 @@
       "code": "Day 216",
       "date": "23 Nov 2026",
       "pages": "Client surface",
-      "file": "client-brief-2026-11-23.pdf"
+      "file": "client-brief-2026-11-23.pdf",
+      "daily": false
     },
     {
       "id": "d5",
@@ -71,7 +94,8 @@
       "date": "23 Nov 2026",
       "pages": "Internal surface",
       "internal": true,
-      "file": "brief-2026-11-23.pdf"
+      "file": "brief-2026-11-23.pdf",
+      "daily": false
     },
     {
       "id": "d3",
