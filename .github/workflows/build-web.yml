@@ -1,0 +1,47 @@
+# Checks that the RegimeVector web terminal builds (data build, typecheck, export) on every push to
+# main and attaches the site as a downloadable artifact. Deployment is done by Cloudflare Workers
+# Builds, connected to this repository (see app/wrangler.jsonc and the README's Hosting section).
+name: Build web terminal
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-web
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci
+
+      - name: Build data (archive + content → src/data)
+        run: npm run build:data
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Export web
+        run: npx expo export --platform web
+        env:
+          EXPO_NO_TELEMETRY: 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: regimevector-web
+          path: app/dist
+          retention-days: 14

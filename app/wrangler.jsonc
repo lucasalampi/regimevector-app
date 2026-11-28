@@ -1,0 +1,14 @@
+// Cloudflare Workers: serves the static web build (expo export → dist/) as a single-page app.
+// The name must match the Worker in the Cloudflare dashboard. Builds run from the `app` directory
+// (Workers Builds: root directory "app"; build command "npm run build:web"; deploy "npx wrangler deploy").
+{
+  "name": "regimevector-terminal",
+  "compatibility_date": "2025-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Deep links such as /asset?group=rates&sym=US%2010Y load the app shell; the router takes it from there.
+    "not_found_handling": "single-page-application"
+  },
+  "workers_dev": true,
+  "preview_urls": true
+}

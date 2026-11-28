@@ -30,9 +30,11 @@ Code: `src/lib/terminal.ts` (`useTerminal`, `useKeys`), `src/components/terminal
 
 ## Hosting the web build
 
-`npm run export:web` writes a static single-page site to `dist/` (`public/_redirects` sends every path to `index.html`, so deep links work on Cloudflare Pages and Netlify). Any static host works; to look at it locally: `npx serve dist -s`.
+`npm run build:web` (data build + `expo export --platform web`) writes a static single-page site to `dist/`. To look at it locally: `npx serve dist -s`.
 
-`.github/workflows/deploy-web.yml` builds the site on every push to `main` (data build, typecheck, export) and attaches it as a downloadable artifact. With the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set, it also deploys to Cloudflare Pages (project `regimevector`, or the `CF_PAGES_PROJECT` variable). Sign-in is still mocked and every edition is bundled into the site, so keep the hosted copy private: put Cloudflare Access in front of the Pages domain.
+**Cloudflare Workers** serves it: `wrangler.jsonc` names the Worker (`regimevector-terminal`) and serves `dist/` with single-page-app fallback, so deep links work. With the Worker connected to this repository (Workers Builds), Cloudflare builds and deploys on every push to `main`. Build settings: root directory `app`, build command `npm run build:web`, deploy command `npx wrangler deploy`. The site is at `regimevector-terminal.<account>.workers.dev`. Sign-in is still mocked and every edition is bundled into the site, so keep it private with Cloudflare Access (Worker → Settings → Domains & Routes → workers.dev → enable Cloudflare Access).
+
+`.github/workflows/build-web.yml` checks on every push that the site builds (data build, typecheck, export) and attaches it as a downloadable artifact.
 
 ## Screens
 

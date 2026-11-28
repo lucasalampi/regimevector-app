@@ -37,7 +37,8 @@
     "build:data": "node scripts/build-data.mjs",
     "typecheck": "tsc --noEmit",
     "export:web": "expo export --platform web",
-    "export:edition": "node scripts/export-edition.mjs && node scripts/export-edition.mjs --internal"
+    "export:edition": "node scripts/export-edition.mjs && node scripts/export-edition.mjs --internal",
+    "build:web": "npm run build:data && expo export --platform web"
   },
   "private": true
 }
